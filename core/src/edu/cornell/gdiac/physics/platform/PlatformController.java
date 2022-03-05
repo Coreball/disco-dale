@@ -242,13 +242,16 @@ public class PlatformController extends WorldController implements ContactListen
 	public void update(float dt) {
 		// Process actions in object model
 		avatar.setMovement(InputController.getInstance().getHorizontal() *avatar.getForce());
-		avatar.setJumping(InputController.getInstance().didPrimary());
-		avatar.setShooting(InputController.getInstance().didSecondary());
-		
-		// Add a bullet if we fire
-		if (avatar.isShooting()) {
-			createBullet();
+		avatar.setJumping(InputController.getInstance().didJump());
+//		avatar.setShooting(InputController.getInstance().didShoot());
+
+		if (InputController.getInstance().didRotateColor()) {
+			avatar.rotateColor();
 		}
+		// Add a bullet if we fire
+//		if (avatar.isShooting()) {
+//			createBullet();
+//		}
 		
 		avatar.applyForce();
 	    if (avatar.isJumping()) {

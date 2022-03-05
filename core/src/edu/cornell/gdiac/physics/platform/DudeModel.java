@@ -60,7 +60,7 @@ public class DudeModel extends CapsuleObstacle {
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
 
-	private DaleColor color;
+	private DaleColor color = DaleColor.RED;
 	
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -70,7 +70,7 @@ public class DudeModel extends CapsuleObstacle {
 	}
 
 	public void rotateColor() {
-		
+		this.color = DaleColor.values()[(this.color.ordinal() + 1) % DaleColor.values().length];
 	}
 
 	/**
@@ -350,7 +350,7 @@ public class DudeModel extends CapsuleObstacle {
 	 */
 	public void draw(GameCanvas canvas) {
 		float effect = faceRight ? 1.0f : -1.0f;
-		canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+		canvas.draw(texture,this.color.toGdxColor(),origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
 	}
 	
 	/**

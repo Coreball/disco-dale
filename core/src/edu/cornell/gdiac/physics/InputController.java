@@ -57,14 +57,15 @@ public class InputController {
 	/** Whether the button to step back worlds was pressed. */
 	private boolean prevPressed;
 	private boolean prevPrevious;
-	/** Whether the primary action button was pressed. */
-	private boolean primePressed;
-	private boolean primePrevious;
-	/** Whether the secondary action button was pressed. */
-	private boolean secondPressed;
-	private boolean secondPrevious;
-	/** Whether the teritiary action button was pressed. */
-	private boolean tertiaryPressed;
+	/** Whether the rotating color action button was pressed. */
+	private boolean rotateColorPressed;
+	private boolean rotateColorPrevious;
+	/** Whether the jump action button was pressed. */
+	private boolean jumpPressed;
+	private boolean jumpPrevious;
+	/** Whether the click action button was pressed. */
+	private boolean clickPressed;
+	private boolean clickPrevious;
 	/** Whether the debug toggle was pressed. */
 	private boolean debugPressed;
 	private boolean debugPrevious;
@@ -98,17 +99,6 @@ public class InputController {
 	}
 	
 	/**
-	 * Returns the amount of vertical movement. 
-	 *
-	 * -1 = down, 1 = up, 0 = still
-	 *
-	 * @return the amount of vertical movement. 
-	 */
-	public float getVertical() {
-		return vertical;
-	}
-	
-	/**
 	 * Returns the current position of the crosshairs on the screen.
 	 *
 	 * This value does not return the actual reference to the crosshairs position.
@@ -124,39 +114,39 @@ public class InputController {
 	}
 
 	/**
-	 * Returns true if the primary action button was pressed.
+	 * Returns true if the rotating color action button was pressed.
 	 *
 	 * This is a one-press button. It only returns true at the moment it was
 	 * pressed, and returns false at any frame afterwards.
 	 *
 	 * @return true if the primary action button was pressed.
 	 */
-	public boolean didPrimary() {
-		return primePressed && !primePrevious;
+	public boolean didRotateColor() {
+		return rotateColorPressed && !rotateColorPrevious;
 	}
 
 	/**
-	 * Returns true if the secondary action button was pressed.
+	 * Returns true if the jump action button was pressed.
 	 *
 	 * This is a one-press button. It only returns true at the moment it was
 	 * pressed, and returns false at any frame afterwards.
 	 *
 	 * @return true if the secondary action button was pressed.
 	 */
-	public boolean didSecondary() {
-		return secondPressed && !secondPrevious;
+	public boolean didJump() {
+		return jumpPressed && !jumpPrevious;
 	}
 
 	/**
-	 * Returns true if the tertiary action button was pressed.
+	 * Returns true if the click action button was pressed.
 	 *
-	 * This is a sustained button. It will returns true as long as the player
-	 * holds it down.
+	 * This is a one-press button. It only returns true at the moment it was
+	 * pressed, and returns false at any frame afterwards.
 	 *
 	 * @return true if the secondary action button was pressed.
 	 */
-	public boolean didTertiary() {
-		return tertiaryPressed;
+	public boolean didClick() {
+		return clickPressed && !clickPrevious;
 	}
 
 	/**
@@ -235,8 +225,9 @@ public class InputController {
 	public void readInput(Rectangle bounds, Vector2 scale) {
 		// Copy state from last animation frame
 		// Helps us ignore buttons that are held down
-		primePrevious  = primePressed;
-		secondPrevious = secondPressed;
+		rotateColorPrevious  = rotateColorPressed;
+		jumpPrevious = jumpPressed;
+		clickPrevious = clickPressed;
 		resetPrevious  = resetPressed;
 		debugPrevious  = debugPressed;
 		exitPrevious = exitPressed;
@@ -267,16 +258,17 @@ public class InputController {
 		exitPressed  = xbox.getBack();
 		nextPressed  = xbox.getRBumper();
 		prevPressed  = xbox.getLBumper();
-		primePressed = xbox.getA();
+		rotateColorPressed = xbox.getA();
+		// TODO implement jumpPressed (maybe don't need it)
+		jumpPressed = false;
 		debugPressed  = xbox.getY();
 
 		// Increase animation frame, but only if trying to move
 		horizontal = xbox.getLeftX();
-		vertical   = xbox.getLeftY();
-		secondPressed = xbox.getRightTrigger() > 0.6f;
 		
-		// Move the crosshairs with the right stick.
-		tertiaryPressed = xbox.getA();
+		// Move the crosshairs with the right stick.r
+		// TODO implement clickPressed
+		clickPressed = false;
 		crosscache.set(xbox.getLeftX(), xbox.getLeftY());
 		if (crosscache.len2() > GP_THRESHOLD) {
 			momentum += GP_ACCELERATE;
@@ -302,9 +294,9 @@ public class InputController {
 	private void readKeyboard(Rectangle bounds, Vector2 scale, boolean secondary) {
 		// Give priority to gamepad results
 		resetPressed = (secondary && resetPressed) || (Gdx.input.isKeyPressed(Input.Keys.R));
-		debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.D));
-		primePressed = (secondary && primePressed) || (Gdx.input.isKeyPressed(Input.Keys.UP));
-		secondPressed = (secondary && secondPressed) || (Gdx.input.isKeyPressed(Input.Keys.SPACE));
+		debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.G));
+		jumpPressed = (secondary && jumpPressed) || (Gdx.input.isKeyPressed(Input.Keys.UP));
+		rotateColorPressed = (secondary && rotateColorPressed) || (Gdx.input.isKeyPressed(Input.Keys.SPACE));
 		prevPressed = (secondary && prevPressed) || (Gdx.input.isKeyPressed(Input.Keys.P));
 		nextPressed = (secondary && nextPressed) || (Gdx.input.isKeyPressed(Input.Keys.N));
 		exitPressed  = (secondary && exitPressed) || (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
@@ -317,17 +309,9 @@ public class InputController {
 		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
 			horizontal -= 1.0f;
 		}
-		
-		vertical = (secondary ? vertical : 0.0f);
-		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-			vertical += 1.0f;
-		}
-		if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-			vertical -= 1.0f;
-		}
-		
+
 		// Mouse results
-        tertiaryPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+        clickPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 		crosshair.set(Gdx.input.getX(), Gdx.input.getY());
 		crosshair.scl(1/scale.x,-1/scale.y);
 		crosshair.y += bounds.height;
