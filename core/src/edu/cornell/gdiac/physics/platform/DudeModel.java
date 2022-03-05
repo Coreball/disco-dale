@@ -59,10 +59,19 @@ public class DudeModel extends CapsuleObstacle {
 	private boolean isShooting;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
+
+	private DaleColor color;
 	
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
 
+	public DaleColor getColor() {
+		return color;
+	}
+
+	public void rotateColor() {
+		
+	}
 
 	/**
 	 * Returns left/right movement of this character.
