@@ -220,7 +220,7 @@ public class PlatformController extends WorldController implements ContactListen
 
 		dwidth  = flyTexture.getRegionWidth()/scale.x;
 		dheight = flyTexture.getRegionHeight()/scale.y;
-		fly = new FlyModel(constants.get("fly"),1f, 1f, dwidth, dheight);
+		fly = new FlyModel(constants.get("fly"),5f, 5f, dwidth, dheight);
 		fly.setDrawScale(scale);
 		fly.setTexture(flyTexture);
 		addObject(fly);
@@ -379,6 +379,11 @@ public class PlatformController extends WorldController implements ContactListen
 			if ((bd1 == avatar   && bd2 == goalDoor) ||
 				(bd1 == goalDoor && bd2 == avatar)) {
 				setComplete(true);
+			}
+
+			if ((bd1 == avatar   && bd2 == fly) ||
+					(bd1 == fly && bd2 == avatar)) {
+				setFailure(true);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
