@@ -13,13 +13,11 @@ package edu.cornell.gdiac.physics.platform;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.*;
 import com.badlogic.gdx.audio.*;
-import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.physics.box2d.*;
 
 import edu.cornell.gdiac.assets.AssetDirectory;
-import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.physics.*;
 import edu.cornell.gdiac.physics.obstacle.*;
 
@@ -41,6 +39,7 @@ public class PlatformController extends WorldController implements ContactListen
 	private TextureRegion bulletTexture;
 	/** Texture asset for the bridge plank */
 	private TextureRegion bridgeTexture;
+	private TextureRegion flyTexture;
 
 	/** The jump sound.  We only want to play once. */
 	private Sound jumpSound;
@@ -58,7 +57,8 @@ public class PlatformController extends WorldController implements ContactListen
 	/** Physics constants for initialization */
 	private JsonValue constants;
 	/** Reference to the character avatar */
-	private DudeModel avatar;
+	private DaleModel avatar;
+	private FlyModel fly;
 	/** Reference to the goalDoor (for collision detection) */
 	private BoxObstacle goalDoor;
 
@@ -92,6 +92,7 @@ public class PlatformController extends WorldController implements ContactListen
 		barrierTexture = new TextureRegion(directory.getEntry("platform:barrier",Texture.class));
 		bulletTexture = new TextureRegion(directory.getEntry("platform:bullet",Texture.class));
 		bridgeTexture = new TextureRegion(directory.getEntry("platform:rope",Texture.class));
+		flyTexture = new TextureRegion(directory.getEntry("platform:fly", Texture.class));
 
 		jumpSound = directory.getEntry( "platform:jump", Sound.class );
 		fireSound = directory.getEntry( "platform:pew", Sound.class );
@@ -181,7 +182,7 @@ public class PlatformController extends WorldController implements ContactListen
 		// Create dude
 		dwidth  = avatarTexture.getRegionWidth()/scale.x;
 		dheight = avatarTexture.getRegionHeight()/scale.y;
-		avatar = new DudeModel(constants.get("dude"), dwidth, dheight);
+		avatar = new DaleModel(constants.get("dude"), dwidth, dheight);
 		avatar.setDrawScale(scale);
 		avatar.setTexture(avatarTexture);
 		addObject(avatar);
@@ -203,6 +204,13 @@ public class PlatformController extends WorldController implements ContactListen
 		addObject(spinPlatform);
 
 		volume = constants.getFloat("volume", 1.0f);
+
+		dwidth  = flyTexture.getRegionWidth()/scale.x;
+		dheight = flyTexture.getRegionHeight()/scale.y;
+		fly = new FlyModel(constants.get("fly"),1f, 1f, dwidth, dheight);
+		fly.setDrawScale(scale);
+		fly.setTexture(flyTexture);
+		addObject(fly);
 	}
 	
 	/**
@@ -257,6 +265,10 @@ public class PlatformController extends WorldController implements ContactListen
 	    if (avatar.isJumping()) {
 	    	jumpId = playSound( jumpSound, jumpId, volume );
 	    }
+
+//		fly.setDirection((float) Math.toDegrees(Math.atan2(avatar.getY() - fly.getY(), avatar.getX() - fly.getX())));
+//		fly.setSpeed(5);
+		fly.setVelocity(5, (float) Math.toDegrees(Math.atan2(avatar.getY() - fly.getY(), avatar.getX() - fly.getX())));
 	}
 
 	/**

@@ -24,7 +24,7 @@ import edu.cornell.gdiac.physics.obstacle.*;
  * Note that this class returns to static loading.  That is because there are
  * no other subclasses that we might loop through.
  */
-public class DudeModel extends CapsuleObstacle {
+public class DaleModel extends CapsuleObstacle {
 	/** The initializing data (to avoid magic numbers) */
 	private final JsonValue data;
 
@@ -217,7 +217,7 @@ public class DudeModel extends CapsuleObstacle {
 	 * @param width		The object width in physics units
 	 * @param height	The object width in physics units
 	 */
-	public DudeModel(JsonValue data, float width, float height) {
+	public DaleModel(JsonValue data, float width, float height) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(	data.get("pos").getFloat(0),
 				data.get("pos").getFloat(1),
