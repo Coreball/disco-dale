@@ -211,13 +211,10 @@ public class PlatformController extends WorldController implements ContactListen
 		float[] vertices;
 		vertices = new float[]{0.0f, 0.0f, 0.0f, canvas.getHeight(), canvas.getWidth() / 2f, 0f};
 		colorRegions[0] = new ColorRegionModel(DaleColor.RED, vertices);
-		colorRegions[0].setName("color region");
 		vertices = new float[]{canvas.getWidth() / 2f, 0f, canvas.getWidth(), canvas.getHeight(), 0f, canvas.getHeight()};
 		colorRegions[1] = new ColorRegionModel(DaleColor.YELLOW, vertices);
-		colorRegions[1].setName("color region");
 		vertices = new float[]{canvas.getWidth(), 0f, canvas.getWidth(), canvas.getHeight(), canvas.getWidth() / 2f, 0f};
 		colorRegions[2] = new ColorRegionModel(DaleColor.BLUE, vertices);
-		colorRegions[2].setName("color region");
 
 		volume = constants.getFloat("volume", 1.0f);
 
@@ -282,9 +279,24 @@ public class PlatformController extends WorldController implements ContactListen
 	    	jumpId = playSound( jumpSound, jumpId, volume );
 	    }
 
-//		fly.setDirection((float) Math.toDegrees(Math.atan2(avatar.getY() - fly.getY(), avatar.getX() - fly.getX())));
-//		fly.setSpeed(5);
-		fly.setVelocity(5, (float) Math.toDegrees(Math.atan2(avatar.getY() - fly.getY(), avatar.getX() - fly.getX())));
+		if (!daleMatches()) {
+			fly.setVelocity(5, (float) Math.toDegrees(Math.atan2(avatar.getY() - fly.getY(), avatar.getX() - fly.getX())));
+		} else {
+			fly.setVelocity(0, 0);
+		}
+	}
+
+	private DaleColor daleBackground() {
+		for (ColorRegionModel c : colorRegions) {
+			if (c.shape.contains(avatar.getX() * scale.x, avatar.getY() * scale.y)) {
+				return c.getColor();
+			}
+		}
+		return null;
+	}
+
+	private boolean daleMatches() {
+		return avatar.getColor() == daleBackground();
 	}
 
 	/**
@@ -407,13 +419,10 @@ public class PlatformController extends WorldController implements ContactListen
 	public void draw(float dt) {
 		canvas.clear();
 
-		canvas.beginPolygon();
+		canvas.begin();
 		for(ColorRegionModel crm : colorRegions ) {
 			crm.draw(canvas);
 		}
-		canvas.endPolygon();
-
-		canvas.begin();
 		for(Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
@@ -423,9 +432,6 @@ public class PlatformController extends WorldController implements ContactListen
 			canvas.beginDebug();
 			for(Obstacle obj : objects) {
 				obj.drawDebug(canvas);
-			}
-			for(ColorRegionModel crm : colorRegions ) {
-				crm.drawDebug(canvas);
 			}
 			canvas.endDebug();
 		}

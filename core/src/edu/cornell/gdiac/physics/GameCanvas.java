@@ -719,6 +719,38 @@ public class GameCanvas {
     	spriteBatch.setColor(Color.WHITE);
 		spriteBatch.draw(region, x,  y);
 	}
+
+	/**
+	 * Draws the polygonal region with the given transformations
+	 *
+	 * A polygon region is a texture region with attached vertices so that it draws a
+	 * textured polygon. The polygon vertices are relative to the texture file.
+	 *
+	 * The texture colors will be multiplied by the given color.  This will turn
+	 * any white into the given color.  Other colors will be similarly affected.
+	 *
+	 * The transformations are BEFORE after the global transform (@see begin(Affine2)).
+	 * As a result, the specified texture origin will be applied to all transforms
+	 * (both the local and global).
+	 *
+	 * The local transformations in this method are applied in the following order:
+	 * scaling, then rotation, then translation (e.g. placement at (sx,sy)).
+	 *
+	 * @param region The polygon to draw
+	 * @param tint  The color tint
+	 * @param x 	The x-coordinate of the bottom left corner
+	 * @param y 	The y-coordinate of the bottom left corner
+	 */
+	public void draw(PolygonRegion region, Color tint, float x, float y) {
+		if (active != DrawPass.STANDARD) {
+			Gdx.app.error("GameCanvas", "Cannot draw without active begin()", new IllegalStateException());
+			return;
+		}
+
+		// Unlike Lab 1, we can shortcut without a master drawing method
+		spriteBatch.setColor(tint);
+		spriteBatch.draw(region, x,  y);
+	}
 	
 	/**
 	 * Draws the polygonal region with the given transformations
