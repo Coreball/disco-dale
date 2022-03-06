@@ -209,13 +209,13 @@ public class PlatformController extends WorldController implements ContactListen
 		// Create color regions
 		colorRegions = new ColorRegionModel[3];
 		float[] vertices;
-		vertices = new float[]{0.0f, 0.0f, 100.0f, 100.0f, 100.0f, 200.0f, 0.0f, 200.0f};
+		vertices = new float[]{0.0f, 0.0f, 0.0f, canvas.getHeight(), canvas.getWidth() / 2f, 0f};
 		colorRegions[0] = new ColorRegionModel(DaleColor.RED, vertices);
 		colorRegions[0].setName("color region");
-		vertices = new float[]{300f, 300f, 350f, 350f, 300f, 400f, 250f, 350f};
+		vertices = new float[]{canvas.getWidth() / 2f, 0f, canvas.getWidth(), canvas.getHeight(), 0f, canvas.getHeight()};
 		colorRegions[1] = new ColorRegionModel(DaleColor.YELLOW, vertices);
 		colorRegions[1].setName("color region");
-		vertices = new float[]{250f, 250f, 300f, 300f, 250f, 350f, 200f, 300f};
+		vertices = new float[]{canvas.getWidth(), 0f, canvas.getWidth(), canvas.getHeight(), canvas.getWidth() / 2f, 0f};
 		colorRegions[2] = new ColorRegionModel(DaleColor.BLUE, vertices);
 		colorRegions[2].setName("color region");
 
