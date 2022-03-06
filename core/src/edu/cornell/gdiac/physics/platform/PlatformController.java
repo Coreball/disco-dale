@@ -65,6 +65,9 @@ public class PlatformController extends WorldController implements ContactListen
 	/** Mark set to handle more sophisticated collision callbacks */
 	protected ObjectSet<Fixture> sensorFixtures;
 
+	/** Color regions */
+	private ColorRegionModel[] colorRegions;
+
 	/**
 	 * Creates and initialize a new instance of the platformer game
 	 *
@@ -202,6 +205,19 @@ public class PlatformController extends WorldController implements ContactListen
 		spinPlatform.setDrawScale(scale);
 		spinPlatform.setTexture(barrierTexture);
 		addObject(spinPlatform);
+
+		// Create color regions
+		colorRegions = new ColorRegionModel[3];
+		float[] vertices;
+		vertices = new float[]{0.0f, 0.0f, 100.0f, 100.0f, 100.0f, 200.0f, 0.0f, 200.0f};
+		colorRegions[0] = new ColorRegionModel(DaleColor.RED, vertices);
+		colorRegions[0].setName("color region");
+		vertices = new float[]{300f, 300f, 350f, 350f, 300f, 400f, 250f, 350f};
+		colorRegions[1] = new ColorRegionModel(DaleColor.YELLOW, vertices);
+		colorRegions[1].setName("color region");
+		vertices = new float[]{250f, 250f, 300f, 300f, 250f, 350f, 200f, 300f};
+		colorRegions[2] = new ColorRegionModel(DaleColor.BLUE, vertices);
+		colorRegions[2].setName("color region");
 
 		volume = constants.getFloat("volume", 1.0f);
 
@@ -386,7 +402,48 @@ public class PlatformController extends WorldController implements ContactListen
 			}
 		}
 	}
-	
+
+	@Override
+	public void draw(float dt) {
+		canvas.clear();
+
+		canvas.beginPolygon();
+		for(ColorRegionModel crm : colorRegions ) {
+			crm.draw(canvas);
+		}
+		canvas.endPolygon();
+
+		canvas.begin();
+		for(Obstacle obj : objects) {
+			obj.draw(canvas);
+		}
+		canvas.end();
+
+		if (debug) {
+			canvas.beginDebug();
+			for(Obstacle obj : objects) {
+				obj.drawDebug(canvas);
+			}
+			for(ColorRegionModel crm : colorRegions ) {
+				crm.drawDebug(canvas);
+			}
+			canvas.endDebug();
+		}
+
+		// Final message
+		if (complete && !failed) {
+			displayFont.setColor(Color.YELLOW);
+			canvas.begin(); // DO NOT SCALE
+			canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
+			canvas.end();
+		} else if (failed) {
+			displayFont.setColor(Color.RED);
+			canvas.begin(); // DO NOT SCALE
+			canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
+			canvas.end();
+		}
+	}
+
 	/** Unused ContactListener method */
 	public void postSolve(Contact contact, ContactImpulse impulse) {}
 	/** Unused ContactListener method */

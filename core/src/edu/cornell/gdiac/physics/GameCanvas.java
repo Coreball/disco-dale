@@ -39,7 +39,9 @@ public class GameCanvas {
 		/** We are drawing sprites */
 		STANDARD,
 		/** We are drawing outlines */
-		DEBUG
+		DEBUG,
+		/** We are drawing polygon */
+		POLYGON,
 	}
 	
 	/**
@@ -1133,6 +1135,64 @@ public class GameCanvas {
     	debugRender.setColor(color);
     	debugRender.ellipse(x0-w, y0-h, 2*w, 2*h, 12);
     }
+
+	/**
+	 * Start the debug drawing sequence.
+	 *
+	 * Nothing is flushed to the graphics card until the method end() is called.
+	 */
+	public void beginPolygon() {
+		debugRender.setProjectionMatrix(camera.combined);
+		debugRender.begin(ShapeRenderer.ShapeType.Filled);
+		debugRender.setColor(Color.RED);
+
+		active = DrawPass.POLYGON;
+	}
+
+	/**
+	 * Ends the debug drawing sequence, flushing textures to the graphics card.
+	 */
+	public void endPolygon() {
+		debugRender.end();
+		active = DrawPass.INACTIVE;
+	}
+
+	/**
+	 * Draws a solid triangle of the given shape in the specified color.
+	 *
+	 * @param shape The Box2d shape
+	 * @param color The outline color
+	 * @param x  The x-coordinate of the shape position
+	 * @param y  The y-coordinate of the shape position
+	 * @param angle  The shape angle of rotation
+	 * @param sx The amount to scale the x-axis
+	 * @param sx The amount to scale the y-axis
+	 */
+	public void drawFilledTri(PolygonShape shape, Color color, float x, float y, float angle, float sx, float sy) {
+		if (active != DrawPass.POLYGON) {
+			Gdx.app.error("GameCanvas", "Cannot draw without active beginPolygon()", new IllegalStateException());
+			return;
+		}
+
+		local.setToScaling(sx,sy);
+		local.translate(x,y);
+		local.rotateRad(angle);
+
+		float x0, y0;
+		debugRender.setColor(color);
+
+		float[] vertices = new float[shape.getVertexCount() * 2];
+		for(int ii = 0; ii < shape.getVertexCount(); ii++) {
+			shape.getVertex(ii, vertex);
+			local.applyTo(vertex);
+			x0 = vertex.x;
+			y0 = vertex.y;
+			vertices[2 * ii] = x0;
+			vertices[2 * ii + 1] = y0;
+		}
+
+		debugRender.triangle(vertices[0], vertices[1], vertices[2], vertices[3], vertices[4], vertices[5]);
+	}
     
 	/**
 	 * Compute the affine transform (and store it in local) for this image.
