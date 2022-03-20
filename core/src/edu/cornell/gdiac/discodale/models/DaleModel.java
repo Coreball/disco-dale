@@ -8,15 +8,15 @@
  * Based on original PhysicsDemo Lab by Don Holden, 2007
  * Updated asset version, 2/6/2021
  */
-package edu.cornell.gdiac.physics.platform;
+package edu.cornell.gdiac.discodale.models;
 
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 
 import com.badlogic.gdx.utils.JsonValue;
-import edu.cornell.gdiac.physics.*;
-import edu.cornell.gdiac.physics.obstacle.*;
+import edu.cornell.gdiac.discodale.*;
+import edu.cornell.gdiac.discodale.obstacle.*;
 
 /**
  * Player avatar for the plaform game.
@@ -40,8 +40,6 @@ public class DaleModel extends CapsuleObstacle {
 	private final float jump_force;
 	/** Cooldown (in animation frames) for jumping */
 	private final int jumpLimit;
-	/** Cooldown (in animation frames) for shooting */
-	private final int shotLimit;
 
 	/** The current horizontal movement of the character */
 	private float   movement;
@@ -51,12 +49,8 @@ public class DaleModel extends CapsuleObstacle {
 	private int jumpCooldown;
 	/** Whether we are actively jumping */
 	private boolean isJumping;
-	/** How long until we can shoot again */
-	private int shootCooldown;
 	/** Whether our feet are on the ground */
 	private boolean isGrounded;
-	/** Whether we are actively shooting */
-	private boolean isShooting;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
 
@@ -99,24 +93,6 @@ public class DaleModel extends CapsuleObstacle {
 		} else if (movement > 0) {
 			faceRight = true;
 		}
-	}
-	
-	/**
-	 * Returns true if the dude is actively firing.
-	 *
-	 * @return true if the dude is actively firing.
-	 */
-	public boolean isShooting() {
-		return isShooting && shootCooldown <= 0;
-	}
-	
-	/**
-	 * Sets whether the dude is actively firing.
-	 *
-	 * @param value whether the dude is actively firing.
-	 */
-	public void setShooting(boolean value) {
-		isShooting = value; 
 	}
 
 	/**
@@ -232,19 +208,16 @@ public class DaleModel extends CapsuleObstacle {
 		force = data.getFloat("force", 0);
 		jump_force = data.getFloat( "jump_force", 0 );
 		jumpLimit = data.getInt( "jump_cool", 0 );
-		shotLimit = data.getInt( "shot_cool", 0 );
-		sensorName = "DudeGroundSensor";
+		sensorName = Constants.DALE_GROUND_SENSOR_NAME;
 		this.data = data;
 
 		// Gameplay attributes
 		isGrounded = false;
-		isShooting = false;
 		isJumping = false;
 		faceRight = true;
 		
-		shootCooldown = 0;
 		jumpCooldown = 0;
-		setName("dude");
+		setName(Constants.DALE_NAME_TAG);
 	}
 
 	/**
@@ -334,12 +307,6 @@ public class DaleModel extends CapsuleObstacle {
 			jumpCooldown = Math.max(0, jumpCooldown - 1);
 		}
 
-		if (isShooting()) {
-			shootCooldown = shotLimit;
-		} else {
-			shootCooldown = Math.max(0, shootCooldown - 1);
-		}
-		
 		super.update(dt);
 	}
 

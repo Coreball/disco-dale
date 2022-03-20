@@ -8,14 +8,14 @@
  * Based on original PhysicsDemo Lab by Don Holden, 2007
  * Updated asset version, 2/6/2021
  */
-package edu.cornell.gdiac.physics.platform;
+package edu.cornell.gdiac.discodale.models;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
-import edu.cornell.gdiac.physics.GameCanvas;
-import edu.cornell.gdiac.physics.obstacle.CapsuleObstacle;
+import edu.cornell.gdiac.discodale.GameCanvas;
+import edu.cornell.gdiac.discodale.obstacle.CapsuleObstacle;
 
 /**
  * Player avatar for the plaform game.

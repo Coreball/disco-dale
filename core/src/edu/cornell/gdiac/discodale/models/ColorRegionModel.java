@@ -1,4 +1,4 @@
-package edu.cornell.gdiac.physics.platform;
+package edu.cornell.gdiac.discodale.models;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -7,7 +7,8 @@ import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Polygon;
-import edu.cornell.gdiac.physics.GameCanvas;
+import edu.cornell.gdiac.discodale.GameCanvas;
+import edu.cornell.gdiac.discodale.models.DaleColor;
 
 public class ColorRegionModel {
 	/** An earclipping triangular to make sure we work with convex shapes */

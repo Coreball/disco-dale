@@ -1,6 +1,7 @@
-package edu.cornell.gdiac.physics.platform;
+package edu.cornell.gdiac.discodale.controllers;
 
-import com.badlogic.gdx.utils.Queue;
+import edu.cornell.gdiac.discodale.models.DaleModel;
+import edu.cornell.gdiac.discodale.models.FlyModel;
 
 public class FlyController {
     /** The fly being controlled by this FlyController*/

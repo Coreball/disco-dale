@@ -1,4 +1,4 @@
-package edu.cornell.gdiac.physics.platform;
+package edu.cornell.gdiac.discodale.models;
 
 import com.badlogic.gdx.graphics.Color;
 

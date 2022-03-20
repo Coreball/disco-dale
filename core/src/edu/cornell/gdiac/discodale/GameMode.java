@@ -14,22 +14,21 @@
  * Based on original PhysicsDemo Lab by Don Holden, 2007
  * LibGDX version, 2/6/2015
  */
-package edu.cornell.gdiac.physics;
+package edu.cornell.gdiac.discodale;
 
 import java.util.Iterator;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.*;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.utils.*;
-import com.badlogic.gdx.assets.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.graphics.g2d.freetype.*;
+import com.badlogic.gdx.utils.JsonValue;
+import edu.cornell.gdiac.discodale.models.*;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.util.*;
-import edu.cornell.gdiac.physics.obstacle.*;
+import edu.cornell.gdiac.discodale.obstacle.*;
 
 /**
  * Base class for a world-specific controller.
@@ -45,37 +44,14 @@ import edu.cornell.gdiac.physics.obstacle.*;
  * This is the purpose of our AssetState variable; it ensures that multiple instances
  * place nicely with the static assets.
  */
-public abstract class WorldController implements Screen {
+public class GameMode implements Screen {
 	/** The texture for walls and platforms */
 	protected TextureRegion earthTile;
 	/** The texture for the exit condition */
 	protected TextureRegion goalTile;
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
-	
-	/** Exit code for quitting the game */
-	public static final int EXIT_QUIT = 0;
-	/** Exit code for advancing to next level */
-	public static final int EXIT_NEXT = 1;
-	/** Exit code for jumping back to previous level */
-	public static final int EXIT_PREV = 2;
-    /** How many frames after winning/losing do we continue? */
-	public static final int EXIT_COUNT = 120;
 
-	/** The amount of time for a physics engine step. */
-	public static final float WORLD_STEP = 1/60.0f;
-	/** Number of velocity iterations for the constrain solvers */
-	public static final int WORLD_VELOC = 6;
-	/** Number of position iterations for the constrain solvers */
-	public static final int WORLD_POSIT = 2;
-	
-	/** Width of the game world in Box2d units */
-	protected static final float DEFAULT_WIDTH  = 32.0f;
-	/** Height of the game world in Box2d units */
-	protected static final float DEFAULT_HEIGHT = 18.0f;
-	/** The default value of gravity (going down) */
-	protected static final float DEFAULT_GRAVITY = -4.9f;
-	
 	/** Reference to the game canvas */
 	protected GameCanvas canvas;
 	/** All the objects in the world. */
@@ -102,6 +78,34 @@ public abstract class WorldController implements Screen {
 	protected boolean debug;
 	/** Countdown active for winning or losing */
 	protected int countdown;
+
+	/** Texture asset for character avatar */
+	private TextureRegion avatarTexture;
+	private TextureRegion flyTexture;
+
+	/** The jump sound.  We only want to play once. */
+	private Sound jumpSound;
+	private long jumpId = -1;
+	/** The default sound volume */
+	private float volume;
+
+	// Physics objects for the game
+	/** Physics constants for initialization */
+	private JsonValue constants;
+	/** Reference to the character avatar */
+	private DaleModel dale;
+	private FlyModel fly;
+	private SceneModel scene;
+
+	private CollisionController collisionController;
+
+	public GameMode() {
+		this(Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT, Constants.DEFAULT_GRAVITY);
+		setDebug(false);
+		setComplete(false);
+		setFailure(false);
+		this.scene = new SceneModel(bounds);
+	}
 
 	/**
 	 * Returns true if debug mode is active.
@@ -145,7 +149,7 @@ public abstract class WorldController implements Screen {
 	 */
 	public void setComplete(boolean value) {
 		if (value) {
-			countdown = EXIT_COUNT;
+			countdown = Constants.EXIT_COUNT;
 		}
 		complete = value;
 	}
@@ -170,7 +174,7 @@ public abstract class WorldController implements Screen {
 	 */
 	public void setFailure(boolean value) {
 		if (value) {
-			countdown = EXIT_COUNT;
+			countdown = Constants.EXIT_COUNT;
 		}
 		failed = value;
 	}
@@ -207,6 +211,7 @@ public abstract class WorldController implements Screen {
 		this.canvas = canvas;
 		this.scale.x = canvas.getWidth()/bounds.getWidth();
 		this.scale.y = canvas.getHeight()/bounds.getHeight();
+		this.scene.setCanvas(canvas);
 	}
 	
 	/**
@@ -216,10 +221,10 @@ public abstract class WorldController implements Screen {
 	 * with the Box2d coordinates.  The bounds are in terms of the Box2d
 	 * world, not the screen.
 	 */
-	protected WorldController() {
-		this(new Rectangle(0,0,DEFAULT_WIDTH,DEFAULT_HEIGHT), 
-			 new Vector2(0,DEFAULT_GRAVITY));
-	}
+//	protected GameMode() {
+//		this(new Rectangle(0,0,DEFAULT_WIDTH,DEFAULT_HEIGHT),
+//			 new Vector2(0,DEFAULT_GRAVITY));
+//	}
 
 	/**
 	 * Creates a new game world
@@ -232,7 +237,7 @@ public abstract class WorldController implements Screen {
 	 * @param height	The height in Box2d coordinates
 	 * @param gravity	The downward gravity
 	 */
-	protected WorldController(float width, float height, float gravity) {
+	protected GameMode(float width, float height, float gravity) {
 		this(new Rectangle(0,0,width,height), new Vector2(0,gravity));
 	}
 
@@ -246,7 +251,7 @@ public abstract class WorldController implements Screen {
 	 * @param bounds	The game bounds in Box2d coordinates
 	 * @param gravity	The gravitational force on this Box2d world
 	 */
-	protected WorldController(Rectangle bounds, Vector2 gravity) {
+	protected GameMode(Rectangle bounds, Vector2 gravity) {
 		world = new World(gravity,false);
 		this.bounds = new Rectangle(bounds);
 		this.scale = new Vector2(1,1);
@@ -273,21 +278,6 @@ public abstract class WorldController implements Screen {
 		scale  = null;
 		world  = null;
 		canvas = null;
-	}
-
-	/**
-	 * Gather the assets for this controller.
-	 *
-	 * This method extracts the asset variables from the given asset directory. It
-	 * should only be called after the asset directory is completed.
-	 *
-	 * @param directory	Reference to global asset manager.
-	 */
-	public void gatherAssets(AssetDirectory directory) {
-		// Allocate the tiles
-		earthTile = new TextureRegion(directory.getEntry( "shared:earth", Texture.class ));
-		goalTile  = new TextureRegion(directory.getEntry( "shared:goal", Texture.class ));
-		displayFont = directory.getEntry( "shared:retro" ,BitmapFont.class);
 	}
 
 	/**
@@ -329,13 +319,63 @@ public abstract class WorldController implements Screen {
 		boolean vert  = (bounds.y <= obj.getY() && obj.getY() <= bounds.y+bounds.height);
 		return horiz && vert;
 	}
-	
+
 	/**
 	 * Resets the status of the game so that we can play again.
 	 *
 	 * This method disposes of the world and creates a new one.
 	 */
-	public abstract void reset();
+	public void reset() {
+		Vector2 gravity = new Vector2(world.getGravity());
+
+		for(Obstacle obj : objects) {
+			obj.deactivatePhysics(world);
+		}
+		scene.reset(world);
+		objects.clear();
+		addQueue.clear();
+		world.dispose();
+
+
+		world = new World(gravity,false);
+		world.setContactListener(this.collisionController);
+		setComplete(false);
+		setFailure(false);
+		populateLevel();
+	}
+
+	/**
+	 * Lays out the game geography.
+	 */
+	private void populateLevel() {
+		float dwidth  = avatarTexture.getRegionWidth()/scale.x;
+		float dheight = avatarTexture.getRegionHeight()/scale.y;
+		dale = new DaleModel(constants.get("dude"), dwidth, dheight);
+		dale.setDrawScale(scale);
+		dale.setTexture(avatarTexture);
+		addObject(dale);
+		this.collisionController = new CollisionController(this.dale, this.scene);
+		this.world.setContactListener(this.collisionController);
+
+		scene.setGoalTexture(goalTile);
+		scene.setWallTexture(earthTile);
+		scene.populateLevel(constants.get("walls"), constants.get("platforms"), constants.get("defaults"), constants.get("goal"));
+		scene.activatePhysics(this.world);
+
+		JsonValue defaults = constants.get("defaults");
+
+		// This world is heavier
+		world.setGravity( new Vector2(0,defaults.getFloat("gravity",0)) );
+
+		volume = constants.getFloat("volume", 1.0f);
+
+//		dwidth  = flyTexture.getRegionWidth()/scale.x;
+//		dheight = flyTexture.getRegionHeight()/scale.y;
+//		fly = new FlyModel(constants.get("fly"),5f, 5f, dwidth, dheight);
+//		fly.setDrawScale(scale);
+//		fly.setTexture(flyTexture);
+//		addObject(fly);
+	}
 	
 	/**
 	 * Returns whether to process the update loop
@@ -368,15 +408,15 @@ public abstract class WorldController implements Screen {
 		// Now it is time to maybe switch screens.
 		if (input.didExit()) {
 			pause();
-			listener.exitScreen(this, EXIT_QUIT);
+			listener.exitScreen(this, Constants.EXIT_QUIT);
 			return false;
 		} else if (input.didAdvance()) {
 			pause();
-			listener.exitScreen(this, EXIT_NEXT);
+			listener.exitScreen(this, Constants.EXIT_NEXT);
 			return false;
 		} else if (input.didRetreat()) {
 			pause();
-			listener.exitScreen(this, EXIT_PREV);
+			listener.exitScreen(this, Constants.EXIT_PREV);
 			return false;
 		} else if (countdown > 0) {
 			countdown--;
@@ -385,7 +425,7 @@ public abstract class WorldController implements Screen {
 				reset();
 			} else if (complete) {
 				pause();
-				listener.exitScreen(this, EXIT_NEXT);
+				listener.exitScreen(this, Constants.EXIT_NEXT);
 				return false;
 			}
 		}
@@ -402,8 +442,28 @@ public abstract class WorldController implements Screen {
 	 *
 	 * @param dt	Number of seconds since last animation frame
 	 */
-	public abstract void update(float dt);
-	
+	public void update(float dt) {
+		// Process actions in object model
+		dale.setMovement(InputController.getInstance().getHorizontal() * dale.getForce());
+		dale.setJumping(InputController.getInstance().didJump());
+
+		if (InputController.getInstance().didRotateColor()) {
+			dale.rotateColor();
+		}
+
+		dale.applyForce();
+		if (dale.isJumping()) {
+			jumpId = playSound( jumpSound, jumpId, volume );
+		}
+
+//		if (!daleMatches()) {
+//			fly.setVelocity(5, (float) Math.toDegrees(Math.atan2(dale.getY() - fly.getY(), dale.getX() - fly.getX())));
+//		} else {
+//			fly.setVelocity(0, 0);
+//		}
+	}
+
+
 	/**
 	 * Processes physics
 	 *
@@ -420,7 +480,7 @@ public abstract class WorldController implements Screen {
 		}
 		
 		// Turn the physics engine crank.
-		world.step(WORLD_STEP,WORLD_VELOC,WORLD_POSIT);
+		world.step(Constants.WORLD_STEP, Constants.WORLD_VELOC, Constants.WORLD_POSIT);
 
 		// Garbage collect the deleted objects.
 		// Note how we use the linked list nodes to delete O(1) in place.
@@ -451,8 +511,9 @@ public abstract class WorldController implements Screen {
 	 */
 	public void draw(float dt) {
 		canvas.clear();
-		
+
 		canvas.begin();
+		scene.draw(canvas);
 		for(Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
@@ -594,6 +655,27 @@ public abstract class WorldController implements Screen {
 	 */
 	public void setScreenListener(ScreenListener listener) {
 		this.listener = listener;
+	}
+
+	/**
+	 * Gather the assets for this controller.
+	 *
+	 * This method extracts the asset variables from the given asset directory. It
+	 * should only be called after the asset directory is completed.
+	 *
+	 * @param directory	Reference to global asset manager.
+	 */
+	public void gatherAssets(AssetDirectory directory) {
+		avatarTexture  = new TextureRegion(directory.getEntry("platform:dude",Texture.class));
+		flyTexture = new TextureRegion(directory.getEntry("platform:fly", Texture.class));
+
+		jumpSound = directory.getEntry( "platform:jump", Sound.class );
+
+		constants = directory.getEntry( "platform:constants", JsonValue.class );
+		// Allocate the tiles
+		earthTile = new TextureRegion(directory.getEntry( "shared:earth", Texture.class ));
+		goalTile  = new TextureRegion(directory.getEntry( "shared:goal", Texture.class ));
+		displayFont = directory.getEntry( "shared:retro" ,BitmapFont.class);
 	}
 
 }
