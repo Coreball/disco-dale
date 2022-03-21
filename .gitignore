@@ -119,5 +119,5 @@ Thumbs.db
 /out/
 
 ## Ignore dump and binary files
-.trc
-.dmp
+*.trc
+*.dmp
