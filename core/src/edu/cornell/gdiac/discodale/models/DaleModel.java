@@ -25,6 +25,10 @@ import edu.cornell.gdiac.discodale.obstacle.*;
  * no other subclasses that we might loop through.
  */
 public class DaleModel extends CapsuleObstacle {
+	private static int WIN_CODE = 1;
+	private static int LOSE_CODE = -1;
+	private static int PLAY_CODE = 0;
+
 	/** The initializing data (to avoid magic numbers) */
 	private final JsonValue data;
 
@@ -56,6 +60,8 @@ public class DaleModel extends CapsuleObstacle {
 
 	/** Whether Dale's color is matched with background */
 	private boolean match;
+
+	private int winLose;
 
 	private DaleColor color = DaleColor.RED;
 
@@ -200,6 +206,20 @@ public class DaleModel extends CapsuleObstacle {
 	}
 
 	/**
+	 * Sets Dale's winLose.
+	 */
+	public void setWinLose(boolean win) {
+		winLose = win ? WIN_CODE : LOSE_CODE;
+	}
+
+	/**
+	 * Gets Dale's winLose.
+	 */
+	public int getWinLose() {
+		return winLose;
+	}
+
+	/**
 	 * Creates a new dude avatar with the given physics data
 	 *
 	 * The size is expressed in physics units NOT pixels. In order for
@@ -233,6 +253,7 @@ public class DaleModel extends CapsuleObstacle {
 		isJumping = false;
 		faceRight = true;
 		match = true;
+		winLose = PLAY_CODE;
 
 		jumpCooldown = 0;
 		setName(Constants.DALE_NAME_TAG);

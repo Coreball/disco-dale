@@ -79,6 +79,9 @@ public class SceneModel {
             for (int j = 0; j < GRID_HEIGHT; j++) {
                 boolean temp = false;
                 for (Obstacle object : objects) {
+                    if(object == goalDoor){
+                        continue;
+                    }
                     if (object != null && object.getBody() != null) {
                         for (Fixture fixture : object.getBody().getFixtureList()) {
                             if (fixture.testPoint(i + 0.5f, j + 0.5f)) {
@@ -95,15 +98,15 @@ public class SceneModel {
                 grid[i][j] = temp;
             }
         }
-        //Debugging message
-        for (int j = GRID_HEIGHT - 1; j >= 0; j--) {
-            for (int i = 0; i < GRID_WIDTH; i++) {
-                System.out.print(grid[i][j]?1:0);
-                System.out.print(" ");
-            }
-            System.out.println("");
-        }
-        System.out.println("");
+//        //Debugging message
+//        for (int j = GRID_HEIGHT - 1; j >= 0; j--) {
+//            for (int i = 0; i < GRID_WIDTH; i++) {
+//                System.out.print(grid[i][j]?1:0);
+//                System.out.print(" ");
+//            }
+//            System.out.println("");
+//        }
+//        System.out.println("");
     }
 
     /**
@@ -114,7 +117,7 @@ public class SceneModel {
         float dwidth = goalTile.getRegionWidth() / scale.x;
         float dheight = goalTile.getRegionHeight() / scale.y;
         JsonValue goalpos = goal.get("pos");
-        System.out.println(goalpos.getFloat(0));
+//        System.out.println(goalpos.getFloat(0));
         goalDoor = new BoxObstacle(goalpos.getFloat(0), goalpos.getFloat(1), dwidth, dheight);
         goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
         goalDoor.setDensity(goal.getFloat("density", 0));

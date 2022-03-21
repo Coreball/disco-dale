@@ -19,7 +19,6 @@ public class FlyController {
     }
 
     private static int FLY_SPEED = 5;
-    private static int BIG_NUM = 20000; // Used in A* search
 
     /** The fly being controlled by this FlyController */
     private FlyModel fly;
@@ -50,14 +49,6 @@ public class FlyController {
             this.parent = null;
         }
 
-    }
-
-    public float getDx() {
-        return dx;
-    }
-
-    public float getDy() {
-        return dy;
     }
 
     /**
@@ -92,7 +83,7 @@ public class FlyController {
         changeState();
         switch (state) {
             case IDLE:
-                // TODO: temporary implementation. May be more complex
+                // TODO: temporary. May be more complex idle behaviors
                 dx = 0;
                 dy = 0;
                 break;
@@ -153,8 +144,6 @@ public class FlyController {
         int fx = cToG(fly.getX());
         int fy = cToG(fly.getY());
         Node current = new Node(fx, fy, 0, distance(gx, gy, fx, fy));
-        // goal does not need g cost, so 0
-        Node goal = new Node(gx, gy, 0, 0);
         LinkedList<Node> explored = new LinkedList<Node>();
         LinkedList<Node> frontier = new LinkedList<Node>();
         frontier.add(current);
@@ -166,43 +155,37 @@ public class FlyController {
                 return (int) Math.signum(cost1 - cost2);
             }
         };
-        boolean find = false;
+        Node goal = null;
         while (!frontier.isEmpty()) {
             Node n = Collections.min(frontier, comparator);
+            if (n.x == gx && n.y == gy) {
+                goal = n;
+                break;
+            }
             frontier.remove(n);
             explored.add(n);
-            int[] xs = new int[]{-1,1,0,0};
-            int[] ys = new int[]{0,0,-1,1};
-            for (int i : xs) {
-                for (int j :ys) {
+            for (int i =-1;i<= 1;i++) {
+                for (int j=-1;j<=1;j++) {
                     int nextx = n.x + i;
                     int nexty = n.y + j;
                     if (nextx < 0 || nextx > grid.length - 1 || nexty < 0 || nexty > grid[0].length - 1) {
                         continue;
                     }
-                    if(i!=0&&j!=0){
+                    if(grid[nextx][nexty]){
                         continue;
                     }
-                    if (nextx == gx && nexty == gy) {
-                        goal.parent = n;
-                        find = true;
-                        break;
-                    }
                     if (!visited[nextx][nexty]) {
-                        visited[nextx][nexty] = true;
-                        float dist1 = distance(n.x, n.y, nextx, nexty);
-                        if (grid[nextx][nexty]) {
-                            dist1 = BIG_NUM;
-                        }
                         if (Math.abs(i * j) == 1) {
-                            if (nextx+i>0&&nextx+i<grid.length&&grid[nextx + i][nexty] || nexty+j>0&&nexty+j<grid[0].length&&grid[nextx][nexty + j]) {
-                                dist1 = BIG_NUM;
+                            if (grid[n.x + i][n.y] || grid[n.x][n.y + j]) {
+                                continue;
                             }
                         }
+                        visited[nextx][nexty] = true;
+                        float dist1 = distance(n.x, n.y, nextx, nexty);
                         float dist2 = distance(nextx, nexty, gx, gy);
                         Node next = new Node(nextx, nexty, n.g + dist1, dist2);
-                        frontier.add(next);
                         next.parent = n;
+                        frontier.add(next);
                     }else{
                         Node next = null;
                         for(Node node : frontier){
@@ -215,14 +198,6 @@ public class FlyController {
                             continue;
                         }
                         float dist1 = distance(n.x, n.y, nextx, nexty);
-                        if (grid[nextx][nexty]) {
-                            dist1 = BIG_NUM;
-                        }
-//                        if (Math.abs(i * j) == 1) {
-//                            if (nextx+i>0&&nextx+i<grid.length&&grid[nextx + i][nexty] || nexty+j>0&&nexty+j<grid[0].length&&grid[nextx][nexty + j]) {
-//                                dist2 = BIG_NUM;
-//                            }
-//                        }
                         if(dist1 < next.g){
                             next.g = dist1;
                             next.parent = n;
@@ -230,17 +205,25 @@ public class FlyController {
 
                     }
                 }
-                if (find) {
-                    break;
-                }
             }
 
         }
 
-        // Debugging message
-        if (goal.parent == null) {
-            System.out.println("NOOOOOOOOO");
+
+
+        // When there is no path to dale, just stay
+        // TODO: May be different if idle behavior is more complex
+        if(goal == null){
+            dx = 0;
+            dy = 0;
+            return;
         }
+
+        // In corner cases (won or losed, but haven't reset), dale and fly are in one grid, so goal has no parent
+        if(goal.parent == null){
+            return;
+        }
+
         // backtrack
         while (goal.parent != current) {
             goal = goal.parent;
@@ -252,5 +235,16 @@ public class FlyController {
         dy = next.y - fly.getY()+0.5f;
         dx = dx / (float) Math.sqrt(dx * dx + dy * dy);
         dy = dy / (float) Math.sqrt(dx * dx + dy * dy);
+
+        // debugging message
+//        System.out.println("hi");
+//        System.out.println(gx);
+//        System.out.println(gy);
+//        System.out.println(fly.getX());
+//        System.out.println(fly.getY());
+//        System.out.println(next.x);
+//        System.out.println(next.y);
+//        System.out.println(dx);
+//        System.out.println(dy);
     }
 }

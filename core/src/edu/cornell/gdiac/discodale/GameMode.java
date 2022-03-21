@@ -50,6 +50,10 @@ import edu.cornell.gdiac.discodale.obstacle.*;
  * place nicely with the static assets.
  */
 public class GameMode implements Screen {
+	private static int WIN_CODE = 1;
+	private static int LOSE_CODE = -1;
+	private static int PLAY_CODE = 0;
+
 	/** The texture for walls and platforms */
 	protected TextureRegion earthTile;
 	/** The texture for the exit condition */
@@ -155,7 +159,10 @@ public class GameMode implements Screen {
 	 * @param value whether the level is completed.
 	 */
 	public void setComplete(boolean value) {
-		if (value) {
+		if(failed){
+			return;
+		}
+		if (value && countdown<0) {
 			countdown = Constants.EXIT_COUNT;
 		}
 		complete = value;
@@ -180,7 +187,10 @@ public class GameMode implements Screen {
 	 * @param value whether the level is failed.
 	 */
 	public void setFailure(boolean value) {
-		if (value) {
+		if(complete){
+			return;
+		}
+		if (value && countdown<0) {
 			countdown = Constants.EXIT_COUNT;
 		}
 		failed = value;
@@ -348,6 +358,7 @@ public class GameMode implements Screen {
 		world.setContactListener(this.collisionController);
 		setComplete(false);
 		setFailure(false);
+		countdown = -1;
 		populateLevel();
 	}
 
@@ -361,7 +372,16 @@ public class GameMode implements Screen {
 		dale.setDrawScale(scale);
 		dale.setTexture(avatarTexture);
 		addObject(dale);
-		this.collisionController = new CollisionController(this.dale, this.scene);
+
+		dwidth = flyTexture.getRegionWidth() / scale.x;
+		dheight = flyTexture.getRegionHeight() / scale.y;
+		fly = new FlyModel(constants.get("fly"), 5f, 5f, dwidth, dheight);
+		fly.setDrawScale(scale);
+		fly.setTexture(flyTexture);
+		addObject(fly);
+		flyController = new FlyController(fly, dale, scene);
+
+		this.collisionController = new CollisionController(this.dale, this.fly, this.scene);
 		this.world.setContactListener(this.collisionController);
 
 		scene.setGoalTexture(goalTile);
@@ -376,14 +396,6 @@ public class GameMode implements Screen {
 		world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
 
 		volume = constants.getFloat("volume", 1.0f);
-
-		dwidth = flyTexture.getRegionWidth() / scale.x;
-		dheight = flyTexture.getRegionHeight() / scale.y;
-		fly = new FlyModel(constants.get("fly"), 5f, 5f, dwidth, dheight);
-		fly.setDrawScale(scale);
-		fly.setTexture(flyTexture);
-		addObject(fly);
-		flyController = new FlyController(fly, dale, scene);
 	}
 
 	/**
@@ -429,6 +441,7 @@ public class GameMode implements Screen {
 			return false;
 		} else if (countdown > 0) {
 			countdown--;
+//			System.out.println(countdown);
 		} else if (countdown == 0) {
 			if (failed) {
 				reset();
@@ -486,7 +499,18 @@ public class GameMode implements Screen {
 		flyController.changeDirection();
 		flyController.setVelocity();
 
-		// TODO: do we need to update grid every frame? (for moving platforms)
+		int winLose = dale.getWinLose();
+		if(winLose == WIN_CODE){
+			setComplete(true);
+//			//debugging message
+//			System.out.println("win");
+		}
+		if(winLose == LOSE_CODE){
+			setFailure(true);
+//			//debugging message
+//			System.out.println("lose");
+		}
+
 		 scene.updateGrid();
 	}
 
@@ -555,8 +579,8 @@ public class GameMode implements Screen {
 		}
 
 		// Final message
-		if (complete && !failed) {
-			displayFont.setColor(Color.YELLOW);
+		if (complete) {
+			displayFont.setColor(Color.ORANGE);
 			canvas.begin(); // DO NOT SCALE
 			canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
 			canvas.end();
