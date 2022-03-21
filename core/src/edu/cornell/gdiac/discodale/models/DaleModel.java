@@ -10,6 +10,7 @@
  */
 package edu.cornell.gdiac.discodale.models;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
@@ -55,6 +56,8 @@ public class DaleModel extends CapsuleObstacle {
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
 
+	/** Tongue texture */
+	private Texture tongueTexture;
 	/** Speed the grapple sticky part moves at */
 	private float grappleStickyPartSpeed;
 	/** Angle grapple shoots out at */
@@ -197,6 +200,30 @@ public class DaleModel extends CapsuleObstacle {
 	}
 
 	/**
+	 * Returns the tongue texture
+	 * @return tongue texture
+	 */
+	public Texture getTongueTexture() {
+		return tongueTexture;
+	}
+
+	/**
+	 * Set the tongue texture
+	 * @param tongueTexture tongue texture
+	 */
+	public void setTongueTexture(Texture tongueTexture) {
+		this.tongueTexture = tongueTexture;
+	}
+
+	/**
+	 * Set the tongue tip sticky part texture
+	 * @param stickyPartTexture sticky part texture
+	 */
+	public void setStickyPartTexture(Texture stickyPartTexture) {
+		grappleStickyPart.setTexture(new TextureRegion(stickyPartTexture));
+	}
+
+	/**
 	 * Returns the grapple angle
 	 * @return grapple angle
 	 */
@@ -229,11 +256,19 @@ public class DaleModel extends CapsuleObstacle {
 	}
 
 	/**
-	 * Calculate the length of the tongue. This is the distance between Dale and the sticky part.
+	 * Calculate the current length of the tongue. This is the distance between Dale and the sticky part.
 	 * @return length of tongue
 	 */
-	public float getGrappleTongueLength() {
-		return vectorCache.set(getPosition()).sub(grappleStickyPart.getPosition()).len();
+	public float getTongueLength() {
+		return vectorCache.set(grappleStickyPart.getPosition()).sub(getPosition()).len();
+	}
+
+	/**
+	 * Calculate the current angle from Dale to the sticky part of the tongue.
+	 * @return angle from Dale to tongue (radians)
+	 */
+	public float getTongueAngle() {
+		return vectorCache.set(grappleStickyPart.getPosition()).sub(getPosition()).angleRad();
 	}
 
 	/**
@@ -445,8 +480,11 @@ public class DaleModel extends CapsuleObstacle {
 	 */
 	public void draw(GameCanvas canvas) {
 		float effect = faceRight ? 1.0f : -1.0f;
+		// Reorder this to change if the tongue is on top of Dale or not
 		canvas.draw(texture,this.color.toGdxColor(),origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
-		// TODO draw tongue and sticky part
+		canvas.draw(tongueTexture, Color.WHITE, 0, tongueTexture.getHeight() / 2f, getX() * drawScale.x, getY() * drawScale.y,
+				getTongueAngle(), getTongueLength() / tongueTexture.getWidth() * drawScale.x, 1);
+		grappleStickyPart.draw(canvas);
 	}
 	
 	/**

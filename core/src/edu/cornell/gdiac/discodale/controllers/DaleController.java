@@ -50,7 +50,7 @@ public class DaleController {
 				}
 				break;
 			case RETURNING:
-				if (dale.getGrappleTongueLength() < 0.5) { // TODO don't use magic number here
+				if (dale.getTongueLength() < 0.5) { // TODO don't use magic number here
 					dale.setGrappleState(GrappleState.RETRACTED);
 					dale.setStickyPartActive(true);
 					dale.createSelfGrappleJoint(world);
