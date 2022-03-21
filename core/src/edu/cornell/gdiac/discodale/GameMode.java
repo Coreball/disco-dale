@@ -452,6 +452,7 @@ public class GameMode implements Screen {
 		daleController.processColorRotation();
 		daleController.processGrappleAction(world);
 		dale.applyForce();
+		dale.applyStickyPartMovement(dt);
 
 		if (dale.isJumping()) {
 			jumpId = playSound( jumpSound, jumpId, volume );
