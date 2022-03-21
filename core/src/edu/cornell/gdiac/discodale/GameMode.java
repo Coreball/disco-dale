@@ -25,6 +25,7 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
+import edu.cornell.gdiac.discodale.controllers.DaleController;
 import edu.cornell.gdiac.discodale.models.*;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.util.*;
@@ -97,6 +98,7 @@ public class GameMode implements Screen {
 	private FlyModel fly;
 	private SceneModel scene;
 
+	private DaleController daleController;
 	private CollisionController collisionController;
 
 	public GameMode() {
@@ -354,6 +356,8 @@ public class GameMode implements Screen {
 		dale.setDrawScale(scale);
 		dale.setTexture(avatarTexture);
 		addObject(dale);
+
+		this.daleController = new DaleController(this.dale);
 		this.collisionController = new CollisionController(this.dale, this.scene);
 		this.world.setContactListener(this.collisionController);
 
@@ -443,15 +447,11 @@ public class GameMode implements Screen {
 	 * @param dt	Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
-		// Process actions in object model
-		dale.setMovement(InputController.getInstance().getHorizontal() * dale.getForce());
-		dale.setJumping(InputController.getInstance().didJump());
-
-		if (InputController.getInstance().didRotateColor()) {
-			dale.rotateColor();
-		}
-
+		daleController.processMovement();
+		daleController.processJumping();
+		daleController.processColorRotation();
 		dale.applyForce();
+
 		if (dale.isJumping()) {
 			jumpId = playSound( jumpSound, jumpId, volume );
 		}
