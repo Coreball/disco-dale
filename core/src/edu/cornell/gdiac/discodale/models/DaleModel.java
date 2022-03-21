@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 
+import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 import com.badlogic.gdx.utils.JsonValue;
 import edu.cornell.gdiac.discodale.*;
 import edu.cornell.gdiac.discodale.obstacle.*;
@@ -53,6 +54,15 @@ public class DaleModel extends CapsuleObstacle {
 	private boolean isGrounded;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
+
+	/** Coordinates of grapple target */
+	private final Vector2 grappleTarget;
+	/** Grapple state */
+	private GrappleState grappleState;
+	/** Tongue sticky part */
+	private WheelObstacle grappleStickyPart;
+	/** Joint for welding sticky part to Dale */
+	private Joint selfGrappleJoint;
 
 	private DaleColor color = DaleColor.RED;
 	
@@ -183,6 +193,50 @@ public class DaleModel extends CapsuleObstacle {
 	}
 
 	/**
+	 * Return a reference to the grapple target vector.
+	 * @return grapple target
+	 */
+	public Vector2 getGrappleTarget() {
+		return grappleTarget;
+	}
+
+	/**
+	 * Return grapple state
+	 * @return grapple state
+	 */
+	public GrappleState getGrappleState() {
+		return grappleState;
+	}
+
+	/**
+	 * Set grapple state
+	 * @param grappleState grapple state
+	 */
+	public void setGrappleState(GrappleState grappleState) {
+		this.grappleState = grappleState;
+	}
+
+	/**
+	 * Create weld joint at the center of Dale and the tongue sticky part.
+	 * @param world physics world to make joint in
+	 */
+	public void createSelfGrappleJoint(World world) {
+		WeldJointDef jointDef = new WeldJointDef();
+		jointDef.bodyA = this.getBody();
+		jointDef.bodyB = grappleStickyPart.getBody();
+		jointDef.collideConnected = false;
+		selfGrappleJoint = world.createJoint(jointDef);
+	}
+
+	/**
+	 * Destroy weld joint at the center of Dale and tongue sticky part.
+	 * @param world physics world to destroy joint in
+	 */
+	public void destroySelfGrappleJoint(World world) {
+		world.destroyJoint(selfGrappleJoint);
+	}
+
+	/**
 	 * Creates a new dude avatar with the given physics data
 	 *
 	 * The size is expressed in physics units NOT pixels.  In order for 
@@ -217,6 +271,15 @@ public class DaleModel extends CapsuleObstacle {
 		faceRight = true;
 		
 		jumpCooldown = 0;
+
+		// Grapple things
+		grappleTarget = new Vector2();
+		grappleState = GrappleState.RETRACTED;
+		grappleStickyPart = new WheelObstacle(getX(), getY(), getWidth() / 10);
+		grappleStickyPart.setName("stickypart");
+		grappleStickyPart.setDensity(data.getFloat("density", 0));
+		grappleStickyPart.setBodyType(BodyDef.BodyType.DynamicBody);
+
 		setName(Constants.DALE_NAME_TAG);
 	}
 
@@ -234,6 +297,12 @@ public class DaleModel extends CapsuleObstacle {
 		if (!super.activatePhysics(world)) {
 			return false;
 		}
+
+		if (!grappleStickyPart.activatePhysics(world)) {
+			return false;
+		}
+
+		createSelfGrappleJoint(world);
 
 		// Ground Sensor
 		// -------------
@@ -308,6 +377,13 @@ public class DaleModel extends CapsuleObstacle {
 		}
 
 		super.update(dt);
+		grappleStickyPart.update(dt);
+	}
+
+	@Override
+	public void setDrawScale(Vector2 value) {
+		super.setDrawScale(value);
+		grappleStickyPart.setDrawScale(value); // So important!
 	}
 
 	/**
@@ -318,6 +394,7 @@ public class DaleModel extends CapsuleObstacle {
 	public void draw(GameCanvas canvas) {
 		float effect = faceRight ? 1.0f : -1.0f;
 		canvas.draw(texture,this.color.toGdxColor(),origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+		// TODO draw tongue and sticky part
 	}
 	
 	/**
@@ -330,5 +407,16 @@ public class DaleModel extends CapsuleObstacle {
 	public void drawDebug(GameCanvas canvas) {
 		super.drawDebug(canvas);
 		canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+		grappleStickyPart.drawDebug(canvas);
+	}
+
+	/**
+	 * The state of Dale's grapple tongue
+	 */
+	public enum GrappleState {
+		RETRACTED,
+		EXTENDING,
+		ATTACHED,
+		RETURNING,
 	}
 }

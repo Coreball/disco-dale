@@ -72,6 +72,8 @@ public class InputController {
 	/** Whether the exit button was pressed. */
 	private boolean exitPressed;
 	private boolean exitPrevious;
+	/** Whether the click action button is being held. */
+	private boolean clickHeld;
 	
 	/** How much did we move horizontally? */
 	private float horizontal;
@@ -193,6 +195,15 @@ public class InputController {
 	public boolean didExit() {
 		return exitPressed && !exitPrevious;
 	}
+
+	/**
+	 * Returns true if the click button is held.
+	 *
+	 * @return true if the click button is held.
+	 */
+	public boolean didClickHeld() {
+		return clickHeld;
+	}
 	
 	/**
 	 * Creates a new input controller
@@ -267,7 +278,7 @@ public class InputController {
 		horizontal = xbox.getLeftX();
 		
 		// Move the crosshairs with the right stick.r
-		// TODO implement clickPressed
+		// TODO implement clickPressed and clickHeld
 		clickPressed = false;
 		crosscache.set(xbox.getLeftX(), xbox.getLeftY());
 		if (crosscache.len2() > GP_THRESHOLD) {
@@ -312,6 +323,7 @@ public class InputController {
 
 		// Mouse results
         clickPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+		clickHeld = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 		crosshair.set(Gdx.input.getX(), Gdx.input.getY());
 		crosshair.scl(1/scale.x,-1/scale.y);
 		crosshair.y += bounds.height;

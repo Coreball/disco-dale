@@ -450,6 +450,7 @@ public class GameMode implements Screen {
 		daleController.processMovement();
 		daleController.processJumping();
 		daleController.processColorRotation();
+		daleController.processGrappleAction(world);
 		dale.applyForce();
 
 		if (dale.isJumping()) {
