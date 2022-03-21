@@ -36,6 +36,8 @@ public class DaleModel extends CapsuleObstacle {
 	private final float damping;
 	/** The maximum character speed */
 	private final float maxspeed;
+	/** The maximum character speed in the AIR */
+	private final float maxAirSpeed;
 	/** Identifier to allow us to track the sensor in ContactListener */
 	private final String sensorName;
 	/** The impulse for the character jump */
@@ -61,7 +63,9 @@ public class DaleModel extends CapsuleObstacle {
 	private Texture tongueTexture;
 	/** Speed the grapple sticky part moves at */
 	private float grappleStickyPartSpeed;
-	/** Angle grapple shoots out at */
+	/** Force the grapple applies on Dale */
+	private float grappleForce;
+	/** Angle grapple shoots out at (calculated based on target location) */
 	private float grappleAngle;
 	/** Grapple state */
 	private GrappleState grappleState;
@@ -386,6 +390,7 @@ public class DaleModel extends CapsuleObstacle {
 		setFixedRotation(true);
 
 		maxspeed = data.getFloat("maxspeed", 0);
+		maxAirSpeed = data.getFloat("max_air_speed", 0);
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
 		jump_force = data.getFloat( "jump_force", 0 );
@@ -402,6 +407,7 @@ public class DaleModel extends CapsuleObstacle {
 
 		// Grapple things
 		grappleStickyPartSpeed = data.getFloat("grapple_speed", 1);
+		grappleForce = data.getFloat("grapple_force", 1);
 		grappleAngle = 0;
 		grappleState = GrappleState.RETRACTED;
 		grappleStickyPart = new WheelObstacle(getX(), getY(), getWidth() / 10);
@@ -469,25 +475,36 @@ public class DaleModel extends CapsuleObstacle {
 		if (!isActive()) {
 			return;
 		}
-		
-		// Don't want to be moving. Damp out player motion
-		if (getMovement() == 0f) {
-			forceCache.set(-getDamping()*getVX(),0);
-			body.applyForce(forceCache,getPosition(),true);
-		}
-		
-		// Velocity too high, clamp it
-		if (Math.abs(getVX()) >= getMaxSpeed()) {
-			setVX(Math.signum(getVX())*getMaxSpeed());
-		} else {
-			forceCache.set(getMovement(),0);
-			body.applyForce(forceCache,getPosition(),true);
-		}
 
-		// Jump!
-		if (isJumping()) {
-			forceCache.set(0, jump_force);
-			body.applyLinearImpulse(forceCache,getPosition(),true);
+		if (grappleState == GrappleState.ATTACHED) {
+			// Apply grapple force
+			forceCache.set(grappleForce, 0).rotateRad(getTongueAngle());
+			body.applyForce(forceCache, getPosition(), true);
+		} else if (!isGrounded()) {
+			// Limit max air speed
+			if (getLinearVelocity().len2() >= maxAirSpeed) {
+				setLinearVelocity(vectorCache.set(getLinearVelocity()).limit(maxAirSpeed));
+			}
+		} else {
+			// Don't want to be moving. Damp out player motion
+			if (getMovement() == 0f) {
+				forceCache.set(-getDamping() * getVX(), 0);
+				body.applyForce(forceCache, getPosition(), true);
+			}
+
+			// Clamp walking speed
+			if (Math.abs(getVX()) >= getMaxSpeed()) {
+				setVX(Math.signum(getVX()) * getMaxSpeed());
+			} else {
+				forceCache.set(getMovement(),0);
+				body.applyForce(forceCache,getPosition(),true);
+			}
+
+			// Jump!
+			if (isJumping()) {
+				forceCache.set(0, jump_force);
+				body.applyLinearImpulse(forceCache,getPosition(),true);
+			}
 		}
 	}
 
@@ -506,7 +523,6 @@ public class DaleModel extends CapsuleObstacle {
 			case RETURNING:
 				vectorCache.set(getPosition()).sub(grappleStickyPart.getPosition()).nor().scl(dt * grappleStickyPartSpeed);
 				grappleStickyPart.setPosition(vectorCache.add(grappleStickyPart.getPosition()));
-//				grappleStickyPart.setLinearVelocity(vectorCache);
 				// TODO is there a better way to do this
 				break;
 			default:
