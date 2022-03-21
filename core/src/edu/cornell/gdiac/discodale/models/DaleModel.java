@@ -56,6 +56,7 @@ public class DaleModel extends CapsuleObstacle {
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
 
+	// region Grapple Properties
 	/** Tongue texture */
 	private Texture tongueTexture;
 	/** Speed the grapple sticky part moves at */
@@ -66,8 +67,13 @@ public class DaleModel extends CapsuleObstacle {
 	private GrappleState grappleState;
 	/** Tongue sticky part */
 	private final WheelObstacle grappleStickyPart;
-	/** Joint for welding sticky part to Dale */
-	private Joint selfGrappleJoint;
+	/** Body that sticky part is attached to, if any */
+	private Body grappleAttachedBody;
+	/** Local anchor for attached body */
+	private final Vector2 grappleAttachedBodyLocalAnchor = new Vector2();
+	/** Joint for welding sticky part to Dale or a wall */
+	private Joint grappleJoint;
+	// endregion
 
 	private DaleColor color = DaleColor.RED;
 	
@@ -199,6 +205,8 @@ public class DaleModel extends CapsuleObstacle {
 		return faceRight;
 	}
 
+	// region Grapple Methods
+
 	/**
 	 * Returns the tongue texture
 	 * @return tongue texture
@@ -272,23 +280,78 @@ public class DaleModel extends CapsuleObstacle {
 	}
 
 	/**
+	 * Return Dale's sticky part
+	 * @return the sticky part
+	 */
+	public WheelObstacle getStickyPart() {
+		return grappleStickyPart;
+	}
+
+	/**
+	 * Return body that sticky part is attached to
+	 * @return attached body
+	 */
+	public Body getGrappleAttachedBody() {
+		return grappleAttachedBody;
+	}
+
+	/**
+	 * Set attached body when sticky part hits something so can create the joint right after
+	 * @param grappleAttachedBody body sticky part should attach to
+	 */
+	public void setGrappleAttachedBody(Body grappleAttachedBody) {
+		this.grappleAttachedBody = grappleAttachedBody;
+	}
+
+	/**
+	 * Returns local anchor vector for attached body
+	 * @return attached body local anchor
+	 */
+	public Vector2 getGrappleAttachedBodyLocalAnchor() {
+		return grappleAttachedBodyLocalAnchor;
+	}
+
+	/**
+	 * Set attached body local anchor
+	 * @param grappleAttachedBodyLocalAnchor attached body local anchor
+	 */
+	public void setGrappleAttachedBodyLocalAnchor(Vector2 grappleAttachedBodyLocalAnchor) {
+		this.grappleAttachedBodyLocalAnchor.set(grappleAttachedBodyLocalAnchor);
+	}
+
+	/**
 	 * Create weld joint at the center of Dale and the tongue sticky part.
 	 * @param world physics world to make joint in
 	 */
-	public void createSelfGrappleJoint(World world) {
+	public void createGrappleJoint(World world) {
 		WeldJointDef jointDef = new WeldJointDef();
 		jointDef.bodyA = this.getBody();
 		jointDef.bodyB = grappleStickyPart.getBody();
 		jointDef.collideConnected = false;
-		selfGrappleJoint = world.createJoint(jointDef);
+		grappleJoint = world.createJoint(jointDef);
+	}
+
+	/**
+	 * Create weld joint at the center of another body and the tongue sticky part.
+	 * @param bodyA other body for grapple joint
+	 * @param world physics world to make joint in
+	 */
+	public void createGrappleJoint(Body bodyA, Vector2 localAnchorA, World world) {
+		WeldJointDef jointDef = new WeldJointDef();
+		jointDef.bodyA = bodyA;
+		jointDef.localAnchorA.set(localAnchorA);
+		jointDef.bodyB = grappleStickyPart.getBody();
+		jointDef.collideConnected = false;
+		grappleJoint = world.createJoint(jointDef);
 	}
 
 	/**
 	 * Destroy weld joint at the center of Dale and tongue sticky part.
 	 * @param world physics world to destroy joint in
 	 */
-	public void destroySelfGrappleJoint(World world) {
-		world.destroyJoint(selfGrappleJoint);
+	public void destroyGrappleJoint(World world) {
+		world.destroyJoint(grappleJoint);
+		grappleJoint = null;
 	}
 
 	/**
@@ -298,6 +361,8 @@ public class DaleModel extends CapsuleObstacle {
 	public void setStickyPartActive(boolean active) {
 		grappleStickyPart.setActive(active);
 	}
+
+	// endregion
 
 	/**
 	 * Creates a new dude avatar with the given physics data
@@ -343,6 +408,7 @@ public class DaleModel extends CapsuleObstacle {
 		grappleStickyPart.setName("stickypart");
 		grappleStickyPart.setDensity(data.getFloat("density", 0));
 		grappleStickyPart.setBodyType(BodyDef.BodyType.DynamicBody);
+		grappleAttachedBody = null;
 
 		setName(Constants.DALE_NAME_TAG);
 	}
@@ -366,7 +432,7 @@ public class DaleModel extends CapsuleObstacle {
 			return false;
 		}
 
-		createSelfGrappleJoint(world);
+		createGrappleJoint(world);
 
 		// Ground Sensor
 		// -------------

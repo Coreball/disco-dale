@@ -38,7 +38,7 @@ public class DaleController {
 					dale.setGrappleState(GrappleState.EXTENDING);
 					vectorCache.set(InputController.getInstance().getCrossHair()).sub(dale.getPosition());
 					dale.setGrappleAngle(vectorCache.angleRad());
-					dale.destroySelfGrappleJoint(world);
+					dale.destroyGrappleJoint(world);
 					System.out.println("Grapple angle: " + dale.getGrappleAngle());
 				}
 				break;
@@ -46,14 +46,25 @@ public class DaleController {
 				if (!InputController.getInstance().didClickHeld()) {
 					dale.setGrappleState(GrappleState.RETURNING);
 					dale.setStickyPartActive(false);
-//					dale.createSelfGrappleJoint(world);
+				} else if (dale.getGrappleAttachedBody() != null) {
+					dale.setGrappleState(GrappleState.ATTACHED);
+					dale.createGrappleJoint(dale.getGrappleAttachedBody(), dale.getGrappleAttachedBodyLocalAnchor(), world);
+				}
+				break;
+			case ATTACHED:
+				if (!InputController.getInstance().didClickHeld()) {
+					dale.setGrappleState(GrappleState.RETURNING);
+					dale.setGrappleAttachedBody(null);
+					dale.setGrappleAttachedBodyLocalAnchor(Vector2.Zero);
+					dale.setStickyPartActive(false);
+					dale.destroyGrappleJoint(world);
 				}
 				break;
 			case RETURNING:
 				if (dale.getTongueLength() < 0.5) { // TODO don't use magic number here
 					dale.setGrappleState(GrappleState.RETRACTED);
 					dale.setStickyPartActive(true);
-					dale.createSelfGrappleJoint(world);
+					dale.createGrappleJoint(world);
 				}
 				break;
 		}
