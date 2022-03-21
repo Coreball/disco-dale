@@ -521,6 +521,7 @@ public class GameMode implements Screen {
 		
 		if (debug) {
 			canvas.beginDebug();
+			scene.drawDebug(canvas);
 			for(Obstacle obj : objects) {
 				obj.drawDebug(canvas);
 			}
@@ -529,7 +530,7 @@ public class GameMode implements Screen {
 		
 		// Final message
 		if (complete && !failed) {
-			displayFont.setColor(Color.YELLOW);
+			displayFont.setColor(Color.RED);
 			canvas.begin(); // DO NOT SCALE
 			canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
 			canvas.end();
