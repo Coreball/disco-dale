@@ -20,10 +20,11 @@ import edu.cornell.gdiac.discodale.obstacle.CapsuleObstacle;
 /**
  * Player avatar for the plaform game.
  *
- * Note that this class returns to static loading.  That is because there are
+ * Note that this class returns to static loading. That is because there are
  * no other subclasses that we might loop through.
  */
 public class FlyModel extends CapsuleObstacle {
+
 	/** The initializing data (to avoid magic numbers) */
 	private final JsonValue data;
 
@@ -38,9 +39,8 @@ public class FlyModel extends CapsuleObstacle {
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
 
-	/** Flag angry, whether the fly is chasing Dale or not*/
+	/** Flag angry, whether the fly is chasing Dale or not */
 	private boolean angry;
-
 
 	public float getDirection() {
 		return this.velocity.angleDeg();
@@ -62,11 +62,13 @@ public class FlyModel extends CapsuleObstacle {
 		this.velocity.set(0, speed).setAngleDeg(direction);
 	}
 
-	public boolean getAngry(){return this.angry;}
+	public boolean getAngry() {
+		return this.angry;
+	}
 
-	public void setAngry(boolean angry){this.angry = angry;}
-
-
+	public void setAngry(boolean angry) {
+		this.angry = angry;
+	}
 
 	/**
 	 * Returns the name of the ground sensor
@@ -82,24 +84,23 @@ public class FlyModel extends CapsuleObstacle {
 	/**
 	 * Creates a new dude avatar with the given physics data
 	 *
-	 * The size is expressed in physics units NOT pixels.  In order for
+	 * The size is expressed in physics units NOT pixels. In order for
 	 * drawing to work properly, you MUST set the drawScale. The drawScale
 	 * converts the physics units to pixels.
 	 *
-	 * @param data  	The physics constants for this dude
-	 * @param width		The object width in physics units
-	 * @param height	The object width in physics units
+	 * @param data   The physics constants for this dude
+	 * @param width  The object width in physics units
+	 * @param height The object width in physics units
 	 */
-	public FlyModel(JsonValue data,float x, float y,float width, float height) {
+	public FlyModel(JsonValue data, float x, float y, float width, float height) {
 		// The shrink factors fit the image to a tigher hitbox
-		super(	x, y,
-				width*data.get("shrink").getFloat( 0 ),
-				height*data.get("shrink").getFloat( 1 ));
+		super(x, y,
+				width * data.get("shrink").getFloat(0),
+				height * data.get("shrink").getFloat(1));
 		setFixedRotation(true);
 		setAngry(false);
 		sensorName = "FlyGroundSensor";
 		this.data = data;
-
 
 		// Gameplay attributes
 
@@ -129,30 +130,30 @@ public class FlyModel extends CapsuleObstacle {
 		// To determine whether or not the dude is on the ground,
 		// we create a thin sensor under his feet, which reports
 		// collisions with the world but has no collision response.
-//		Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
-//		FixtureDef sensorDef = new FixtureDef();
-//		sensorDef.density = data.getFloat("density",0);
-//		sensorDef.isSensor = true;
-//		sensorShape = new PolygonShape();
-//		JsonValue sensorjv = data.get("sensor");
-//		sensorShape.setAsBox(sensorjv.getFloat("shrink",0)*getWidth()/2.0f,
-//								 sensorjv.getFloat("height",0), sensorCenter, 0.0f);
-//		sensorDef.shape = sensorShape;
-//
-//		// Ground sensor to represent our feet
-//		Fixture sensorFixture = body.createFixture( sensorDef );
-//		sensorFixture.setUserData(getSensorName());
-//		body.setMassData(new MassData());
+		// Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
+		// FixtureDef sensorDef = new FixtureDef();
+		// sensorDef.density = data.getFloat("density",0);
+		// sensorDef.isSensor = true;
+		// sensorShape = new PolygonShape();
+		// JsonValue sensorjv = data.get("sensor");
+		// sensorShape.setAsBox(sensorjv.getFloat("shrink",0)*getWidth()/2.0f,
+		// sensorjv.getFloat("height",0), sensorCenter, 0.0f);
+		// sensorDef.shape = sensorShape;
+		//
+		// // Ground sensor to represent our feet
+		// Fixture sensorFixture = body.createFixture( sensorDef );
+		// sensorFixture.setUserData(getSensorName());
+		// body.setMassData(new MassData());
 		setGravityScale(0);
 		return true;
 	}
-	
+
 	/**
 	 * Updates the object's physics state (NOT GAME LOGIC).
 	 *
 	 * We use this method to reset cooldowns.
 	 *
-	 * @param dt	Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
 		body.setLinearVelocity(this.velocity);
@@ -165,9 +166,10 @@ public class FlyModel extends CapsuleObstacle {
 	 * @param canvas Drawing context
 	 */
 	public void draw(GameCanvas canvas) {
-		canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),1.0f,1.0f);
+		canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(),
+				1.0f, 1.0f);
 	}
-	
+
 	/**
 	 * Draws the outline of the physics body.
 	 *
@@ -177,6 +179,6 @@ public class FlyModel extends CapsuleObstacle {
 	 */
 	public void drawDebug(GameCanvas canvas) {
 		super.drawDebug(canvas);
-		canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+		canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
 	}
 }

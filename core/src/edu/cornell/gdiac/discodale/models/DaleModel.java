@@ -21,7 +21,7 @@ import edu.cornell.gdiac.discodale.obstacle.*;
 /**
  * Player avatar for the plaform game.
  *
- * Note that this class returns to static loading.  That is because there are
+ * Note that this class returns to static loading. That is because there are
  * no other subclasses that we might loop through.
  */
 public class DaleModel extends CapsuleObstacle {
@@ -42,7 +42,7 @@ public class DaleModel extends CapsuleObstacle {
 	private final int jumpLimit;
 
 	/** The current horizontal movement of the character */
-	private float   movement;
+	private float movement;
 	/** Which direction is the character facing */
 	private boolean faceRight;
 	/** How long until we can jump again */
@@ -54,8 +54,11 @@ public class DaleModel extends CapsuleObstacle {
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
 
+	/** Whether Dale's color is matched with background */
+	private boolean match;
+
 	private DaleColor color = DaleColor.RED;
-	
+
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
 
@@ -77,7 +80,7 @@ public class DaleModel extends CapsuleObstacle {
 	public float getMovement() {
 		return movement;
 	}
-	
+
 	/**
 	 * Sets left/right movement of this character.
 	 * 
@@ -86,7 +89,7 @@ public class DaleModel extends CapsuleObstacle {
 	 * @param value left/right movement of this character.
 	 */
 	public void setMovement(float value) {
-		movement = value; 
+		movement = value;
 		// Change facing if appropriate
 		if (movement < 0) {
 			faceRight = false;
@@ -103,14 +106,14 @@ public class DaleModel extends CapsuleObstacle {
 	public boolean isJumping() {
 		return isJumping && isGrounded && jumpCooldown <= 0;
 	}
-	
+
 	/**
 	 * Sets whether the dude is actively jumping.
 	 *
 	 * @param value whether the dude is actively jumping.
 	 */
 	public void setJumping(boolean value) {
-		isJumping = value; 
+		isJumping = value;
 	}
 
 	/**
@@ -121,14 +124,14 @@ public class DaleModel extends CapsuleObstacle {
 	public boolean isGrounded() {
 		return isGrounded;
 	}
-	
+
 	/**
 	 * Sets whether the dude is on the ground.
 	 *
 	 * @param value whether the dude is on the ground.
 	 */
 	public void setGrounded(boolean value) {
-		isGrounded = value; 
+		isGrounded = value;
 	}
 
 	/**
@@ -150,13 +153,13 @@ public class DaleModel extends CapsuleObstacle {
 	public float getDamping() {
 		return damping;
 	}
-	
+
 	/**
-	 * Returns the upper limit on dude left-right movement.  
+	 * Returns the upper limit on dude left-right movement.
 	 *
 	 * This does NOT apply to vertical movement.
 	 *
-	 * @return the upper limit on dude left-right movement.  
+	 * @return the upper limit on dude left-right movement.
 	 */
 	public float getMaxSpeed() {
 		return maxspeed;
@@ -169,7 +172,7 @@ public class DaleModel extends CapsuleObstacle {
 	 *
 	 * @return the name of the ground sensor
 	 */
-	public String getSensorName() { 
+	public String getSensorName() {
 		return sensorName;
 	}
 
@@ -183,31 +186,45 @@ public class DaleModel extends CapsuleObstacle {
 	}
 
 	/**
+	 * Sets Dale's color match.
+	 */
+	public void setMatch(boolean match) {
+		this.match = match;
+	}
+
+	/**
+	 * Gets Dale's color match.
+	 */
+	public boolean getMatch() {
+		return match;
+	}
+
+	/**
 	 * Creates a new dude avatar with the given physics data
 	 *
-	 * The size is expressed in physics units NOT pixels.  In order for 
-	 * drawing to work properly, you MUST set the drawScale. The drawScale 
+	 * The size is expressed in physics units NOT pixels. In order for
+	 * drawing to work properly, you MUST set the drawScale. The drawScale
 	 * converts the physics units to pixels.
 	 *
-	 * @param data  	The physics constants for this dude
-	 * @param width		The object width in physics units
-	 * @param height	The object width in physics units
+	 * @param data   The physics constants for this dude
+	 * @param width  The object width in physics units
+	 * @param height The object width in physics units
 	 */
 	public DaleModel(JsonValue data, float width, float height) {
 		// The shrink factors fit the image to a tigher hitbox
-		super(	data.get("pos").getFloat(0),
+		super(data.get("pos").getFloat(0),
 				data.get("pos").getFloat(1),
-				width*data.get("shrink").getFloat( 0 ),
-				height*data.get("shrink").getFloat( 1 ));
-        setDensity(data.getFloat("density", 0));
-		setFriction(data.getFloat("friction", 0));  /// HE WILL STICK TO WALLS IF YOU FORGET
+				width * data.get("shrink").getFloat(0),
+				height * data.get("shrink").getFloat(1));
+		setDensity(data.getFloat("density", 0));
+		setFriction(data.getFloat("friction", 0)); /// HE WILL STICK TO WALLS IF YOU FORGET
 		setFixedRotation(true);
 
 		maxspeed = data.getFloat("maxspeed", 0);
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
-		jump_force = data.getFloat( "jump_force", 0 );
-		jumpLimit = data.getInt( "jump_cool", 0 );
+		jump_force = data.getFloat("jump_force", 0);
+		jumpLimit = data.getInt("jump_cool", 0);
 		sensorName = Constants.DALE_GROUND_SENSOR_NAME;
 		this.data = data;
 
@@ -215,7 +232,8 @@ public class DaleModel extends CapsuleObstacle {
 		isGrounded = false;
 		isJumping = false;
 		faceRight = true;
-		
+		match = true;
+
 		jumpCooldown = 0;
 		setName(Constants.DALE_NAME_TAG);
 	}
@@ -237,29 +255,28 @@ public class DaleModel extends CapsuleObstacle {
 
 		// Ground Sensor
 		// -------------
-		// We only allow the dude to jump when he's on the ground. 
+		// We only allow the dude to jump when he's on the ground.
 		// Double jumping is not allowed.
 		//
-		// To determine whether or not the dude is on the ground, 
-		// we create a thin sensor under his feet, which reports 
+		// To determine whether or not the dude is on the ground,
+		// we create a thin sensor under his feet, which reports
 		// collisions with the world but has no collision response.
 		Vector2 sensorCenter = new Vector2(0, -getHeight() / 2);
 		FixtureDef sensorDef = new FixtureDef();
-		sensorDef.density = data.getFloat("density",0);
+		sensorDef.density = data.getFloat("density", 0);
 		sensorDef.isSensor = true;
 		sensorShape = new PolygonShape();
 		JsonValue sensorjv = data.get("sensor");
-		sensorShape.setAsBox(sensorjv.getFloat("shrink",0)*getWidth()/2.0f,
-								 sensorjv.getFloat("height",0), sensorCenter, 0.0f);
+		sensorShape.setAsBox(sensorjv.getFloat("shrink", 0) * getWidth() / 2.0f,
+				sensorjv.getFloat("height", 0), sensorCenter, 0.0f);
 		sensorDef.shape = sensorShape;
 
 		// Ground sensor to represent our feet
-		Fixture sensorFixture = body.createFixture( sensorDef );
+		Fixture sensorFixture = body.createFixture(sensorDef);
 		sensorFixture.setUserData(getSensorName());
-		
+
 		return true;
 	}
-	
 
 	/**
 	 * Applies the force to the body of this dude
@@ -270,34 +287,34 @@ public class DaleModel extends CapsuleObstacle {
 		if (!isActive()) {
 			return;
 		}
-		
+
 		// Don't want to be moving. Damp out player motion
 		if (getMovement() == 0f) {
-			forceCache.set(-getDamping()*getVX(),0);
-			body.applyForce(forceCache,getPosition(),true);
+			forceCache.set(-getDamping() * getVX(), 0);
+			body.applyForce(forceCache, getPosition(), true);
 		}
-		
+
 		// Velocity too high, clamp it
 		if (Math.abs(getVX()) >= getMaxSpeed()) {
-			setVX(Math.signum(getVX())*getMaxSpeed());
+			setVX(Math.signum(getVX()) * getMaxSpeed());
 		} else {
-			forceCache.set(getMovement(),0);
-			body.applyForce(forceCache,getPosition(),true);
+			forceCache.set(getMovement(), 0);
+			body.applyForce(forceCache, getPosition(), true);
 		}
 
 		// Jump!
 		if (isJumping()) {
 			forceCache.set(0, jump_force);
-			body.applyLinearImpulse(forceCache,getPosition(),true);
+			body.applyLinearImpulse(forceCache, getPosition(), true);
 		}
 	}
-	
+
 	/**
 	 * Updates the object's physics state (NOT GAME LOGIC).
 	 *
 	 * We use this method to reset cooldowns.
 	 *
-	 * @param dt	Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
 		// Apply cooldowns
@@ -317,9 +334,10 @@ public class DaleModel extends CapsuleObstacle {
 	 */
 	public void draw(GameCanvas canvas) {
 		float effect = faceRight ? 1.0f : -1.0f;
-		canvas.draw(texture,this.color.toGdxColor(),origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+		canvas.draw(texture, this.color.toGdxColor(), origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y,
+				getAngle(), effect, 1.0f);
 	}
-	
+
 	/**
 	 * Draws the outline of the physics body.
 	 *
@@ -329,6 +347,6 @@ public class DaleModel extends CapsuleObstacle {
 	 */
 	public void drawDebug(GameCanvas canvas) {
 		super.drawDebug(canvas);
-		canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+		canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
 	}
 }
