@@ -59,16 +59,20 @@ public class DaleModel extends CapsuleObstacle {
 	private PolygonShape sensorShape;
 
 	// region Grapple Properties
+
 	/** Tongue texture */
 	private Texture tongueTexture;
 	/** Speed the grapple sticky part moves at */
-	private float grappleStickyPartSpeed;
+	private float stickyPartSpeed;
+	/** Maximum tongue length before attachment */
+	private float maxTongueLength;
 	/** Force the grapple applies on Dale */
 	private float grappleForce;
-	/** Angle grapple shoots out at (calculated based on target location) */
-	private float grappleAngle;
+
 	/** Grapple state */
 	private GrappleState grappleState;
+	/** Angle grapple shoots out at (calculated based on target location) */
+	private float grappleAngle;
 	/** Tongue sticky part */
 	private final WheelObstacle grappleStickyPart;
 	/** Body that sticky part is attached to, if any */
@@ -77,6 +81,7 @@ public class DaleModel extends CapsuleObstacle {
 	private final Vector2 grappleAttachedBodyLocalAnchor = new Vector2();
 	/** Joint for welding sticky part to Dale or a wall */
 	private Joint grappleJoint;
+
 	// endregion
 
 	private DaleColor color = DaleColor.RED;
@@ -236,19 +241,35 @@ public class DaleModel extends CapsuleObstacle {
 	}
 
 	/**
-	 * Returns the grapple angle
-	 * @return grapple angle
+	 * Return grapple sticky part speed
+	 * @return grapple sticky part speed
 	 */
-	public float getGrappleAngle() {
-		return grappleAngle;
+	public float getStickyPartSpeed() {
+		return stickyPartSpeed;
 	}
 
 	/**
-	 * Set grapple angle
-	 * @param grappleAngle grapple angle
+	 * Set grapple sticky part speed
+	 * @param stickyPartSpeed grapple sticky part speed
 	 */
-	public void setGrappleAngle(float grappleAngle) {
-		this.grappleAngle = grappleAngle;
+	public void setStickyPartSpeed(float stickyPartSpeed) {
+		this.stickyPartSpeed = stickyPartSpeed;
+	}
+
+	/**
+	 * Get grapple force
+	 * @return grapple force
+	 */
+	public float getGrappleForce() {
+		return grappleForce;
+	}
+
+	/**
+	 * Set grapple force
+	 * @param grappleForce grapple force
+	 */
+	public void setGrappleForce(float grappleForce) {
+		this.grappleForce = grappleForce;
 	}
 
 	/**
@@ -265,6 +286,30 @@ public class DaleModel extends CapsuleObstacle {
 	 */
 	public void setGrappleState(GrappleState grappleState) {
 		this.grappleState = grappleState;
+	}
+
+	/**
+	 * Returns the grapple angle
+	 * @return grapple angle
+	 */
+	public float getGrappleAngle() {
+		return grappleAngle;
+	}
+
+	/**
+	 * Set grapple angle
+	 * @param grappleAngle grapple angle
+	 */
+	public void setGrappleAngle(float grappleAngle) {
+		this.grappleAngle = grappleAngle;
+	}
+
+	/**
+	 * Returns the maximum length of the tongue before attachment.
+	 * @return max length of tongue
+	 */
+	public float getMaxTongueLength() {
+		return maxTongueLength;
 	}
 
 	/**
@@ -406,8 +451,9 @@ public class DaleModel extends CapsuleObstacle {
 		jumpCooldown = 0;
 
 		// Grapple things
-		grappleStickyPartSpeed = data.getFloat("grapple_speed", 1);
+		stickyPartSpeed = data.getFloat("grapple_speed", 1);
 		grappleForce = data.getFloat("grapple_force", 1);
+		maxTongueLength = data.getFloat("max_tongue_length", 1);
 		grappleAngle = 0;
 		grappleState = GrappleState.RETRACTED;
 		grappleStickyPart = new WheelObstacle(getX(), getY(), getWidth() / 10);
@@ -517,11 +563,11 @@ public class DaleModel extends CapsuleObstacle {
 	public void applyStickyPartMovement(float dt) {
 		switch (grappleState) {
 			case EXTENDING:
-				vectorCache.set(1, 0).rotateRad(grappleAngle).scl(grappleStickyPartSpeed);
+				vectorCache.set(1, 0).rotateRad(grappleAngle).scl(stickyPartSpeed);
 				grappleStickyPart.setLinearVelocity(vectorCache);
 				break;
 			case RETURNING:
-				vectorCache.set(getPosition()).sub(grappleStickyPart.getPosition()).nor().scl(dt * grappleStickyPartSpeed);
+				vectorCache.set(getPosition()).sub(grappleStickyPart.getPosition()).nor().scl(dt * stickyPartSpeed);
 				grappleStickyPart.setPosition(vectorCache.add(grappleStickyPart.getPosition()));
 				// TODO is there a better way to do this
 				break;

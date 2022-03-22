@@ -43,7 +43,7 @@ public class DaleController {
 				}
 				break;
 			case EXTENDING:
-				if (!InputController.getInstance().didClickHeld()) {
+				if (!InputController.getInstance().didClickHeld() || dale.getTongueLength() > dale.getMaxTongueLength()) {
 					dale.setGrappleState(GrappleState.RETURNING);
 					dale.setStickyPartActive(false);
 				} else if (dale.getGrappleAttachedBody() != null) {

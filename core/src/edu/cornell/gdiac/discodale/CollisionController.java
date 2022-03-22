@@ -52,7 +52,6 @@ public class CollisionController implements ContactListener {
                     ((bd1 == dale.getStickyPart() && bd2 != dale) || (bd2 == dale.getStickyPart() && bd1 != dale))) {
                 // Can't create the weld joint directly here because it violates locking assertions or something
                 // So set the attached body and local anchor location to create it when DaleController processes
-                System.out.println("touching");
                 Body bodyA = dale.getStickyPart() == bd1 ? body2 : body1;
                 Body stickyPartBody = dale.getStickyPart() == bd1 ? body1 : body2;
                 vectorCache.set(stickyPartBody.getPosition()).sub(bodyA.getPosition());

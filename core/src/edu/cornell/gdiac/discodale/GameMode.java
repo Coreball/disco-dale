@@ -101,6 +101,14 @@ public class GameMode implements Screen {
 	private DaleController daleController;
 	private CollisionController collisionController;
 
+	/** Which value to change with the increase/decrease buttons */
+	private AdjustTarget adjustTarget = AdjustTarget.GRAPPLE_SPEED;
+	/** Enum for which value to change with the increase/decrease buttons */
+	private enum AdjustTarget {
+		GRAPPLE_SPEED,
+		GRAPPLE_FORCE,
+	}
+
 	public GameMode() {
 		this(Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT, Constants.DEFAULT_GRAVITY);
 		setDebug(false);
@@ -414,6 +422,29 @@ public class GameMode implements Screen {
 		// Toggle debug
 		if (input.didDebug()) {
 			debug = !debug;
+		}
+
+		// Adjust values for technical prototype if buttons pressed
+		if (input.didSwitchAdjust()) {
+			adjustTarget = AdjustTarget.values()[(adjustTarget.ordinal() + 1) % AdjustTarget.values().length];
+		}
+		if (input.didIncrease() || input.didDecrease()) {
+			float adjustment = 1.0f * (input.didIncrease() ? 1f : -1f);
+			switch (adjustTarget) {
+				case GRAPPLE_SPEED:
+					dale.setStickyPartSpeed(Math.max(0, dale.getStickyPartSpeed() + adjustment));
+					break;
+				case GRAPPLE_FORCE:
+					dale.setGrappleForce(Math.max(0, dale.getGrappleForce() + adjustment));
+					break;
+			}
+		}
+		// Show latest values if just updated
+		if (input.didSwitchAdjust() || input.didIncrease() || input.didDecrease()) {
+			System.out.println("Adjust target: " + adjustTarget.name());
+			System.out.println("Grapple sticky part speed: " + dale.getStickyPartSpeed());
+			System.out.println("Grapple force: " + dale.getGrappleForce());
+			System.out.println();
 		}
 		
 		// Handle resets
