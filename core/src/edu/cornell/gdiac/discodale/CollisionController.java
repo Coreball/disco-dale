@@ -11,7 +11,7 @@ import edu.cornell.gdiac.discodale.models.DaleModel;
 public class CollisionController implements ContactListener {
 
     private DaleModel dale;
-    private FlyModel fly;
+    private FlyModel[] flies;
     private SceneModel sceneModel;
 
     /** Vector math cache */
@@ -20,10 +20,10 @@ public class CollisionController implements ContactListener {
     /** Mark set to handle more sophisticated collision callbacks */
     protected ObjectSet<Fixture> sensorFixtures;
 
-    public CollisionController(DaleModel dale, FlyModel fly, SceneModel sceneModel) {
+    public CollisionController(DaleModel dale, FlyModel[] flies, SceneModel sceneModel) {
         this.sensorFixtures = new ObjectSet<>();
         this.dale = dale;
-        this.fly = fly;
+        this.flies = flies;
         this.sceneModel = sceneModel;
     }
 
@@ -75,14 +75,23 @@ public class CollisionController implements ContactListener {
                 dale.setWinLose(true);
             }
 
-            if ((bd1 == dale   && bd2 == fly) ||
-                    (bd1 == fly && bd2 == dale)) {
+            if ((bd1 == dale   && isFly(bd2)) ||
+                    (isFly(bd2) && bd2 == dale)) {
                 dale.setWinLose(false);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    private boolean isFly(Obstacle ob){
+        try{
+            FlyModel f = (FlyModel) ob;
+            return true;
+        } catch (Exception e){
+            return false;
+        }
     }
 
     /**

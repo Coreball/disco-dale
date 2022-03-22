@@ -83,7 +83,6 @@ public class FlyController {
         changeState();
         switch (state) {
             case IDLE:
-                // TODO: temporary. May be more complex idle behaviors
                 setIdleDirection();
                 break;
             case CHASE:
