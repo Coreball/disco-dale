@@ -25,7 +25,10 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
+
 import edu.cornell.gdiac.discodale.controllers.DaleController;
+import edu.cornell.gdiac.discodale.controllers.FlyController;
+
 import edu.cornell.gdiac.discodale.models.*;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.util.*;
@@ -35,17 +38,26 @@ import edu.cornell.gdiac.discodale.obstacle.*;
  * Base class for a world-specific controller.
  *
  *
- * A world has its own objects, assets, and input controller.  Thus this is 
- * really a mini-GameEngine in its own right.  The only thing that it does
+ * A world has its own objects, assets, and input controller. Thus this is
+ * really a mini-GameEngine in its own right. The only thing that it does
  * not do is create a GameCanvas; that is shared with the main application.
  *
- * You will notice that asset loading is not done with static methods this time.  
- * Instance asset loading makes it easier to process our game modes in a loop, which 
- * is much more scalable. However, we still want the assets themselves to be static.
- * This is the purpose of our AssetState variable; it ensures that multiple instances
+ * You will notice that asset loading is not done with static methods this time.
+ * Instance asset loading makes it easier to process our game modes in a loop,
+ * which
+ * is much more scalable. However, we still want the assets themselves to be
+ * static.
+ * This is the purpose of our AssetState variable; it ensures that multiple
+ * instances
  * place nicely with the static assets.
  */
 public class GameMode implements Screen {
+	private static int WIN_CODE = 1;
+	private static int LOSE_CODE = -1;
+	private static int PLAY_CODE = 0;
+
+	private static int CHANGE_COLOR_TIME = 300;
+
 	/** The texture for walls and platforms */
 	protected TextureRegion earthTile;
 	/** The texture for the exit condition */
@@ -56,7 +68,7 @@ public class GameMode implements Screen {
 	/** Reference to the game canvas */
 	protected GameCanvas canvas;
 	/** All the objects in the world. */
-	protected PooledList<Obstacle> objects  = new PooledList<Obstacle>();
+	protected PooledList<Obstacle> objects = new PooledList<Obstacle>();
 	/** Queue for adding objects */
 	protected PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
 	/** Listener that will update the player mode when we are done */
@@ -68,7 +80,7 @@ public class GameMode implements Screen {
 	protected Rectangle bounds;
 	/** The world scale */
 	protected Vector2 scale;
-	
+
 	/** Whether or not this is an active controller */
 	protected boolean active;
 	/** Whether we have completed this level */
@@ -84,7 +96,7 @@ public class GameMode implements Screen {
 	private TextureRegion avatarTexture;
 	private TextureRegion flyTexture;
 
-	/** The jump sound.  We only want to play once. */
+	/** The jump sound. We only want to play once. */
 	private Sound jumpSound;
 	private long jumpId = -1;
 	/** The default sound volume */
@@ -98,6 +110,7 @@ public class GameMode implements Screen {
 	private FlyModel fly;
 	private SceneModel scene;
 
+
 	private DaleController daleController;
 	private CollisionController collisionController;
 
@@ -108,6 +121,10 @@ public class GameMode implements Screen {
 		GRAPPLE_SPEED,
 		GRAPPLE_FORCE,
 	}
+
+	private FlyController flyController;
+
+	private int colorChangeCountdown;
 
 	public GameMode() {
 		this(Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT, Constants.DEFAULT_GRAVITY);
@@ -124,7 +141,7 @@ public class GameMode implements Screen {
 	 *
 	 * @return true if debug mode is active.
 	 */
-	public boolean isDebug( ) {
+	public boolean isDebug() {
 		return debug;
 	}
 
@@ -146,7 +163,7 @@ public class GameMode implements Screen {
 	 *
 	 * @return true if the level is completed.
 	 */
-	public boolean isComplete( ) {
+	public boolean isComplete() {
 		return complete;
 	}
 
@@ -158,7 +175,10 @@ public class GameMode implements Screen {
 	 * @param value whether the level is completed.
 	 */
 	public void setComplete(boolean value) {
-		if (value) {
+		if(failed){
+			return;
+		}
+		if (value && countdown<0) {
 			countdown = Constants.EXIT_COUNT;
 		}
 		complete = value;
@@ -171,7 +191,7 @@ public class GameMode implements Screen {
 	 *
 	 * @return true if the level is failed.
 	 */
-	public boolean isFailure( ) {
+	public boolean isFailure() {
 		return failed;
 	}
 
@@ -183,18 +203,21 @@ public class GameMode implements Screen {
 	 * @param value whether the level is failed.
 	 */
 	public void setFailure(boolean value) {
-		if (value) {
+		if(complete){
+			return;
+		}
+		if (value && countdown<0) {
 			countdown = Constants.EXIT_COUNT;
 		}
 		failed = value;
 	}
-	
+
 	/**
 	 * Returns true if this is the active screen
 	 *
 	 * @return true if this is the active screen
 	 */
-	public boolean isActive( ) {
+	public boolean isActive() {
 		return active;
 	}
 
@@ -208,75 +231,77 @@ public class GameMode implements Screen {
 	public GameCanvas getCanvas() {
 		return canvas;
 	}
-	
+
 	/**
 	 * Sets the canvas associated with this controller
 	 *
-	 * The canvas is shared across all controllers.  Setting this value will compute
+	 * The canvas is shared across all controllers. Setting this value will compute
 	 * the drawing scale from the canvas size.
 	 *
 	 * @param canvas the canvas associated with this controller
 	 */
 	public void setCanvas(GameCanvas canvas) {
 		this.canvas = canvas;
-		this.scale.x = canvas.getWidth()/bounds.getWidth();
-		this.scale.y = canvas.getHeight()/bounds.getHeight();
+		this.scale.x = canvas.getWidth() / bounds.getWidth();
+		this.scale.y = canvas.getHeight() / bounds.getHeight();
 		this.scene.setCanvas(canvas);
 	}
-	
+
 	/**
 	 * Creates a new game world with the default values.
 	 *
 	 * The game world is scaled so that the screen coordinates do not agree
-	 * with the Box2d coordinates.  The bounds are in terms of the Box2d
+	 * with the Box2d coordinates. The bounds are in terms of the Box2d
 	 * world, not the screen.
 	 */
-//	protected GameMode() {
-//		this(new Rectangle(0,0,DEFAULT_WIDTH,DEFAULT_HEIGHT),
-//			 new Vector2(0,DEFAULT_GRAVITY));
-//	}
+	// protected GameMode() {
+	// this(new Rectangle(0,0,DEFAULT_WIDTH,DEFAULT_HEIGHT),
+	// new Vector2(0,DEFAULT_GRAVITY));
+	// }
 
 	/**
 	 * Creates a new game world
 	 *
 	 * The game world is scaled so that the screen coordinates do not agree
-	 * with the Box2d coordinates.  The bounds are in terms of the Box2d
+	 * with the Box2d coordinates. The bounds are in terms of the Box2d
 	 * world, not the screen.
 	 *
-	 * @param width  	The width in Box2d coordinates
-	 * @param height	The height in Box2d coordinates
-	 * @param gravity	The downward gravity
+	 * @param width   The width in Box2d coordinates
+	 * @param height  The height in Box2d coordinates
+	 * @param gravity The downward gravity
 	 */
 	protected GameMode(float width, float height, float gravity) {
-		this(new Rectangle(0,0,width,height), new Vector2(0,gravity));
+		this(new Rectangle(0, 0, width, height), new Vector2(0, gravity));
 	}
 
 	/**
 	 * Creates a new game world
 	 *
 	 * The game world is scaled so that the screen coordinates do not agree
-	 * with the Box2d coordinates.  The bounds are in terms of the Box2d
+	 * with the Box2d coordinates. The bounds are in terms of the Box2d
 	 * world, not the screen.
 	 *
-	 * @param bounds	The game bounds in Box2d coordinates
-	 * @param gravity	The gravitational force on this Box2d world
+	 * @param bounds  The game bounds in Box2d coordinates
+	 * @param gravity The gravitational force on this Box2d world
 	 */
 	protected GameMode(Rectangle bounds, Vector2 gravity) {
-		world = new World(gravity,false);
+		world = new World(gravity, false);
 		this.bounds = new Rectangle(bounds);
-		this.scale = new Vector2(1,1);
+		this.scale = new Vector2(1, 1);
 		complete = false;
 		failed = false;
-		debug  = false;
+		debug = false;
 		active = false;
 		countdown = -1;
+
+		colorChangeCountdown = CHANGE_COLOR_TIME;
 	}
-	
+
 	/**
 	 * Dispose of all (non-static) resources allocated to this mode.
 	 */
 	public void dispose() {
-		for(Obstacle obj : objects) {
+		for (Obstacle obj : objects) {
 			obj.deactivatePhysics(world);
 		}
 		objects.clear();
@@ -285,8 +310,8 @@ public class GameMode implements Screen {
 		objects = null;
 		addQueue = null;
 		bounds = null;
-		scale  = null;
-		world  = null;
+		scale = null;
+		world = null;
 		canvas = null;
 	}
 
@@ -294,7 +319,8 @@ public class GameMode implements Screen {
 	 *
 	 * Adds a physics object in to the insertion queue.
 	 *
-	 * Objects on the queue are added just before collision processing.  We do this to 
+	 * Objects on the queue are added just before collision processing. We do this
+	 * to
 	 * control object creation.
 	 *
 	 * param obj The object to add
@@ -325,8 +351,8 @@ public class GameMode implements Screen {
 	 * @return true if the object is in bounds.
 	 */
 	public boolean inBounds(Obstacle obj) {
-		boolean horiz = (bounds.x <= obj.getX() && obj.getX() <= bounds.x+bounds.width);
-		boolean vert  = (bounds.y <= obj.getY() && obj.getY() <= bounds.y+bounds.height);
+		boolean horiz = (bounds.x <= obj.getX() && obj.getX() <= bounds.x + bounds.width);
+		boolean vert = (bounds.y <= obj.getY() && obj.getY() <= bounds.y + bounds.height);
 		return horiz && vert;
 	}
 
@@ -338,7 +364,7 @@ public class GameMode implements Screen {
 	public void reset() {
 		Vector2 gravity = new Vector2(world.getGravity());
 
-		for(Obstacle obj : objects) {
+		for (Obstacle obj : objects) {
 			obj.deactivatePhysics(world);
 		}
 		scene.reset(world);
@@ -346,11 +372,12 @@ public class GameMode implements Screen {
 		addQueue.clear();
 		world.dispose();
 
-
-		world = new World(gravity,false);
+		world = new World(gravity, false);
 		world.setContactListener(this.collisionController);
 		setComplete(false);
 		setFailure(false);
+		countdown = -1;
+		colorChangeCountdown = CHANGE_COLOR_TIME;
 		populateLevel();
 	}
 
@@ -358,8 +385,8 @@ public class GameMode implements Screen {
 	 * Lays out the game geography.
 	 */
 	private void populateLevel() {
-		float dwidth  = avatarTexture.getRegionWidth()/scale.x;
-		float dheight = avatarTexture.getRegionHeight()/scale.y;
+		float dwidth = avatarTexture.getRegionWidth() / scale.x;
+		float dheight = avatarTexture.getRegionHeight() / scale.y;
 		dale = new DaleModel(constants.get("dude"), dwidth, dheight);
 		dale.setDrawScale(scale);
 		dale.setTexture(avatarTexture);
@@ -377,38 +404,43 @@ public class GameMode implements Screen {
 
 		addObject(dale);
 
+
 		this.daleController = new DaleController(this.dale);
-		this.collisionController = new CollisionController(this.dale, this.scene);
+
+		dwidth = flyTexture.getRegionWidth() / scale.x;
+		dheight = flyTexture.getRegionHeight() / scale.y;
+		fly = new FlyModel(constants.get("fly"), 5f, 5f, dwidth, dheight);
+		fly.setDrawScale(scale);
+		fly.setTexture(flyTexture);
+		addObject(fly);
+		flyController = new FlyController(fly, dale, scene);
+
+		this.collisionController = new CollisionController(this.dale, this.fly, this.scene);
+
 		this.world.setContactListener(this.collisionController);
 
 		scene.setGoalTexture(goalTile);
 		scene.setWallTexture(earthTile);
-		scene.populateLevel(constants.get("walls"), constants.get("platforms"), constants.get("defaults"), constants.get("goal"));
+		scene.populateLevel(constants.get("walls"), constants.get("platforms"), constants.get("defaults"),
+				constants.get("goal"));
 		scene.activatePhysics(this.world);
 
 		JsonValue defaults = constants.get("defaults");
 
 		// This world is heavier
-		world.setGravity( new Vector2(0,defaults.getFloat("gravity",0)) );
+		world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
 
 		volume = constants.getFloat("volume", 1.0f);
-
-//		dwidth  = flyTexture.getRegionWidth()/scale.x;
-//		dheight = flyTexture.getRegionHeight()/scale.y;
-//		fly = new FlyModel(constants.get("fly"),5f, 5f, dwidth, dheight);
-//		fly.setDrawScale(scale);
-//		fly.setTexture(flyTexture);
-//		addObject(fly);
 	}
-	
+
 	/**
 	 * Returns whether to process the update loop
 	 *
 	 * At the start of the update loop, we check if it is time
-	 * to switch to a new game mode.  If not, the update proceeds
+	 * to switch to a new game mode. If not, the update proceeds
 	 * normally.
 	 *
-	 * @param dt	Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 * 
 	 * @return whether to process the update loop
 	 */
@@ -423,6 +455,7 @@ public class GameMode implements Screen {
 		if (input.didDebug()) {
 			debug = !debug;
 		}
+
 
 		// Adjust values for technical prototype if buttons pressed
 		if (input.didSwitchAdjust()) {
@@ -451,7 +484,7 @@ public class GameMode implements Screen {
 		if (input.didReset()) {
 			reset();
 		}
-		
+
 		// Now it is time to maybe switch screens.
 		if (input.didExit()) {
 			pause();
@@ -467,6 +500,7 @@ public class GameMode implements Screen {
 			return false;
 		} else if (countdown > 0) {
 			countdown--;
+//			System.out.println(countdown);
 		} else if (countdown == 0) {
 			if (failed) {
 				reset();
@@ -478,16 +512,32 @@ public class GameMode implements Screen {
 		}
 		return true;
 	}
-	
+
+	private DaleColor daleBackground() {
+		for (ColorRegionModel c : scene.getColorRegions()) {
+			if (c.shape.contains(dale.getX() * scale.x, dale.getY() * scale.y)) {
+				return c.getColor();
+			}
+		}
+		return null;
+	}
+
+	private boolean daleMatches() {
+		return dale.getColor() == daleBackground();
+	}
+
 	/**
 	 * The core gameplay loop of this world.
 	 *
 	 * This method contains the specific update code for this mini-game. It does
-	 * not handle collisions, as those are managed by the parent class WorldController.
-	 * This method is called after input is read, but before collisions are resolved.
-	 * The very last thing that it should do is apply forces to the appropriate objects.
+	 * not handle collisions, as those are managed by the parent class
+	 * WorldController.
+	 * This method is called after input is read, but before collisions are
+	 * resolved.
+	 * The very last thing that it should do is apply forces to the appropriate
+	 * objects.
 	 *
-	 * @param dt	Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
 		daleController.processMovement();
@@ -498,32 +548,52 @@ public class GameMode implements Screen {
 		dale.applyStickyPartMovement(dt);
 
 		if (dale.isJumping()) {
-			jumpId = playSound( jumpSound, jumpId, volume );
+			jumpId = playSound(jumpSound, jumpId, volume);
 		}
 
-//		if (!daleMatches()) {
-//			fly.setVelocity(5, (float) Math.toDegrees(Math.atan2(dale.getY() - fly.getY(), dale.getX() - fly.getX())));
-//		} else {
-//			fly.setVelocity(0, 0);
-//		}
-	}
+		dale.setMatch(daleMatches());
 
+		flyController.changeDirection();
+		flyController.setVelocity();
+
+		int winLose = dale.getWinLose();
+		if(winLose == WIN_CODE){
+			setComplete(true);
+//			//debugging message
+//			System.out.println("win");
+		}
+		if(winLose == LOSE_CODE){
+			setFailure(true);
+//			//debugging message
+//			System.out.println("lose");
+		}
+
+		if(colorChangeCountdown>0){
+			colorChangeCountdown--;
+		}else {
+			scene.updateColorRegions();
+			colorChangeCountdown = CHANGE_COLOR_TIME;
+		}
+
+		 scene.updateGrid();
+	}
 
 	/**
 	 * Processes physics
 	 *
 	 * Once the update phase is over, but before we draw, we are ready to handle
-	 * physics.  The primary method is the step() method in world.  This implementation
+	 * physics. The primary method is the step() method in world. This
+	 * implementation
 	 * works for all applications and should not need to be overwritten.
 	 *
-	 * @param dt	Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 */
 	public void postUpdate(float dt) {
 		// Add any objects created by actions
 		while (!addQueue.isEmpty()) {
 			addObject(addQueue.poll());
 		}
-		
+
 		// Turn the physics engine crank.
 		world.step(Constants.WORLD_STEP, Constants.WORLD_VELOC, Constants.WORLD_POSIT);
 
@@ -543,39 +613,41 @@ public class GameMode implements Screen {
 			}
 		}
 	}
-	
+
 	/**
 	 * Draw the physics objects to the canvas
 	 *
-	 * For simple worlds, this method is enough by itself.  It will need
+	 * For simple worlds, this method is enough by itself. It will need
 	 * to be overriden if the world needs fancy backgrounds or the like.
 	 *
 	 * The method draws all objects in the order that they were added.
 	 *
-	 * @param dt	Number of seconds since last animation frame
+	 * @param dt Number of seconds since last animation frame
 	 */
 	public void draw(float dt) {
 		canvas.clear();
 
 		canvas.begin();
 		scene.draw(canvas);
-		for(Obstacle obj : objects) {
+		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
 		canvas.end();
-		
+
 		if (debug) {
 			canvas.beginDebug();
+
 			scene.drawDebug(canvas);
 			for(Obstacle obj : objects) {
 				obj.drawDebug(canvas);
 			}
 			canvas.endDebug();
 		}
-		
+
 		// Final message
-		if (complete && !failed) {
-			displayFont.setColor(Color.RED);
+
+		if (complete) {
+			displayFont.setColor(Color.ORANGE);
 			canvas.begin(); // DO NOT SCALE
 			canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
 			canvas.end();
@@ -592,46 +664,45 @@ public class GameMode implements Screen {
 	 *
 	 * Every time you play a sound asset, it makes a new instance of that sound.
 	 * If you play the sounds to close together, you will have overlapping copies.
-	 * To prevent that, you must stop the sound before you play it again.  That
-	 * is the purpose of this method.  It stops the current instance playing (if
+	 * To prevent that, you must stop the sound before you play it again. That
+	 * is the purpose of this method. It stops the current instance playing (if
 	 * any) and then returns the id of the new instance for tracking.
 	 *
-	 * @param sound		The sound asset to play
-	 * @param soundId	The previously playing sound instance
+	 * @param sound   The sound asset to play
+	 * @param soundId The previously playing sound instance
 	 *
 	 * @return the new sound instance for this asset.
 	 */
 	public long playSound(Sound sound, long soundId) {
-		return playSound( sound, soundId, 1.0f );
+		return playSound(sound, soundId, 1.0f);
 	}
-
 
 	/**
 	 * Method to ensure that a sound asset is only played once.
 	 *
 	 * Every time you play a sound asset, it makes a new instance of that sound.
 	 * If you play the sounds to close together, you will have overlapping copies.
-	 * To prevent that, you must stop the sound before you play it again.  That
-	 * is the purpose of this method.  It stops the current instance playing (if
+	 * To prevent that, you must stop the sound before you play it again. That
+	 * is the purpose of this method. It stops the current instance playing (if
 	 * any) and then returns the id of the new instance for tracking.
 	 *
-	 * @param sound		The sound asset to play
-	 * @param soundId	The previously playing sound instance
-	 * @param volume	The sound volume
+	 * @param sound   The sound asset to play
+	 * @param soundId The previously playing sound instance
+	 * @param volume  The sound volume
 	 *
 	 * @return the new sound instance for this asset.
 	 */
 	public long playSound(Sound sound, long soundId, float volume) {
 		if (soundId != -1) {
-			sound.stop( soundId );
+			sound.stop(soundId);
 		}
 		return sound.play(volume);
 	}
 
 	/**
-	 * Called when the Screen is resized. 
+	 * Called when the Screen is resized.
 	 *
-	 * This can happen at any point during a non-paused state but will never happen 
+	 * This can happen at any point during a non-paused state but will never happen
 	 * before a call to show().
 	 *
 	 * @param width  The new width in pixels
@@ -644,7 +715,8 @@ public class GameMode implements Screen {
 	/**
 	 * Called when the Screen should render itself.
 	 *
-	 * We defer to the other methods update() and draw().  However, it is VERY important
+	 * We defer to the other methods update() and draw(). However, it is VERY
+	 * important
 	 * that we only quit AFTER a draw.
 	 *
 	 * @param delta Number of seconds since last animation frame
@@ -662,7 +734,7 @@ public class GameMode implements Screen {
 	/**
 	 * Called when the Screen is paused.
 	 * 
-	 * This is usually when it's not active or visible on screen. An Application is 
+	 * This is usually when it's not active or visible on screen. An Application is
 	 * also paused before it is destroyed.
 	 */
 	public void pause() {
@@ -677,7 +749,7 @@ public class GameMode implements Screen {
 	public void resume() {
 		// TODO Auto-generated method stub
 	}
-	
+
 	/**
 	 * Called when this screen becomes the current screen for a Game.
 	 */
@@ -709,19 +781,19 @@ public class GameMode implements Screen {
 	 * This method extracts the asset variables from the given asset directory. It
 	 * should only be called after the asset directory is completed.
 	 *
-	 * @param directory	Reference to global asset manager.
+	 * @param directory Reference to global asset manager.
 	 */
 	public void gatherAssets(AssetDirectory directory) {
-		avatarTexture  = new TextureRegion(directory.getEntry("platform:dude",Texture.class));
+		avatarTexture = new TextureRegion(directory.getEntry("platform:dude", Texture.class));
 		flyTexture = new TextureRegion(directory.getEntry("platform:fly", Texture.class));
 
-		jumpSound = directory.getEntry( "platform:jump", Sound.class );
+		jumpSound = directory.getEntry("platform:jump", Sound.class);
 
-		constants = directory.getEntry( "platform:constants", JsonValue.class );
+		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles
-		earthTile = new TextureRegion(directory.getEntry( "shared:earth", Texture.class ));
-		goalTile  = new TextureRegion(directory.getEntry( "shared:goal", Texture.class ));
-		displayFont = directory.getEntry( "shared:retro" ,BitmapFont.class);
+		earthTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
+		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
+		displayFont = directory.getEntry("shared:retro", BitmapFont.class);
 	}
 
 }

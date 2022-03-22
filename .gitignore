@@ -117,3 +117,7 @@ Thumbs.db
 ## Ignore output/artifacts
 /desktop/out/
 /out/
+
+## Ignore dump and binary files
+*.trc
+*.dmp

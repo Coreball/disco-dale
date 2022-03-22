@@ -3,6 +3,7 @@ package edu.cornell.gdiac.discodale;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
+import edu.cornell.gdiac.discodale.models.FlyModel;
 import edu.cornell.gdiac.discodale.models.SceneModel;
 import edu.cornell.gdiac.discodale.obstacle.Obstacle;
 import edu.cornell.gdiac.discodale.models.DaleModel;
@@ -10,6 +11,7 @@ import edu.cornell.gdiac.discodale.models.DaleModel;
 public class CollisionController implements ContactListener {
 
     private DaleModel dale;
+    private FlyModel fly;
     private SceneModel sceneModel;
 
     /** Vector math cache */
@@ -18,9 +20,10 @@ public class CollisionController implements ContactListener {
     /** Mark set to handle more sophisticated collision callbacks */
     protected ObjectSet<Fixture> sensorFixtures;
 
-    public CollisionController(DaleModel dale, SceneModel sceneModel) {
+    public CollisionController(DaleModel dale, FlyModel fly, SceneModel sceneModel) {
         this.sensorFixtures = new ObjectSet<>();
         this.dale = dale;
+        this.fly = fly;
         this.sceneModel = sceneModel;
     }
 
@@ -69,13 +72,13 @@ public class CollisionController implements ContactListener {
             // Check for win condition
             if ((bd1 == dale && bd2 == sceneModel.goalDoor) ||
                     (bd1 == sceneModel.goalDoor && bd2 == dale)) {
-//                setComplete(true);
+                dale.setWinLose(true);
             }
 
-//            if ((bd1 == dale   && bd2 == fly) ||
-//                    (bd1 == fly && bd2 == dale)) {
-////                setFailure(true);
-//            }
+            if ((bd1 == dale   && bd2 == fly) ||
+                    (bd1 == fly && bd2 == dale)) {
+                dale.setWinLose(false);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
