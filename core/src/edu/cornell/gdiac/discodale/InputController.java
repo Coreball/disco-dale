@@ -72,6 +72,17 @@ public class InputController {
 	/** Whether the exit button was pressed. */
 	private boolean exitPressed;
 	private boolean exitPrevious;
+	/** Whether the click action button is being held. */
+	private boolean clickHeld;
+	/** Whether the switch adjustment button was pressed. */
+	private boolean switchAdjustmentPressed;
+	private boolean switchAdjustmentPrevious;
+	/** Whether the increase button was pressed. */
+	private boolean increasePressed;
+	private boolean increasePrevious;
+	/** Whether the decrease button was pressed. */
+	private boolean decreasePressed;
+	private boolean decreasePrevious;
 	
 	/** How much did we move horizontally? */
 	private float horizontal;
@@ -193,6 +204,42 @@ public class InputController {
 	public boolean didExit() {
 		return exitPressed && !exitPrevious;
 	}
+
+	/**
+	 * Returns true if the click button is held.
+	 *
+	 * @return true if the click button is held.
+	 */
+	public boolean didClickHeld() {
+		return clickHeld;
+	}
+
+	/**
+	 * Returns true if the switch adjust button was pressed. (For technical prototype)
+	 *
+	 * @return true if the switch adjust button was pressed.
+	 */
+	public boolean didSwitchAdjust() {
+		return switchAdjustmentPressed && !switchAdjustmentPrevious;
+	}
+
+	/**
+	 * Returns true if the increase button was pressed. (For technical prototype)
+	 *
+	 * @return true if the increase button was pressed.
+	 */
+	public boolean didIncrease() {
+		return increasePressed && !increasePrevious;
+	}
+
+	/**
+	 * Returns true if the decrease button was pressed. (For technical prototype)
+	 *
+	 * @return true if the decrease button was pressed.
+	 */
+	public boolean didDecrease() {
+		return decreasePressed && !decreasePrevious;
+	}
 	
 	/**
 	 * Creates a new input controller
@@ -233,6 +280,9 @@ public class InputController {
 		exitPrevious = exitPressed;
 		nextPrevious = nextPressed;
 		prevPrevious = prevPressed;
+		switchAdjustmentPrevious = switchAdjustmentPressed;
+		increasePrevious = increasePressed;
+		decreasePrevious = decreasePressed;
 		
 		// Check to see if a GamePad is connected
 		if (xbox != null && xbox.isConnected()) {
@@ -267,7 +317,7 @@ public class InputController {
 		horizontal = xbox.getLeftX();
 		
 		// Move the crosshairs with the right stick.r
-		// TODO implement clickPressed
+		// TODO implement clickPressed and clickHeld
 		clickPressed = false;
 		crosscache.set(xbox.getLeftX(), xbox.getLeftY());
 		if (crosscache.len2() > GP_THRESHOLD) {
@@ -310,8 +360,14 @@ public class InputController {
 			horizontal -= 1.0f;
 		}
 
+		// Technical prototype value adjustment controls
+		switchAdjustmentPressed = (secondary && switchAdjustmentPressed) || (Gdx.input.isKeyPressed(Input.Keys.NUM_0));
+		increasePressed = (secondary && increasePressed) || (Gdx.input.isKeyPressed(Input.Keys.EQUALS));
+		decreasePressed = (secondary && decreasePressed) || (Gdx.input.isKeyPressed(Input.Keys.MINUS));
+
 		// Mouse results
         clickPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+		clickHeld = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 		crosshair.set(Gdx.input.getX(), Gdx.input.getY());
 		crosshair.scl(1/scale.x,-1/scale.y);
 		crosshair.y += bounds.height;

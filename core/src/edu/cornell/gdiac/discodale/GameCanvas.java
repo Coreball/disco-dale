@@ -1233,7 +1233,7 @@ public class GameCanvas {
 	 * @param oy 	The y-coordinate of texture origin (in pixels)
 	 * @param x 	The x-coordinate of the texture origin (on screen)
 	 * @param y 	The y-coordinate of the texture origin (on screen)
-	 * @param angle The rotation angle (in degrees) about the origin.
+	 * @param angle The rotation angle (in degrees) about the origin. (SUS)
 	 * @param sx 	The x-axis scaling factor
 	 * @param sy 	The y-axis scaling factor
 	 */
