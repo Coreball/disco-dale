@@ -10,6 +10,7 @@
  */
 package edu.cornell.gdiac.discodale.models;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
@@ -64,6 +65,7 @@ public class DaleModel extends CapsuleObstacle {
 	private int winLose;
 
 	private DaleColor color = DaleColor.RED;
+	private TextureRegion[] textures;
 
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -74,6 +76,7 @@ public class DaleModel extends CapsuleObstacle {
 
 	public void rotateColor() {
 		this.color = DaleColor.values()[(this.color.ordinal() + 1) % DaleColor.values().length];
+		setDaleTexture();
 	}
 
 	/**
@@ -230,7 +233,7 @@ public class DaleModel extends CapsuleObstacle {
 	 * @param width  The object width in physics units
 	 * @param height The object width in physics units
 	 */
-	public DaleModel(JsonValue data, float width, float height) {
+	public DaleModel(JsonValue data, float width, float height, TextureRegion[] ts) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(data.get("pos").getFloat(0),
 				data.get("pos").getFloat(1),
@@ -257,6 +260,8 @@ public class DaleModel extends CapsuleObstacle {
 
 		jumpCooldown = 0;
 		setName(Constants.DALE_NAME_TAG);
+
+		textures = ts;
 	}
 
 	/**
@@ -355,8 +360,12 @@ public class DaleModel extends CapsuleObstacle {
 	 */
 	public void draw(GameCanvas canvas) {
 		float effect = faceRight ? 1.0f : -1.0f;
-		canvas.draw(texture, this.color.toGdxColor(), origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y,
+		canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y,
 				getAngle(), effect, 1.0f);
+	}
+
+	public void setDaleTexture() {
+		setTexture(textures[this.color.toColorTexture()]);
 	}
 
 	/**

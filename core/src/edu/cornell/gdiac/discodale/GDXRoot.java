@@ -33,7 +33,7 @@ public class GDXRoot extends Game implements ScreenListener {
 	private GameCanvas canvas; 
 	/** Player mode for the asset loading screen (CONTROLLER CLASS) */
 	private LoadingMode loading;
-	/** Player mode for the the game proper (CONTROLLER CLASS) */
+	/** Player mode for the game proper (CONTROLLER CLASS) */
 	private int current;
 
 	private GameMode controller;

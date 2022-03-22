@@ -91,7 +91,9 @@ public class GameMode implements Screen {
 	protected int countdown;
 
 	/** Texture asset for character avatar */
-	private TextureRegion avatarTexture;
+	private TextureRegion blueTexture;
+	private TextureRegion greenTexture;
+	private TextureRegion pinkTexture;
 	private TextureRegion flyTexture;
 
 	/** The jump sound. We only want to play once. */
@@ -373,11 +375,12 @@ public class GameMode implements Screen {
 	 * Lays out the game geography.
 	 */
 	private void populateLevel() {
-		float dwidth = avatarTexture.getRegionWidth() / scale.x;
-		float dheight = avatarTexture.getRegionHeight() / scale.y;
-		dale = new DaleModel(constants.get("dude"), dwidth, dheight);
+		float dwidth = blueTexture.getRegionWidth() / scale.x;
+		float dheight = blueTexture.getRegionHeight() / scale.y;
+		TextureRegion[] textures = {pinkTexture, blueTexture, greenTexture};
+		dale = new DaleModel(constants.get("dale"), dwidth, dheight, textures);
 		dale.setDrawScale(scale);
-		dale.setTexture(avatarTexture);
+		dale.setDaleTexture();
 		addObject(dale);
 
 		dwidth = flyTexture.getRegionWidth() / scale.x;
@@ -594,12 +597,12 @@ public class GameMode implements Screen {
 
 		// Final message
 		if (complete) {
-			displayFont.setColor(Color.ORANGE);
+			displayFont.setColor(Color.BLACK);
 			canvas.begin(); // DO NOT SCALE
 			canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
 			canvas.end();
 		} else if (failed) {
-			displayFont.setColor(Color.RED);
+			displayFont.setColor(Color.BLACK);
 			canvas.begin(); // DO NOT SCALE
 			canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
 			canvas.end();
@@ -731,7 +734,10 @@ public class GameMode implements Screen {
 	 * @param directory Reference to global asset manager.
 	 */
 	public void gatherAssets(AssetDirectory directory) {
-		avatarTexture = new TextureRegion(directory.getEntry("platform:dude", Texture.class));
+		blueTexture = new TextureRegion(directory.getEntry("platform:blue", Texture.class));
+		greenTexture = new TextureRegion(directory.getEntry("platform:green", Texture.class));
+		pinkTexture = new TextureRegion(directory.getEntry("platform:pink", Texture.class));
+
 		flyTexture = new TextureRegion(directory.getEntry("platform:fly", Texture.class));
 
 		jumpSound = directory.getEntry("platform:jump", Sound.class);
