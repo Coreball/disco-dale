@@ -16,13 +16,17 @@
 		"pos": [2.5, 5.0],
 		"shrink": [0.7, 0.95],
 		"force": 20.0,
-		"damping": 10.0,
+		"damping": 2.0,
 		"density": 1.0,
 		"friction": 0.0,
 		"maxspeed": 5.0,
+		"max_air_speed": 20.0,
 		"jump_force": 5.5,
 		"jump_cool": 30,
 		"shot_cool": 40,
+		"grapple_speed": 20.0,
+		"grapple_force": 15.0,
+		"max_tongue_length": 20.0,
 		"sensor": {
 			"shrink" : 0.6,
 			"height" : 0.05

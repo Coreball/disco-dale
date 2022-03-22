@@ -26,7 +26,9 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 
+import edu.cornell.gdiac.discodale.controllers.DaleController;
 import edu.cornell.gdiac.discodale.controllers.FlyController;
+
 import edu.cornell.gdiac.discodale.models.*;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.util.*;
@@ -108,9 +110,19 @@ public class GameMode implements Screen {
 	private FlyModel fly;
 	private SceneModel scene;
 
-	private FlyController flyController;
 
+	private DaleController daleController;
 	private CollisionController collisionController;
+
+	/** Which value to change with the increase/decrease buttons */
+	private AdjustTarget adjustTarget = AdjustTarget.GRAPPLE_SPEED;
+	/** Enum for which value to change with the increase/decrease buttons */
+	private enum AdjustTarget {
+		GRAPPLE_SPEED,
+		GRAPPLE_FORCE,
+	}
+
+	private FlyController flyController;
 
 	private int colorChangeCountdown;
 
@@ -378,7 +390,22 @@ public class GameMode implements Screen {
 		dale = new DaleModel(constants.get("dude"), dwidth, dheight);
 		dale.setDrawScale(scale);
 		dale.setTexture(avatarTexture);
+
+		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
+		tonguePixmap.setColor(Color.PINK);
+		tonguePixmap.fill();
+		Texture tongueTexture = new Texture(tonguePixmap);
+		dale.setTongueTexture(tongueTexture);
+		Pixmap stickyPartPixmap = new Pixmap(11, 11, Pixmap.Format.RGBA8888);
+		stickyPartPixmap.setColor(Color.PINK);
+		stickyPartPixmap.fillCircle(5, 5, 5);
+		Texture stickyPartTexture = new Texture(stickyPartPixmap);
+		dale.setStickyPartTexture(stickyPartTexture);
+
 		addObject(dale);
+
+
+		this.daleController = new DaleController(this.dale);
 
 		dwidth = flyTexture.getRegionWidth() / scale.x;
 		dheight = flyTexture.getRegionHeight() / scale.y;
@@ -389,6 +416,7 @@ public class GameMode implements Screen {
 		flyController = new FlyController(fly, dale, scene);
 
 		this.collisionController = new CollisionController(this.dale, this.fly, this.scene);
+
 		this.world.setContactListener(this.collisionController);
 
 		scene.setGoalTexture(goalTile);
@@ -428,6 +456,30 @@ public class GameMode implements Screen {
 			debug = !debug;
 		}
 
+
+		// Adjust values for technical prototype if buttons pressed
+		if (input.didSwitchAdjust()) {
+			adjustTarget = AdjustTarget.values()[(adjustTarget.ordinal() + 1) % AdjustTarget.values().length];
+		}
+		if (input.didIncrease() || input.didDecrease()) {
+			float adjustment = 1.0f * (input.didIncrease() ? 1f : -1f);
+			switch (adjustTarget) {
+				case GRAPPLE_SPEED:
+					dale.setStickyPartSpeed(Math.max(0, dale.getStickyPartSpeed() + adjustment));
+					break;
+				case GRAPPLE_FORCE:
+					dale.setGrappleForce(Math.max(0, dale.getGrappleForce() + adjustment));
+					break;
+			}
+		}
+		// Show latest values if just updated
+		if (input.didSwitchAdjust() || input.didIncrease() || input.didDecrease()) {
+			System.out.println("Adjust target: " + adjustTarget.name());
+			System.out.println("Grapple sticky part speed: " + dale.getStickyPartSpeed());
+			System.out.println("Grapple force: " + dale.getGrappleForce());
+			System.out.println();
+		}
+		
 		// Handle resets
 		if (input.didReset()) {
 			reset();
@@ -488,15 +540,13 @@ public class GameMode implements Screen {
 	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
-		// Process actions in object model
-		dale.setMovement(InputController.getInstance().getHorizontal() * dale.getForce());
-		dale.setJumping(InputController.getInstance().didJump());
-
-		if (InputController.getInstance().didRotateColor()) {
-			dale.rotateColor();
-		}
-
+		daleController.processMovement();
+		daleController.processJumping();
+		daleController.processColorRotation();
+		daleController.processGrappleAction(world);
 		dale.applyForce();
+		dale.applyStickyPartMovement(dt);
+
 		if (dale.isJumping()) {
 			jumpId = playSound(jumpSound, jumpId, volume);
 		}
@@ -586,13 +636,16 @@ public class GameMode implements Screen {
 
 		if (debug) {
 			canvas.beginDebug();
-			for (Obstacle obj : objects) {
+
+			scene.drawDebug(canvas);
+			for(Obstacle obj : objects) {
 				obj.drawDebug(canvas);
 			}
 			canvas.endDebug();
 		}
 
 		// Final message
+
 		if (complete) {
 			displayFont.setColor(Color.ORANGE);
 			canvas.begin(); // DO NOT SCALE
