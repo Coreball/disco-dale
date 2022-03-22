@@ -107,7 +107,7 @@ public class GameMode implements Screen {
 	private JsonValue constants;
 	/** Reference to the character avatar */
 	private DaleModel dale;
-	private FlyModel fly;
+	private FlyModel[] flies;
 	private SceneModel scene;
 
 
@@ -122,7 +122,7 @@ public class GameMode implements Screen {
 		GRAPPLE_FORCE,
 	}
 
-	private FlyController flyController;
+	private FlyController[] flyControllers;
 
 	private int colorChangeCountdown;
 
@@ -405,19 +405,27 @@ public class GameMode implements Screen {
 		addObject(dale);
 
 
-		this.daleController = new DaleController(this.dale);
+		daleController = new DaleController(this.dale);
 
 		dwidth = flyTexture.getRegionWidth() / scale.x;
 		dheight = flyTexture.getRegionHeight() / scale.y;
-		fly = new FlyModel(constants.get("fly"), 5f, 5f, dwidth, dheight);
-		fly.setDrawScale(scale);
-		fly.setTexture(flyTexture);
-		addObject(fly);
-		flyController = new FlyController(fly, dale, scene);
+		flies = new FlyModel[2];
+		flies[0] = new FlyModel(constants.get("fly"), 5f, 5f, dwidth, dheight, FlyModel.IdleType.STATIONARY);
+		flies[0].setDrawScale(scale);
+		flies[0].setTexture(flyTexture);
+		addObject(flies[0]);
+		flies[1] = new FlyModel(constants.get("fly"), 5f, 15f, dwidth, dheight, FlyModel.IdleType.HORIZONTAL);
+		flies[1].setDrawScale(scale);
+		flies[1].setTexture(flyTexture);
+		addObject(flies[1]);
+		flyControllers = new FlyController[2];
+		for (int i = 0; i < flies.length; i++) {
+			flyControllers[i] = new FlyController(flies[i], dale, scene);
+		}
 
-		this.collisionController = new CollisionController(this.dale, this.fly, this.scene);
+		collisionController = new CollisionController(this.dale, this.flies, this.scene);
 
-		this.world.setContactListener(this.collisionController);
+		world.setContactListener(this.collisionController);
 
 		scene.setGoalTexture(goalTile);
 		scene.setWallTexture(earthTile);
@@ -553,8 +561,11 @@ public class GameMode implements Screen {
 
 		dale.setMatch(daleMatches());
 
-		flyController.changeDirection();
-		flyController.setVelocity();
+		for (int i = 0; i < flyControllers.length; i++){
+			flyControllers[i].changeDirection();
+			flyControllers[i].setVelocity();
+		}
+
 
 		int winLose = dale.getWinLose();
 		if(winLose == WIN_CODE){

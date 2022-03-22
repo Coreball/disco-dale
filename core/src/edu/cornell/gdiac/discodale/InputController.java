@@ -353,11 +353,11 @@ public class InputController {
 		
 		// Directional controls
 		horizontal = (secondary ? horizontal : 0.0f);
-		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			horizontal += 1.0f;
+		if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+			horizontal += 0.2f;
 		}
-		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			horizontal -= 1.0f;
+		if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+			horizontal -= 0.2f;
 		}
 
 		// Technical prototype value adjustment controls
