@@ -382,7 +382,7 @@ public class GameMode implements Screen {
 
 		dwidth = flyTexture.getRegionWidth() / scale.x;
 		dheight = flyTexture.getRegionHeight() / scale.y;
-		fly = new FlyModel(constants.get("fly"), 5f, 5f, dwidth, dheight);
+		fly = new FlyModel(constants.get("fly"), 5f, 5f, dwidth, dheight, FlyModel.IdleType.HORIZONTAL);
 		fly.setDrawScale(scale);
 		fly.setTexture(flyTexture);
 		addObject(fly);
