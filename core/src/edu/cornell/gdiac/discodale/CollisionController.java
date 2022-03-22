@@ -1,5 +1,6 @@
 package edu.cornell.gdiac.discodale;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ObjectSet;
 import edu.cornell.gdiac.discodale.models.FlyModel;
@@ -10,16 +11,19 @@ import edu.cornell.gdiac.discodale.models.DaleModel;
 public class CollisionController implements ContactListener {
 
     private DaleModel dale;
-    private FlyModel fly;
+    private FlyModel[] flies;
     private SceneModel sceneModel;
+
+    /** Vector math cache */
+    private final Vector2 vectorCache = new Vector2();
 
     /** Mark set to handle more sophisticated collision callbacks */
     protected ObjectSet<Fixture> sensorFixtures;
 
-    public CollisionController(DaleModel dale, FlyModel fly, SceneModel sceneModel) {
+    public CollisionController(DaleModel dale, FlyModel[] flies, SceneModel sceneModel) {
         this.sensorFixtures = new ObjectSet<>();
         this.dale = dale;
-        this.fly = fly;
+        this.flies = flies;
         this.sceneModel = sceneModel;
     }
 
@@ -46,6 +50,18 @@ public class CollisionController implements ContactListener {
             Obstacle bd1 = (Obstacle)body1.getUserData();
             Obstacle bd2 = (Obstacle)body2.getUserData();
 
+            // See if tongue sticky part has hit something
+            if (dale.getGrappleState() == DaleModel.GrappleState.EXTENDING &&
+                    ((bd1 == dale.getStickyPart() && bd2 != dale) || (bd2 == dale.getStickyPart() && bd1 != dale))) {
+                // Can't create the weld joint directly here because it violates locking assertions or something
+                // So set the attached body and local anchor location to create it when DaleController processes
+                Body bodyA = dale.getStickyPart() == bd1 ? body2 : body1;
+                Body stickyPartBody = dale.getStickyPart() == bd1 ? body1 : body2;
+                vectorCache.set(stickyPartBody.getPosition()).sub(bodyA.getPosition());
+                dale.setGrappleAttachedBody(bodyA);
+                dale.setGrappleAttachedBodyLocalAnchor(vectorCache);
+            }
+
             // See if we have landed on the ground.
             if ((dale.getSensorName().equals(fd2) && dale != bd1) ||
                     (dale.getSensorName().equals(fd1) && dale != bd2)) {
@@ -59,14 +75,23 @@ public class CollisionController implements ContactListener {
                 dale.setWinLose(true);
             }
 
-            if ((bd1 == dale   && bd2 == fly) ||
-                    (bd1 == fly && bd2 == dale)) {
+            if ((bd1 == dale   && isFly(bd2)) ||
+                    (isFly(bd2) && bd2 == dale)) {
                 dale.setWinLose(false);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    private boolean isFly(Obstacle ob){
+        try{
+            FlyModel f = (FlyModel) ob;
+            return true;
+        } catch (Exception e){
+            return false;
+        }
     }
 
     /**

@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 
+import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 import com.badlogic.gdx.utils.JsonValue;
 import edu.cornell.gdiac.discodale.*;
 import edu.cornell.gdiac.discodale.obstacle.*;
@@ -39,6 +40,8 @@ public class DaleModel extends CapsuleObstacle {
 	private final float damping;
 	/** The maximum character speed */
 	private final float maxspeed;
+	/** The maximum character speed in the AIR */
+	private final float maxAirSpeed;
 	/** Identifier to allow us to track the sensor in ContactListener */
 	private final String sensorName;
 	/** The impulse for the character jump */
@@ -59,16 +62,44 @@ public class DaleModel extends CapsuleObstacle {
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
 
+	// region Grapple Properties
+
+	/** Tongue texture */
+	private Texture tongueTexture;
+	/** Speed the grapple sticky part moves at */
+	private float stickyPartSpeed;
+	/** Maximum tongue length before attachment */
+	private float maxTongueLength;
+	/** Force the grapple applies on Dale */
+	private float grappleForce;
+
+	/** Grapple state */
+	private GrappleState grappleState;
+	/** Angle grapple shoots out at (calculated based on target location) */
+	private float grappleAngle;
+	/** Tongue sticky part */
+	private final WheelObstacle grappleStickyPart;
+	/** Body that sticky part is attached to, if any */
+	private Body grappleAttachedBody;
+	/** Local anchor for attached body */
+	private final Vector2 grappleAttachedBodyLocalAnchor = new Vector2();
+	/** Joint for welding sticky part to Dale or a wall */
+	private Joint grappleJoint;
+
+	// endregion
+
 	/** Whether Dale's color is matched with background */
 	private boolean match;
-
 	private int winLose;
+
 
 	private DaleColor color = DaleColor.RED;
 	private TextureRegion[] textures;
 
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
+	/** Caceh for general vector calculations */
+	private final Vector2 vectorCache = new Vector2();
 
 	public DaleColor getColor() {
 		return color;
@@ -194,6 +225,205 @@ public class DaleModel extends CapsuleObstacle {
 		return faceRight;
 	}
 
+	// region Grapple Methods
+
+	/**
+	 * Returns the tongue texture
+	 * @return tongue texture
+	 */
+	public Texture getTongueTexture() {
+		return tongueTexture;
+	}
+
+	/**
+	 * Set the tongue texture
+	 * @param tongueTexture tongue texture
+	 */
+	public void setTongueTexture(Texture tongueTexture) {
+		this.tongueTexture = tongueTexture;
+	}
+
+	/**
+	 * Set the tongue tip sticky part texture
+	 * @param stickyPartTexture sticky part texture
+	 */
+	public void setStickyPartTexture(Texture stickyPartTexture) {
+		grappleStickyPart.setTexture(new TextureRegion(stickyPartTexture));
+	}
+
+	/**
+	 * Return grapple sticky part speed
+	 * @return grapple sticky part speed
+	 */
+	public float getStickyPartSpeed() {
+		return stickyPartSpeed;
+	}
+
+	/**
+	 * Set grapple sticky part speed
+	 * @param stickyPartSpeed grapple sticky part speed
+	 */
+	public void setStickyPartSpeed(float stickyPartSpeed) {
+		this.stickyPartSpeed = stickyPartSpeed;
+	}
+
+	/**
+	 * Get grapple force
+	 * @return grapple force
+	 */
+	public float getGrappleForce() {
+		return grappleForce;
+	}
+
+	/**
+	 * Set grapple force
+	 * @param grappleForce grapple force
+	 */
+	public void setGrappleForce(float grappleForce) {
+		this.grappleForce = grappleForce;
+	}
+
+	/**
+	 * Return grapple state
+	 * @return grapple state
+	 */
+	public GrappleState getGrappleState() {
+		return grappleState;
+	}
+
+	/**
+	 * Set grapple state
+	 * @param grappleState grapple state
+	 */
+	public void setGrappleState(GrappleState grappleState) {
+		this.grappleState = grappleState;
+	}
+
+	/**
+	 * Returns the grapple angle
+	 * @return grapple angle
+	 */
+	public float getGrappleAngle() {
+		return grappleAngle;
+	}
+
+	/**
+	 * Set grapple angle
+	 * @param grappleAngle grapple angle
+	 */
+	public void setGrappleAngle(float grappleAngle) {
+		this.grappleAngle = grappleAngle;
+	}
+
+	/**
+	 * Returns the maximum length of the tongue before attachment.
+	 * @return max length of tongue
+	 */
+	public float getMaxTongueLength() {
+		return maxTongueLength;
+	}
+
+	/**
+	 * Calculate the current length of the tongue. This is the distance between Dale and the sticky part.
+	 * @return length of tongue
+	 */
+	public float getTongueLength() {
+		return vectorCache.set(grappleStickyPart.getPosition()).sub(getPosition()).len();
+	}
+
+	/**
+	 * Calculate the current angle from Dale to the sticky part of the tongue.
+	 * @return angle from Dale to tongue (radians)
+	 */
+	public float getTongueAngle() {
+		return vectorCache.set(grappleStickyPart.getPosition()).sub(getPosition()).angleRad();
+	}
+
+	/**
+	 * Return Dale's sticky part
+	 * @return the sticky part
+	 */
+	public WheelObstacle getStickyPart() {
+		return grappleStickyPart;
+	}
+
+	/**
+	 * Return body that sticky part is attached to
+	 * @return attached body
+	 */
+	public Body getGrappleAttachedBody() {
+		return grappleAttachedBody;
+	}
+
+	/**
+	 * Set attached body when sticky part hits something so can create the joint right after
+	 * @param grappleAttachedBody body sticky part should attach to
+	 */
+	public void setGrappleAttachedBody(Body grappleAttachedBody) {
+		this.grappleAttachedBody = grappleAttachedBody;
+	}
+
+	/**
+	 * Returns local anchor vector for attached body
+	 * @return attached body local anchor
+	 */
+	public Vector2 getGrappleAttachedBodyLocalAnchor() {
+		return grappleAttachedBodyLocalAnchor;
+	}
+
+	/**
+	 * Set attached body local anchor
+	 * @param grappleAttachedBodyLocalAnchor attached body local anchor
+	 */
+	public void setGrappleAttachedBodyLocalAnchor(Vector2 grappleAttachedBodyLocalAnchor) {
+		this.grappleAttachedBodyLocalAnchor.set(grappleAttachedBodyLocalAnchor);
+	}
+
+	/**
+	 * Create weld joint at the center of Dale and the tongue sticky part.
+	 * @param world physics world to make joint in
+	 */
+	public void createGrappleJoint(World world) {
+		WeldJointDef jointDef = new WeldJointDef();
+		jointDef.bodyA = this.getBody();
+		jointDef.bodyB = grappleStickyPart.getBody();
+		jointDef.collideConnected = false;
+		grappleJoint = world.createJoint(jointDef);
+	}
+
+	/**
+	 * Create weld joint at the center of another body and the tongue sticky part.
+	 * @param bodyA other body for grapple joint
+	 * @param world physics world to make joint in
+	 */
+	public void createGrappleJoint(Body bodyA, Vector2 localAnchorA, World world) {
+		WeldJointDef jointDef = new WeldJointDef();
+		jointDef.bodyA = bodyA;
+		jointDef.localAnchorA.set(localAnchorA);
+		jointDef.bodyB = grappleStickyPart.getBody();
+		jointDef.collideConnected = false;
+		grappleJoint = world.createJoint(jointDef);
+	}
+
+	/**
+	 * Destroy weld joint at the center of Dale and tongue sticky part.
+	 * @param world physics world to destroy joint in
+	 */
+	public void destroyGrappleJoint(World world) {
+		world.destroyJoint(grappleJoint);
+		grappleJoint = null;
+	}
+
+	/**
+	 * Set grapple sticky part physics active
+	 * @param active true if active
+	 */
+	public void setStickyPartActive(boolean active) {
+		grappleStickyPart.setActive(active);
+	}
+
+	// endregion
+
 	/**
 	 * Sets Dale's color match.
 	 */
@@ -244,6 +474,7 @@ public class DaleModel extends CapsuleObstacle {
 		setFixedRotation(true);
 
 		maxspeed = data.getFloat("maxspeed", 0);
+		maxAirSpeed = data.getFloat("max_air_speed", 0);
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
 		jump_force = data.getFloat("jump_force", 0);
@@ -259,6 +490,19 @@ public class DaleModel extends CapsuleObstacle {
 		winLose = PLAY_CODE;
 
 		jumpCooldown = 0;
+
+		// Grapple things
+		stickyPartSpeed = data.getFloat("grapple_speed", 1);
+		grappleForce = data.getFloat("grapple_force", 1);
+		maxTongueLength = data.getFloat("max_tongue_length", 1);
+		grappleAngle = 0;
+		grappleState = GrappleState.RETRACTED;
+		grappleStickyPart = new WheelObstacle(getX(), getY(), getWidth() / 10);
+		grappleStickyPart.setName("stickypart");
+		grappleStickyPart.setDensity(data.getFloat("density", 0));
+		grappleStickyPart.setBodyType(BodyDef.BodyType.DynamicBody);
+		grappleAttachedBody = null;
+
 		setName(Constants.DALE_NAME_TAG);
 
 		textures = ts;
@@ -278,6 +522,12 @@ public class DaleModel extends CapsuleObstacle {
 		if (!super.activatePhysics(world)) {
 			return false;
 		}
+
+		if (!grappleStickyPart.activatePhysics(world)) {
+			return false;
+		}
+
+		createGrappleJoint(world);
 
 		// Ground Sensor
 		// -------------
@@ -314,24 +564,60 @@ public class DaleModel extends CapsuleObstacle {
 			return;
 		}
 
-		// Don't want to be moving. Damp out player motion
-		if (getMovement() == 0f) {
-			forceCache.set(-getDamping() * getVX(), 0);
-			body.applyForce(forceCache, getPosition(), true);
-		}
 
-		// Velocity too high, clamp it
-		if (Math.abs(getVX()) >= getMaxSpeed()) {
-			setVX(Math.signum(getVX()) * getMaxSpeed());
+		if (grappleState == GrappleState.ATTACHED) {
+			// Apply grapple force
+			forceCache.set(grappleForce, 0).rotateRad(getTongueAngle());
+			body.applyForce(forceCache, getPosition(), true);
+		} else if (!isGrounded()) {
+			// Limit max air speed
+			if (getLinearVelocity().len2() >= maxAirSpeed) {
+				setLinearVelocity(vectorCache.set(getLinearVelocity()).limit(maxAirSpeed));
+			}
 		} else {
-			forceCache.set(getMovement(), 0);
-			body.applyForce(forceCache, getPosition(), true);
-		}
+			// Don't want to be moving. Damp out player motion
+			if (getMovement() == 0f) {
+				forceCache.set(-getDamping() * getVX(), 0);
+				body.applyForce(forceCache, getPosition(), true);
+			}
 
-		// Jump!
-		if (isJumping()) {
-			forceCache.set(0, jump_force);
-			body.applyLinearImpulse(forceCache, getPosition(), true);
+			// Clamp walking speed
+			if (Math.abs(getVX()) >= getMaxSpeed()) {
+				setVX(Math.signum(getVX()) * getMaxSpeed());
+			} else {
+				forceCache.set(getMovement(),0);
+				body.applyForce(forceCache,getPosition(),true);
+			}
+
+			// Jump!
+			if (isJumping()) {
+				forceCache.set(0, jump_force);
+				body.applyLinearImpulse(forceCache,getPosition(),true);
+			}
+
+		}
+	}
+
+
+	/**
+	 * Move the grapple sticky part according to the grapple state.
+	 * If extending, it has constant linear velocity at the original angle between Dale and target
+	 * If retracting, it ignores physics and moves towards Dale manually.
+	 * @param dt seconds since last frame
+	 */
+	public void applyStickyPartMovement(float dt) {
+		switch (grappleState) {
+			case EXTENDING:
+				vectorCache.set(1, 0).rotateRad(grappleAngle).scl(stickyPartSpeed);
+				grappleStickyPart.setLinearVelocity(vectorCache);
+				break;
+			case RETURNING:
+				vectorCache.set(getPosition()).sub(grappleStickyPart.getPosition()).nor().scl(dt * stickyPartSpeed);
+				grappleStickyPart.setPosition(vectorCache.add(grappleStickyPart.getPosition()));
+				// TODO is there a better way to do this
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -351,6 +637,13 @@ public class DaleModel extends CapsuleObstacle {
 		}
 
 		super.update(dt);
+		grappleStickyPart.update(dt);
+	}
+
+	@Override
+	public void setDrawScale(Vector2 value) {
+		super.setDrawScale(value);
+		grappleStickyPart.setDrawScale(value); // So important!
 	}
 
 	/**
@@ -360,8 +653,12 @@ public class DaleModel extends CapsuleObstacle {
 	 */
 	public void draw(GameCanvas canvas) {
 		float effect = faceRight ? 1.0f : -1.0f;
-		canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y,
-				getAngle(), effect, 1.0f);
+
+		// Reorder this to change if the tongue is on top of Dale or not
+		canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+		canvas.draw(tongueTexture, Color.WHITE, 0, tongueTexture.getHeight() / 2f, getX() * drawScale.x, getY() * drawScale.y,
+				getTongueAngle(), getTongueLength() / tongueTexture.getWidth() * drawScale.x, 1);
+		grappleStickyPart.draw(canvas);
 	}
 
 	public void setDaleTexture() {
@@ -377,6 +674,18 @@ public class DaleModel extends CapsuleObstacle {
 	 */
 	public void drawDebug(GameCanvas canvas) {
 		super.drawDebug(canvas);
-		canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+
+		canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+		grappleStickyPart.drawDebug(canvas);
+	}
+
+	/**
+	 * The state of Dale's grapple tongue
+	 */
+	public enum GrappleState {
+		RETRACTED,
+		EXTENDING,
+		ATTACHED,
+		RETURNING,
 	}
 }

@@ -42,6 +42,16 @@ public class FlyModel extends CapsuleObstacle {
 	/** Flag angry, whether the fly is chasing Dale or not */
 	private boolean angry;
 
+	public enum IdleType {
+		STATIONARY,
+		HORIZONTAL
+	}
+	private IdleType idleType;
+
+	public IdleType getIdleType(){
+		return idleType;
+	}
+
 	public float getDirection() {
 		return this.velocity.angleDeg();
 	}
@@ -92,7 +102,7 @@ public class FlyModel extends CapsuleObstacle {
 	 * @param width  The object width in physics units
 	 * @param height The object width in physics units
 	 */
-	public FlyModel(JsonValue data, float x, float y, float width, float height) {
+	public FlyModel(JsonValue data, float x, float y, float width, float height, IdleType idleType) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(x, y,
 				width * data.get("shrink").getFloat(0),
@@ -101,11 +111,13 @@ public class FlyModel extends CapsuleObstacle {
 		setAngry(false);
 		sensorName = "FlyGroundSensor";
 		this.data = data;
+		this.idleType = idleType;
 
 		// Gameplay attributes
 
 		setName("fly");
 	}
+
 
 	/**
 	 * Creates the physics Body(s) for this object, adding them to the world.

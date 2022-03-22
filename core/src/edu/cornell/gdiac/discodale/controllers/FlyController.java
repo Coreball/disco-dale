@@ -83,9 +83,7 @@ public class FlyController {
         changeState();
         switch (state) {
             case IDLE:
-                // TODO: temporary. May be more complex idle behaviors
-                dx = 0;
-                dy = 0;
+                setIdleDirection();
                 break;
             case CHASE:
                 findDirection();
@@ -134,6 +132,32 @@ public class FlyController {
         return (float) (Math.sqrt(Math.pow((double) x1 - x2, 2) + Math.pow((double) y1 - y2, 2)));
     }
 
+    private boolean inBounds(int x, int y, boolean [][] grid){
+        return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length;
+    }
+
+    private void setIdleDirection(){
+        switch (fly.getIdleType()){
+            case STATIONARY:
+                dx = 0;
+                dy = 0;
+                break;
+            case HORIZONTAL:
+                if (Math.abs(dx) != 1.0 || dy != 0f){   // if a fly changes from CHASE to IDLE
+                    dx = 1f;
+                    dy = 0f;
+                }
+                boolean[][] grid = scene.getGrid();
+                int nextx = cToG(fly.getX() + dx);
+                int nexty = cToG(fly.getY() + dy);
+                if(!inBounds(nextx, nexty, grid) || grid[nextx][nexty]){
+                    dx = -dx;
+                    dy = -dy;
+                }
+                break;
+        }
+    }
+
     private void findDirection() {
         boolean[][] grid = scene.getGrid();
         boolean[][] visited = new boolean[grid.length][grid[0].length];
@@ -168,7 +192,7 @@ public class FlyController {
                 for (int j=-1;j<=1;j++) {
                     int nextx = n.x + i;
                     int nexty = n.y + j;
-                    if (nextx < 0 || nextx > grid.length - 1 || nexty < 0 || nexty > grid[0].length - 1) {
+                    if (!inBounds(nextx, nexty, grid)) {
                         continue;
                     }
                     if(grid[nextx][nexty]){
@@ -208,8 +232,6 @@ public class FlyController {
             }
 
         }
-
-
 
         // When there is no path to dale, just stay
         // TODO: May be different if idle behavior is more complex

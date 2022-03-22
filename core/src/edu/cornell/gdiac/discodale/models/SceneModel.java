@@ -205,6 +205,12 @@ public class SceneModel {
         }
     }
 
+    public void drawDebug(GameCanvas canvas) {
+        for(Obstacle obj : objects) {
+            obj.drawDebug(canvas);
+        }
+    }
+
     public boolean activatePhysics(World world) {
         for (Obstacle object : objects) {
             if (!object.activatePhysics(world))
