@@ -12,6 +12,7 @@ import edu.cornell.gdiac.discodale.obstacle.BoxObstacle;
 import edu.cornell.gdiac.discodale.obstacle.Obstacle;
 import edu.cornell.gdiac.discodale.obstacle.PolygonObstacle;
 import edu.cornell.gdiac.util.PooledList;
+import java.util.LinkedList;
 
 public class SceneModel {
     private static int GRID_WIDTH = 32;
@@ -19,6 +20,8 @@ public class SceneModel {
 
     /** Reference to the goalDoor (for collision detection) */
     public BoxObstacle goalDoor;
+    /** Color regions */
+    private ColorRegionModel[] colorRegions;
 
     /** The texture for walls and platforms */
     protected TextureRegion wallTile;
@@ -45,9 +48,6 @@ public class SceneModel {
         this.bounds = new Rectangle(bounds);
         this.scale = new Vector2();
     }
-
-    /** Color regions */
-    private ColorRegionModel[] colorRegions;
 
     public void setWallTexture(TextureRegion texture) {
         this.wallTile = texture;
@@ -219,6 +219,14 @@ public class SceneModel {
             obj.deactivatePhysics(world);
         }
         objects.clear();
+    }
+
+    public void updateColorRegions(){
+        DaleColor c1 = colorRegions[colorRegions.length-1].getColor();
+        for(int i=colorRegions.length-1;i>=1;i--){
+            colorRegions[i].setColor(colorRegions[i-1].getColor());
+        }
+        colorRegions[0].setColor(c1);
     }
 
 }

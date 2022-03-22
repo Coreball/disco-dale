@@ -54,6 +54,8 @@ public class GameMode implements Screen {
 	private static int LOSE_CODE = -1;
 	private static int PLAY_CODE = 0;
 
+	private static int CHANGE_COLOR_TIME = 300;
+
 	/** The texture for walls and platforms */
 	protected TextureRegion earthTile;
 	/** The texture for the exit condition */
@@ -109,6 +111,8 @@ public class GameMode implements Screen {
 	private FlyController flyController;
 
 	private CollisionController collisionController;
+
+	private int colorChangeCountdown;
 
 	public GameMode() {
 		this(Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT, Constants.DEFAULT_GRAVITY);
@@ -277,6 +281,8 @@ public class GameMode implements Screen {
 		debug = false;
 		active = false;
 		countdown = -1;
+
+		colorChangeCountdown = CHANGE_COLOR_TIME;
 	}
 
 	/**
@@ -359,6 +365,7 @@ public class GameMode implements Screen {
 		setComplete(false);
 		setFailure(false);
 		countdown = -1;
+		colorChangeCountdown = CHANGE_COLOR_TIME;
 		populateLevel();
 	}
 
@@ -509,6 +516,13 @@ public class GameMode implements Screen {
 			setFailure(true);
 //			//debugging message
 //			System.out.println("lose");
+		}
+
+		if(colorChangeCountdown>0){
+			colorChangeCountdown--;
+		}else {
+			scene.updateColorRegions();
+			colorChangeCountdown = CHANGE_COLOR_TIME;
 		}
 
 		 scene.updateGrid();
