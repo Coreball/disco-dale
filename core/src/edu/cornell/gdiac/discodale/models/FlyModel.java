@@ -191,6 +191,7 @@ public class FlyModel extends CapsuleObstacle {
 	 */
 	public void drawDebug(GameCanvas canvas) {
 		super.drawDebug(canvas);
-		canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
+		// TODO remove feet sensor from FlyModel
+//		canvas.drawPhysics(sensorShape, Color.RED, getX(), getY(), getAngle(), drawScale.x, drawScale.y);
 	}
 }

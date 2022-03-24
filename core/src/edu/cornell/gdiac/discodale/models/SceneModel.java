@@ -114,8 +114,8 @@ public class SceneModel {
      */
     public void populateLevel(JsonValue walljv, JsonValue platjv, JsonValue defaults, JsonValue goal) {
         // Add level goal
-        float dwidth = goalTile.getRegionWidth() / scale.x;
-        float dheight = goalTile.getRegionHeight() / scale.y;
+        float dwidth = goalTile.getRegionWidth() / (scale.x);
+        float dheight = goalTile.getRegionHeight() / (scale.y);
         JsonValue goalpos = goal.get("pos");
 //        System.out.println(goalpos.getFloat(0));
         goalDoor = new BoxObstacle(goalpos.getFloat(0), goalpos.getFloat(1), dwidth, dheight);
