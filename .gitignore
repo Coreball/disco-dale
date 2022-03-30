@@ -121,3 +121,6 @@ Thumbs.db
 ## Ignore dump and binary files
 *.trc
 *.dmp
+
+# tiled
+level-editor/*.tiled-session
