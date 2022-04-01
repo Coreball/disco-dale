@@ -463,10 +463,9 @@ public class DaleModel extends CapsuleObstacle {
 	 * @param width  The object width in physics units
 	 * @param height The object width in physics units
 	 */
-	public DaleModel(JsonValue data, float width, float height, TextureRegion[] ts) {
+	public DaleModel(float x, float y, JsonValue data, float width, float height, TextureRegion[] ts) {
 		// The shrink factors fit the image to a tigher hitbox
-		super(data.get("pos").getFloat(0),
-				data.get("pos").getFloat(1),
+		super(x, y,
 				width * data.get("shrink").getFloat(0),
 				height * data.get("shrink").getFloat(1));
 		setDensity(data.getFloat("density", 0));

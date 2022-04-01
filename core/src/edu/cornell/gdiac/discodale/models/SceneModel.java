@@ -46,6 +46,9 @@ public class SceneModel {
     protected Rectangle bounds;
     protected Vector2 scale;
 
+    private Vector2 daleStart = new Vector2();
+    private PooledList<Vector2> flyLocations = new PooledList<>();
+
     /** */
     private Vector2 pointCache;
 
@@ -69,6 +72,22 @@ public class SceneModel {
 
     public void setPlatformTexture(TextureRegion texture) {
         this.platformTile = texture;
+    }
+
+    public Vector2 getDaleStart() {
+        return daleStart;
+    }
+
+    public void setDaleStart(float x, float y) {
+        this.daleStart.set(x, y);
+    }
+
+    public PooledList<Vector2> getFlyLocations() {
+        return this.flyLocations;
+    }
+
+    public void addFly(float x, float y) {
+        this.flyLocations.add(new Vector2(x, y));
     }
 
     public void setCanvas(GameCanvas canvas) {
@@ -214,6 +233,22 @@ public class SceneModel {
         obj.setTexture(wallTile);
         obj.setName(name);
         addObject(obj);
+    }
+
+    public void setGoal(float x, float y) {
+        float dwidth = goalTile.getRegionWidth() / (scale.x);
+        float dheight = goalTile.getRegionHeight() / (scale.y);
+        System.out.println(x + " " + y);
+        goalDoor = new BoxObstacle(x, y, dwidth, dheight);
+        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
+        goalDoor.setDensity(0);
+        goalDoor.setFriction(0);
+        goalDoor.setRestitution(0);
+        goalDoor.setSensor(true);
+        goalDoor.setDrawScale(scale);
+        goalDoor.setTexture(goalTile);
+        goalDoor.setName("goal");
+        addObject(goalDoor);
     }
 
     /**

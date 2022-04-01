@@ -115,6 +115,15 @@ public class LevelLoader {
                         case 2:
                             model.addWall(v, "wall" + (j + i * width), defaults);
                             break;
+                        case 8:
+                            model.setDaleStart((j * 32 - 16) / scale.x, ((height - i) * 32 - 16) / scale.y);
+                            break;
+                        case 9:
+                            model.addFly((j * 32 - 16) / scale.x, ((height - i) * 32 - 16) / scale.y);
+                            break;
+                        case 11:
+                            model.setGoal((j * 32 - 16) / scale.x, ((height - i) * 32 - 16) / scale.y);
+                            break;
                     }
                     count = 1;
                     if (j == width - 1) last = 0;

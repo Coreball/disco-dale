@@ -394,7 +394,7 @@ public class GameMode implements Screen {
 		float dwidth = blueTexture.getRegionWidth() / scale.x;
 		float dheight = blueTexture.getRegionHeight() / scale.y;
 		TextureRegion[] textures = {pinkTexture, blueTexture, greenTexture};
-		dale = new DaleModel(constants.get("dale"), dwidth, dheight, textures);
+		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"), dwidth, dheight, textures);
 		dale.setDrawScale(scale);
 		dale.setDaleTexture();
 
