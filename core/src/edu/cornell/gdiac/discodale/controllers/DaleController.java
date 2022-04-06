@@ -21,10 +21,6 @@ public class DaleController {
 		dale.setMovement(InputController.getInstance().getHorizontal() * dale.getForce());
 	}
 
-	public void processJumping() {
-		dale.setJumping(InputController.getInstance().didJump());
-	}
-
 	public void processColorRotation() {
 		if (InputController.getInstance().didRotateColor()) {
 			dale.rotateColor();

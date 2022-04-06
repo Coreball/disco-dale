@@ -98,9 +98,6 @@ public class GameMode implements Screen {
 	private TextureRegion pinkTexture;
 	private TextureRegion flyTexture;
 
-	/** The jump sound. We only want to play once. */
-	private Sound jumpSound;
-	private long jumpId = -1;
 	/** The default sound volume */
 	private float volume;
 
@@ -391,10 +388,11 @@ public class GameMode implements Screen {
 	 * Lays out the game geography.
 	 */
 	private void populateLevel() {
+		float dradius = 1.0f;
 		float dwidth = blueTexture.getRegionWidth() / scale.x;
 		float dheight = blueTexture.getRegionHeight() / scale.y;
 		TextureRegion[] textures = {pinkTexture, blueTexture, greenTexture};
-		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"), dwidth, dheight, textures);
+		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"), dradius, dwidth, dheight, textures);
 		dale.setDrawScale(scale);
 		dale.setDaleTexture();
 
@@ -556,15 +554,10 @@ public class GameMode implements Screen {
 	 */
 	public void update(float dt) {
 		daleController.processMovement();
-		daleController.processJumping();
 		daleController.processColorRotation();
 		daleController.processGrappleAction(world);
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
-
-		if (dale.isJumping()) {
-			jumpId = playSound(jumpSound, jumpId, volume);
-		}
 
 		dale.setMatch(daleMatches());
 
@@ -572,7 +565,6 @@ public class GameMode implements Screen {
 			flyControllers[i].changeDirection();
 			flyControllers[i].setVelocity();
 		}
-
 
 		int winLose = dale.getWinLose();
 		if(winLose == WIN_CODE){
@@ -807,8 +799,6 @@ public class GameMode implements Screen {
 		pinkTexture = new TextureRegion(directory.getEntry("platform:pink", Texture.class));
 
 		flyTexture = new TextureRegion(directory.getEntry("platform:fly", Texture.class));
-
-		jumpSound = directory.getEntry("platform:jump", Sound.class);
 
 		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles
