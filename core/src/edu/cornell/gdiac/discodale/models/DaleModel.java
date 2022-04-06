@@ -472,6 +472,12 @@ public class DaleModel extends CapsuleObstacle {
 		setFriction(data.getFloat("friction", 0)); /// HE WILL STICK TO WALLS IF YOU FORGET
 		setFixedRotation(true);
 
+		// Filter collisions
+		Filter daleFilter = new Filter();
+		daleFilter.categoryBits = 0b00001000;
+		daleFilter.maskBits     = 0b00000111;
+		setFilterData(daleFilter);
+
 		maxspeed = data.getFloat("maxspeed", 0);
 		maxAirSpeed = data.getFloat("max_air_speed", 0);
 		damping = data.getFloat("damping", 0);
@@ -500,6 +506,10 @@ public class DaleModel extends CapsuleObstacle {
 		grappleStickyPart.setName("stickypart");
 		grappleStickyPart.setDensity(data.getFloat("density", 0));
 		grappleStickyPart.setBodyType(BodyDef.BodyType.DynamicBody);
+		Filter grappleFilter = new Filter();
+		grappleFilter.categoryBits = 0b00010000;
+		grappleFilter.maskBits     = 0b00000001;
+		grappleStickyPart.setFilterData(grappleFilter);
 		grappleAttachedBody = null;
 
 		setName(Constants.DALE_NAME_TAG);

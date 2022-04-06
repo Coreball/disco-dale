@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
@@ -219,6 +220,10 @@ public class SceneModel {
         obj.setDrawScale(scale);
         obj.setTexture(wallTile);
         obj.setName(name);
+        Filter objFilter = new Filter();
+        objFilter.categoryBits = 0b00000001;
+        objFilter.maskBits     = 0b00011100;
+        obj.setFilterData(objFilter);
         addObject(obj);
     }
 
@@ -232,6 +237,10 @@ public class SceneModel {
         obj.setDrawScale(scale);
         obj.setTexture(wallTile);
         obj.setName(name);
+        Filter objFilter = new Filter();
+        objFilter.categoryBits = 0b00000001;
+        objFilter.maskBits     = 0b00011100;
+        obj.setFilterData(objFilter);
         addObject(obj);
     }
 
@@ -248,6 +257,10 @@ public class SceneModel {
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTile);
         goalDoor.setName("goal");
+        Filter goalFilter = new Filter();
+        goalFilter.categoryBits = 0b00000010;
+        goalFilter.maskBits     = 0b00001000;
+        goalDoor.setFilterData(goalFilter);
         addObject(goalDoor);
     }
 
