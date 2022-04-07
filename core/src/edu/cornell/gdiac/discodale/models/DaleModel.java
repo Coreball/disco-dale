@@ -127,6 +127,10 @@ public class DaleModel extends WheelObstacle {
 	 */
 	public void setMovement(float value) {
 		movement = value;
+		boolean bodyFacingRight = Math.cos(bodyPart.getAngle()) >= 0;
+		if ((movement < 0 && bodyFacingRight) || (movement > 0 && !bodyFacingRight)) {
+			bodyPart.setAngle((float) (bodyPart.getAngle() + Math.PI));
+		}
 	}
 
 	/**
