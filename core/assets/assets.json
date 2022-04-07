@@ -61,6 +61,7 @@
         "ragdoll:constants":  "ragdoll/constants.json"
     },
     "sounds" : {
+        "theme" : "shared/theme.mp3",
         "rocket:bump" : "rocket/bump.mp3",
         "rocket:mainburn" : "rocket/afterburner.mp3",
         "rocket:leftburn" : "rocket/sideburner-left.mp3",

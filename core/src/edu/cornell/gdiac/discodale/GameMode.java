@@ -98,6 +98,10 @@ public class GameMode implements Screen {
 	private TextureRegion pinkTexture;
 	private TextureRegion flyTexture;
 
+	/** Background music */
+	private Sound theme;
+	private long themeId = -1;
+
 	/** The jump sound. We only want to play once. */
 	private Sound jumpSound;
 	private long jumpId = -1;
@@ -558,6 +562,8 @@ public class GameMode implements Screen {
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
+		themeId = playBGM(theme, themeId, volume);
+
 		if (dale.isJumping()) {
 			jumpId = playSound(jumpSound, jumpId, volume);
 		}
@@ -713,6 +719,13 @@ public class GameMode implements Screen {
 		return sound.play(volume);
 	}
 
+	public long playBGM(Sound sound, long soundId, float volume) {
+		if (soundId != -1) {
+			return soundId;
+		}
+		return sound.loop(volume);
+	}
+
 	/**
 	 * Called when the Screen is resized.
 	 *
@@ -805,6 +818,7 @@ public class GameMode implements Screen {
 		flyTexture = new TextureRegion(directory.getEntry("platform:fly", Texture.class));
 
 		jumpSound = directory.getEntry("platform:jump", Sound.class);
+		theme = directory.getEntry("theme", Sound.class);
 
 		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles
