@@ -594,6 +594,7 @@ public class GameMode implements Screen {
 		}
 
 		 scene.updateGrid();
+		scene.updateColorRegionMovement();
 	}
 
 	/**

@@ -27,11 +27,21 @@ public class SceneModel {
     private static int GRID_WIDTH = 32;
     private static int GRID_HEIGHT = 18;
 
+    /** Window size */
+    //TODO: Hard code? =(1024 or 567)+2*32    (why extra 2*32?)
+    private static int WINDOW_WIDTH = 1088;
+    private static int WINDOW_HEIGHT = 640;
+
     /** Reference to the goalDoor (for collision detection) */
     public BoxObstacle goalDoor;
     /** Color regions */
     private PooledList<ColorRegionModel> colorRegions;
     private ColorMovement colorMovement;
+    // TODO: as inputs of scenemodel?
+    private float colorMovementAmount = 1;
+    private float colorMovementX = 512;
+    private float colorMovementY = 288;
+
 
     /** The texture for walls and platforms */
     protected TextureRegion wallTile;
@@ -107,7 +117,21 @@ public class SceneModel {
     }
 
     public void addColorRegion(ColorRegionModel crm) {
-        this.colorRegions.add(crm);
+        if(colorMovement==ColorMovement.SCROLL_HORIZONTAL || colorMovement == ColorMovement.SCROLL_VERTICAL){
+            float[] vertices = crm.getVertices();
+            for(int i=-1;i<=1;i++){
+                for(int j=-1;j<=1;j++){
+                    ColorRegionModel newCrm = new ColorRegionModel(crm.getColor(),vertices);
+                    newCrm.move(i*WINDOW_WIDTH,j*WINDOW_HEIGHT);
+                    this.colorRegions.add(newCrm);
+                }
+            }
+        }else{
+            this.colorRegions.add(crm);
+        }
+
+
+
     }
 
     public void updateGrid() {
@@ -144,6 +168,33 @@ public class SceneModel {
 //            System.out.println("");
 //        }
 //        System.out.println("");
+    }
+
+    public void updateColorRegionMovement(){
+        switch (colorMovement){
+            case NO_MOVEMENT:
+                break;
+            case SCROLL_HORIZONTAL:
+                for(ColorRegionModel cr:colorRegions){
+                    cr.move(colorMovementAmount,0);
+                    cr.move(cr.testBound(WINDOW_WIDTH,0)*WINDOW_WIDTH*2,0);
+                }
+                break;
+            case SCROLL_VERTICAL:
+                for(ColorRegionModel cr:colorRegions){
+                    cr.move(0,colorMovementAmount);
+                    cr.move(0,cr.testBound(WINDOW_HEIGHT,1)*WINDOW_HEIGHT*2);
+                }
+                break;
+            case ROTATE:
+                //TODO: around which point? Now assume (512,288)
+                for(ColorRegionModel cr:colorRegions){
+                    cr.rotateAround(colorMovementX,colorMovementY,colorMovementAmount);
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     /**

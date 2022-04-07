@@ -40,6 +40,7 @@ public class LevelLoader {
                         m = SceneModel.ColorMovement.SCROLL_HORIZONTAL;
                         break;
                     case 2:
+                        System.out.println("oooooooo");
                         m = SceneModel.ColorMovement.SCROLL_VERTICAL;
                         break;
                     case 3:
