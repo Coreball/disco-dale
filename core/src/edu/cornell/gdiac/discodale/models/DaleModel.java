@@ -37,8 +37,6 @@ public class DaleModel extends WheelObstacle {
 
 	/** The factor to multiply by the input */
 	private final float walkForce;
-	/** The amount to slow the character down */
-	private final float damping;
 	/** The maximum character speed */
 	private final float maxSpeed;
 	/** The maximum character speed in the AIR */
@@ -50,8 +48,10 @@ public class DaleModel extends WheelObstacle {
 	private float movement;
 	/** Whether our feet are on the ground */
 	private boolean isGrounded;
-	/** The physics shape of this object */
-	private PolygonShape sensorShape;
+	/** Feet when facing right */
+	private PolygonShape sensorShapeRight;
+	/** Feet when facing left */
+	private PolygonShape sensorShapeLeft;
 
 	/** Dale's body */
 	private final CapsuleObstacle bodyPart;
@@ -156,15 +156,6 @@ public class DaleModel extends WheelObstacle {
 	 */
 	public float getWalkForce() {
 		return walkForce;
-	}
-
-	/**
-	 * Returns ow hard the brakes are applied to get a dude to stop moving
-	 *
-	 * @return ow hard the brakes are applied to get a dude to stop moving
-	 */
-	public float getDamping() {
-		return damping;
 	}
 
 	/**
@@ -453,7 +444,6 @@ public class DaleModel extends WheelObstacle {
 
 		maxSpeed = data.getFloat("max_speed", 0);
 		maxAirSpeed = data.getFloat("max_air_speed", 0);
-		damping = data.getFloat("damping", 0);
 		walkForce = data.getFloat("walk_force", 0);
 		sensorName = Constants.DALE_GROUND_SENSOR_NAME;
 		this.data = data;
@@ -528,28 +518,31 @@ public class DaleModel extends WheelObstacle {
 		createGrappleJoint(world);
 
 		// Ground Sensor
-		// -------------
-		// We only allow the dude to jump when he's on the ground.
-		// Double jumping is not allowed.
-		//
-		// To determine whether or not the dude is on the ground,
-		// we create a thin sensor under his feet, which reports
-		// collisions with the world but has no collision response.
-		// TODO potentially reuse for walking instead of jumping?
-		Vector2 sensorCenter = new Vector2(0, 0 /*-getHeight() / 2*/);
+		// We only allow Dale to walk when he's on the ground.
+		JsonValue sensorjv = data.get("sensor");
 		FixtureDef sensorDef = new FixtureDef();
 		sensorDef.density = data.getFloat("density", 0);
 		sensorDef.isSensor = true;
-		sensorShape = new PolygonShape();
-		JsonValue sensorjv = data.get("sensor");
-		sensorShape.setAsBox(sensorjv.getFloat("shrink", 0) * 1 /*getWidth() / 2.0f*/,
-				sensorjv.getFloat("height", 0), sensorCenter, 0.0f);
-		sensorDef.shape = sensorShape;
 
-		// Ground sensor to represent our feet
-		Fixture sensorFixture = body.createFixture(sensorDef);
-		sensorFixture.setUserData(getSensorName());
-		sensorFixture.setFilterData(getFilterData()); // Required for walking
+		// Sensor for facing right is on the bottom
+		Vector2 sensorCenterRight = new Vector2(0, 0 - bodyPart.getHeight() / 2);
+		sensorShapeRight = new PolygonShape();
+		sensorShapeRight.setAsBox(sensorjv.getFloat("shrink", 0) * bodyPart.getWidth() / 2.0f,
+				sensorjv.getFloat("height", 0), sensorCenterRight, 0.0f);
+		sensorDef.shape = sensorShapeRight;
+		Fixture sensorFixtureRight = bodyPart.getBody().createFixture(sensorDef);
+		sensorFixtureRight.setUserData(getSensorName());
+		sensorFixtureRight.setFilterData(getFilterData()); // Required for walking
+
+		// Sensor for facing left is on top
+		Vector2 sensorCenterLeft = new Vector2(0, bodyPart.getHeight() / 2);
+		sensorShapeLeft = new PolygonShape();
+		sensorShapeLeft.setAsBox(sensorjv.getFloat("shrink", 0) * bodyPart.getWidth() / 2.0f,
+				sensorjv.getFloat("height", 0), sensorCenterLeft, 0.0f);
+		sensorDef.shape = sensorShapeLeft;
+		Fixture sensorFixtureLeft = bodyPart.getBody().createFixture(sensorDef);
+		sensorFixtureLeft.setUserData(getSensorName());
+		sensorFixtureLeft.setFilterData(getFilterData()); // Required for walking
 
 		return true;
 	}
@@ -575,12 +568,6 @@ public class DaleModel extends WheelObstacle {
 				setLinearVelocity(vectorCache.set(getLinearVelocity()).limit(maxAirSpeed));
 			}
 		} else {
-			// Don't want to be moving. Damp out player motion
-			if (getMovement() == 0f) {
-				forceCache.set(-getDamping() * getVX(), 0);
-				body.applyForce(forceCache, getPosition(), true);
-			}
-
 			// Clamp walking speed
 			if (Math.abs(getVX()) >= getMaxSpeed()) {
 				setVX(Math.signum(getVX()) * getMaxSpeed());
@@ -669,7 +656,8 @@ public class DaleModel extends WheelObstacle {
 		bodyPart.drawDebug(canvas);
 		grappleStickyPart.drawDebug(canvas);
 		super.drawDebug(canvas);
-		canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+		canvas.drawPhysics(sensorShapeRight, Color.RED, bodyPart.getX(), bodyPart.getY(), bodyPart.getAngle(), drawScale.x, drawScale.y);
+		canvas.drawPhysics(sensorShapeLeft, Color.RED, bodyPart.getX(), bodyPart.getY(), bodyPart.getAngle(), drawScale.x, drawScale.y);
 	}
 
 	/**
