@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.physics.box2d.*;
 
+import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef;
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 import com.badlogic.gdx.utils.JsonValue;
 import edu.cornell.gdiac.discodale.*;
@@ -35,11 +36,11 @@ public class DaleModel extends WheelObstacle {
 	private final JsonValue data;
 
 	/** The factor to multiply by the input */
-	private final float force;
+	private final float walkForce;
 	/** The amount to slow the character down */
 	private final float damping;
 	/** The maximum character speed */
-	private final float maxspeed;
+	private final float maxSpeed;
 	/** The maximum character speed in the AIR */
 	private final float maxAirSpeed;
 	/** Identifier to allow us to track the sensor in ContactListener */
@@ -53,6 +54,14 @@ public class DaleModel extends WheelObstacle {
 	private boolean isGrounded;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
+
+	// region Dale's Body Properties
+
+	private Texture bodyTexture;
+	private final CapsuleObstacle bodyPart;
+	private float bodyOffset;
+
+	// endregion
 
 	// region Grapple Properties
 
@@ -86,7 +95,8 @@ public class DaleModel extends WheelObstacle {
 
 
 	private DaleColor color = DaleColor.RED;
-	private TextureRegion[] textures;
+	private TextureRegion[] headTextures;
+	private TextureRegion[] bodyTextures;
 
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -155,8 +165,8 @@ public class DaleModel extends WheelObstacle {
 	 *
 	 * @return how much force to apply to get the dude moving
 	 */
-	public float getForce() {
-		return force;
+	public float getWalkForce() {
+		return walkForce;
 	}
 
 	/**
@@ -176,7 +186,7 @@ public class DaleModel extends WheelObstacle {
 	 * @return the upper limit on dude left-right movement.
 	 */
 	public float getMaxSpeed() {
-		return maxspeed;
+		return maxSpeed;
 	}
 
 	/**
@@ -438,11 +448,10 @@ public class DaleModel extends WheelObstacle {
 	 * @param bodyWidth  The body width in physics units
 	 * @param bodyHeight The body width in physics units
 	 */
-	public DaleModel(float x, float y, JsonValue data, float headRadius, float bodyWidth, float bodyHeight, TextureRegion[] ts) {
+	public DaleModel(float x, float y, JsonValue data, float headRadius, float bodyWidth, float bodyHeight,
+					 float bodyOffset, TextureRegion[] headTextures, TextureRegion[] bodyTextures) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(x, y, headRadius);
-//				width * data.get("shrink").getFloat(0),
-//				height * data.get("shrink").getFloat(1));
 		setDensity(data.getFloat("density", 0));
 		setFriction(data.getFloat("friction", 0)); /// HE WILL STICK TO WALLS IF YOU FORGET
 		setFixedRotation(true);
@@ -453,10 +462,10 @@ public class DaleModel extends WheelObstacle {
 		daleFilter.maskBits     = 0b00000111;
 		setFilterData(daleFilter);
 
-		maxspeed = data.getFloat("maxspeed", 0);
+		maxSpeed = data.getFloat("max_speed", 0);
 		maxAirSpeed = data.getFloat("max_air_speed", 0);
 		damping = data.getFloat("damping", 0);
-		force = data.getFloat("force", 0);
+		walkForce = data.getFloat("walk_force", 0);
 		sensorName = Constants.DALE_GROUND_SENSOR_NAME;
 		this.data = data;
 
@@ -465,6 +474,16 @@ public class DaleModel extends WheelObstacle {
 		faceRight = true;
 		match = true;
 		winLose = PLAY_CODE;
+
+		// Dale's body
+		bodyPart = new CapsuleObstacle(getX(), getY(), bodyWidth * data.get("body_shrink").getFloat(0),
+				bodyHeight * data.get("body_shrink").getFloat(1));
+		bodyPart.setName("dalebody");
+		bodyPart.setDensity(data.getFloat("density", 0));
+		bodyPart.setFriction(data.getFloat("friction", 0));
+		bodyPart.setBodyType(BodyDef.BodyType.DynamicBody);
+		bodyPart.setFilterData(daleFilter);
+		this.bodyOffset = bodyOffset; // For use when making joints later
 
 		// Grapple things
 		stickyPartSpeed = data.getFloat("grapple_speed", 1);
@@ -484,7 +503,8 @@ public class DaleModel extends WheelObstacle {
 
 		setName(Constants.DALE_NAME_TAG);
 
-		textures = ts;
+		this.headTextures = headTextures;
+		this.bodyTextures = bodyTextures;
 	}
 
 	/**
@@ -502,9 +522,20 @@ public class DaleModel extends WheelObstacle {
 			return false;
 		}
 
+		if (!bodyPart.activatePhysics(world)) {
+			return false;
+		}
+
 		if (!grappleStickyPart.activatePhysics(world)) {
 			return false;
 		}
+
+		RevoluteJointDef revoluteJointDef = new RevoluteJointDef();
+		revoluteJointDef.bodyA = this.getBody();
+		revoluteJointDef.bodyB = bodyPart.getBody();
+		revoluteJointDef.localAnchorB.set(new Vector2(bodyOffset, 0));
+		revoluteJointDef.collideConnected = false;
+		world.createJoint(revoluteJointDef);
 
 		createGrappleJoint(world);
 
@@ -530,6 +561,7 @@ public class DaleModel extends WheelObstacle {
 		// Ground sensor to represent our feet
 		Fixture sensorFixture = body.createFixture(sensorDef);
 		sensorFixture.setUserData(getSensorName());
+		sensorFixture.setFilterData(getFilterData()); // Required for walking
 
 		return true;
 	}
@@ -603,12 +635,14 @@ public class DaleModel extends WheelObstacle {
 	 */
 	public void update(float dt) {
 		super.update(dt);
+		bodyPart.update(dt);
 		grappleStickyPart.update(dt);
 	}
 
 	@Override
 	public void setDrawScale(Vector2 value) {
 		super.setDrawScale(value);
+		bodyPart.setDrawScale(value);
 		grappleStickyPart.setDrawScale(value); // So important!
 	}
 
@@ -621,14 +655,16 @@ public class DaleModel extends WheelObstacle {
 		float effect = faceRight ? 1.0f : -1.0f;
 
 		// Reorder this to change if the tongue is on top of Dale or not
-		canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+		bodyPart.draw(canvas);
 		canvas.draw(tongueTexture, Color.WHITE, 0, tongueTexture.getHeight() / 2f, getX() * drawScale.x, getY() * drawScale.y,
 				getTongueAngle(), getTongueLength() / tongueTexture.getWidth() * drawScale.x, 1);
 		grappleStickyPart.draw(canvas);
+		canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
 	}
 
 	public void setDaleTexture() {
-		setTexture(textures[this.color.toColorTexture()]);
+		this.setTexture(headTextures[this.color.toColorTexture()]);
+		bodyPart.setTexture(bodyTextures[this.color.toColorTexture()]);
 	}
 
 	/**
@@ -639,10 +675,10 @@ public class DaleModel extends WheelObstacle {
 	 * @param canvas Drawing context
 	 */
 	public void drawDebug(GameCanvas canvas) {
-		super.drawDebug(canvas);
-
-		canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
+		bodyPart.drawDebug(canvas);
 		grappleStickyPart.drawDebug(canvas);
+		super.drawDebug(canvas);
+		canvas.drawPhysics(sensorShape,Color.RED,getX(),getY(),getAngle(),drawScale.x,drawScale.y);
 	}
 
 	/**

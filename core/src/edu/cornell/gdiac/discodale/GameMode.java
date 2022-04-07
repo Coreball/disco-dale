@@ -98,6 +98,11 @@ public class GameMode implements Screen {
 	private TextureRegion pinkTexture;
 	private TextureRegion flyTexture;
 
+	// TODO support colors with the split-body model
+	/** Dale body texture */
+	private TextureRegion pinkGrapple2Texture;
+	private TextureRegion pinkIdleBody1Texture;
+
 	/** The default sound volume */
 	private float volume;
 
@@ -388,11 +393,13 @@ public class GameMode implements Screen {
 	 * Lays out the game geography.
 	 */
 	private void populateLevel() {
-		float dradius = 1.0f;
-		float dwidth = blueTexture.getRegionWidth() / scale.x;
-		float dheight = blueTexture.getRegionHeight() / scale.y;
-		TextureRegion[] textures = {pinkTexture, blueTexture, greenTexture};
-		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"), dradius, dwidth, dheight, textures);
+		float dradius = pinkGrapple2Texture.getRegionWidth() / scale.x / 2f;
+		float dwidth = pinkIdleBody1Texture.getRegionWidth() / scale.x;
+		float dheight = pinkIdleBody1Texture.getRegionHeight() / scale.y;
+		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
+		TextureRegion[] headTextures = {pinkGrapple2Texture, pinkGrapple2Texture, pinkGrapple2Texture};
+		TextureRegion[] bodyTextures = {pinkIdleBody1Texture, blueTexture, greenTexture};
+		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"), dradius, dwidth, dheight, bodyOffset, headTextures, bodyTextures);
 		dale.setDrawScale(scale);
 		dale.setDaleTexture();
 
@@ -797,6 +804,9 @@ public class GameMode implements Screen {
 		blueTexture = new TextureRegion(directory.getEntry("platform:blue", Texture.class));
 		greenTexture = new TextureRegion(directory.getEntry("platform:green", Texture.class));
 		pinkTexture = new TextureRegion(directory.getEntry("platform:pink", Texture.class));
+
+		pinkGrapple2Texture = new TextureRegion(directory.getEntry("platform:demo:grapple2", Texture.class));
+		pinkIdleBody1Texture = new TextureRegion(directory.getEntry("platform:demo:idlebody1", Texture.class));
 
 		flyTexture = new TextureRegion(directory.getEntry("platform:fly", Texture.class));
 

@@ -44,6 +44,8 @@
         "platform:blue": "platform/idle1blue.png",
         "platform:green": "platform/idle1green.png",
         "platform:pink": "platform/idle1pink.png",
+        "platform:demo:grapple2": "platform/grapple2_scl.png",
+        "platform:demo:idlebody1": "platform/idlebody1_scl.png",
         "ragdoll:bubble": "ragdoll/bubble.png",
         "ragdoll:torso":  "ragdoll/tux_body.png",
         "ragdoll:head":   "ragdoll/ProfWhite.png",
