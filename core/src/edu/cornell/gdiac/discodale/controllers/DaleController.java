@@ -30,6 +30,7 @@ public class DaleController {
 	public void processGrappleAction(World world) {
 		switch (dale.getGrappleState()) {
 			case RETRACTED:
+				dale.lookPosition(InputController.getInstance().getCrossHair());
 				if (InputController.getInstance().didClickHeld()) {
 					dale.setGrappleState(GrappleState.EXTENDING);
 					vectorCache.set(InputController.getInstance().getCrossHair()).sub(dale.getPosition());
@@ -39,6 +40,7 @@ public class DaleController {
 				}
 				break;
 			case EXTENDING:
+				dale.lookPosition(dale.getStickyPart().getPosition());
 				if (!InputController.getInstance().didClickHeld() || dale.getTongueLength() > dale.getMaxTongueLength()) {
 					dale.setGrappleState(GrappleState.RETURNING);
 					dale.setStickyPartActive(false);
@@ -48,6 +50,7 @@ public class DaleController {
 				}
 				break;
 			case ATTACHED:
+				dale.lookPosition(dale.getStickyPart().getPosition());
 				if (!InputController.getInstance().didClickHeld()) {
 					dale.setGrappleState(GrappleState.RETURNING);
 					dale.setGrappleAttachedBody(null);
@@ -57,6 +60,7 @@ public class DaleController {
 				}
 				break;
 			case RETURNING:
+				dale.lookPosition(dale.getStickyPart().getPosition());
 				if (dale.getTongueLength() < 0.5) { // TODO don't use magic number here
 					dale.setGrappleState(GrappleState.RETRACTED);
 					dale.setStickyPartActive(true);

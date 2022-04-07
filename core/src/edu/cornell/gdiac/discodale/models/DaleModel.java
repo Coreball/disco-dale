@@ -48,20 +48,15 @@ public class DaleModel extends WheelObstacle {
 
 	/** The current horizontal movement of the character */
 	private float movement;
-	/** Which direction is the character facing */
-	private boolean faceRight;
 	/** Whether our feet are on the ground */
 	private boolean isGrounded;
 	/** The physics shape of this object */
 	private PolygonShape sensorShape;
 
-	// region Dale's Body Properties
-
-	private Texture bodyTexture;
+	/** Dale's body */
 	private final CapsuleObstacle bodyPart;
+	/** Offset between Dale and body (used to initialize joint) */
 	private float bodyOffset;
-
-	// endregion
 
 	// region Grapple Properties
 
@@ -132,12 +127,6 @@ public class DaleModel extends WheelObstacle {
 	 */
 	public void setMovement(float value) {
 		movement = value;
-		// Change facing if appropriate
-		if (movement < 0) {
-			faceRight = false;
-		} else if (movement > 0) {
-			faceRight = true;
-		}
 	}
 
 	/**
@@ -200,16 +189,16 @@ public class DaleModel extends WheelObstacle {
 		return sensorName;
 	}
 
-	/**
-	 * Returns true if this character is facing right
-	 *
-	 * @return true if this character is facing right
-	 */
-	public boolean isFacingRight() {
-		return faceRight;
-	}
-
 	// region Grapple Methods
+
+	/**
+	 * Look at a position in the world
+	 * @param position position to look at
+	 */
+	public void lookPosition(Vector2 position) {
+		vectorCache.set(position).sub(getPosition());
+		setAngle(vectorCache.angleRad());
+	}
 
 	/**
 	 * Returns the tongue texture
@@ -471,7 +460,6 @@ public class DaleModel extends WheelObstacle {
 
 		// Gameplay attributes
 		isGrounded = false;
-		faceRight = true;
 		match = true;
 		winLose = PLAY_CODE;
 
@@ -652,14 +640,17 @@ public class DaleModel extends WheelObstacle {
 	 * @param canvas Drawing context
 	 */
 	public void draw(GameCanvas canvas) {
-		float effect = faceRight ? 1.0f : -1.0f;
+		boolean headFacingRight = Math.cos(getAngle()) >= 0;
+		float headFlipY = headFacingRight ? 1.0f : -1.0f;
+		boolean bodyFacingRight = Math.cos(bodyPart.getAngle()) >= 0;
+		float bodyFlipY = bodyFacingRight ? 1.0f : -1.0f;
 
 		// Reorder this to change if the tongue is on top of Dale or not
-		bodyPart.draw(canvas);
+		bodyPart.draw(canvas, 1.0f, bodyFlipY);
 		canvas.draw(tongueTexture, Color.WHITE, 0, tongueTexture.getHeight() / 2f, getX() * drawScale.x, getY() * drawScale.y,
 				getTongueAngle(), getTongueLength() / tongueTexture.getWidth() * drawScale.x, 1);
 		grappleStickyPart.draw(canvas);
-		canvas.draw(texture, Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.y,getAngle(),effect,1.0f);
+		this.draw(canvas, 1.0f, headFlipY);
 	}
 
 	public void setDaleTexture() {
