@@ -110,11 +110,6 @@ public class ColorRegionModel {
 //		for (PolygonShape tri : shapes) {
 //			canvas.drawFilledTri(tri, color.toGdxColor(),0f,0f,getAngle(), drawScale.x,drawScale.y);
 //		}
-//		for(int i=-1;i<=1;i++){
-//			for(int j=-1;j<=1;j++){
-//				canvas.draw(polygonRegion, color.toGdxColor(), i*windowWidth, j*windowHeight);
-//			}
-//		}
 		canvas.draw(polygonRegion, color.toGdxColor(), 0, 0);
 
 	}
