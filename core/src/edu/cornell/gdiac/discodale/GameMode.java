@@ -58,6 +58,8 @@ public class GameMode implements Screen {
 
 	private static int CHANGE_COLOR_TIME = 300;
 
+	private static int FLY_SIZE = 32;
+
 	/** The texture for walls and platforms */
 	protected TextureRegion earthTile;
 	/** The texture for the exit condition */
@@ -96,7 +98,7 @@ public class GameMode implements Screen {
 	private TextureRegion blueTexture;
 	private TextureRegion greenTexture;
 	private TextureRegion pinkTexture;
-	private TextureRegion flyTexture;
+	private Texture flyTexture;
 
 	/** Background music */
 	private Sound theme;
@@ -414,8 +416,8 @@ public class GameMode implements Screen {
 
 		daleController = new DaleController(this.dale);
 
-		dwidth = flyTexture.getRegionWidth() / scale.x;
-		dheight = flyTexture.getRegionHeight() / scale.y;
+		dwidth = FLY_SIZE / scale.x;
+		dheight = FLY_SIZE / scale.y;
 		flies = new FlyModel[2];
 		flies[0] = new FlyModel(constants.get("fly"), 5f, 5f, dwidth, dheight, FlyModel.IdleType.STATIONARY);
 		flies[0].setDrawScale(scale);
@@ -815,7 +817,7 @@ public class GameMode implements Screen {
 		greenTexture = new TextureRegion(directory.getEntry("platform:green", Texture.class));
 		pinkTexture = new TextureRegion(directory.getEntry("platform:pink", Texture.class));
 
-		flyTexture = new TextureRegion(directory.getEntry("platform:fly", Texture.class));
+		flyTexture = directory.getEntry("platform:flyidle", Texture.class);
 
 		jumpSound = directory.getEntry("platform:jump", Sound.class);
 		theme = directory.getEntry("theme", Sound.class);
