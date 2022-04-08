@@ -98,7 +98,8 @@ public class GameMode implements Screen {
 	private TextureRegion blueTexture;
 	private TextureRegion greenTexture;
 	private TextureRegion pinkTexture;
-	private Texture flyTexture;
+	private Texture flyIdleTexture;
+	private Texture flyChaseTexture;
 
 	/** Background music */
 	private Sound theme;
@@ -425,11 +426,11 @@ public class GameMode implements Screen {
 		flies = new FlyModel[2];
 		flies[0] = new FlyModel(constants.get("fly"), 5f, 5f, dwidth, dheight, FlyModel.IdleType.STATIONARY);
 		flies[0].setDrawScale(scale);
-		flies[0].setTexture(flyTexture);
+		flies[0].initializeTexture(flyIdleTexture, flyChaseTexture);
 		addObject(flies[0]);
 		flies[1] = new FlyModel(constants.get("fly"), 5f, 15f, dwidth, dheight, FlyModel.IdleType.HORIZONTAL);
 		flies[1].setDrawScale(scale);
-		flies[1].setTexture(flyTexture);
+		flies[1].initializeTexture(flyIdleTexture, flyChaseTexture);
 		addObject(flies[1]);
 		flyControllers = new FlyController[2];
 		for (int i = 0; i < flies.length; i++) {
@@ -821,7 +822,8 @@ public class GameMode implements Screen {
 		greenTexture = new TextureRegion(directory.getEntry("platform:green", Texture.class));
 		pinkTexture = new TextureRegion(directory.getEntry("platform:pink", Texture.class));
 
-		flyTexture = directory.getEntry("platform:flyidle", Texture.class);
+		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
+		flyChaseTexture = directory.getEntry("platform:flychasing", Texture.class);
 
 		jumpSound = directory.getEntry("platform:jump", Sound.class);
 		theme = directory.getEntry("theme", Sound.class);

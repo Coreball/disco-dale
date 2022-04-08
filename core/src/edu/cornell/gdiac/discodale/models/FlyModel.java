@@ -58,6 +58,9 @@ public class FlyModel extends CapsuleObstacle {
 	/** Current animation frame for this fly */
 	private float animeFrame;
 
+	private Texture idleTexture;
+	private Texture chasingTexture;
+
 	public enum IdleType {
 		STATIONARY,
 		HORIZONTAL
@@ -107,11 +110,13 @@ public class FlyModel extends CapsuleObstacle {
 		return sensorName;
 	}
 
-	public void setTexture(Texture texture) {
-		animator = new FilmStrip(texture,1,NUM_ANIM_FRAMES,NUM_ANIM_FRAMES);
+	public void initializeTexture (Texture idle, Texture chasing){
+		idleTexture = idle;
+		chasingTexture = chasing;
+		animator = new FilmStrip(idle,1,NUM_ANIM_FRAMES,NUM_ANIM_FRAMES);
 		origin = new Vector2(animator.getRegionWidth()/2.0f, animator.getRegionHeight()/2.0f);
-		// radius = animator.getRegionHeight() / 2.0f;
 	}
+
 
 	/**
 	 * Creates a new dude avatar with the given physics data
@@ -197,6 +202,12 @@ public class FlyModel extends CapsuleObstacle {
 		animeFrame += ANIMATION_SPEED;
 		if (animeFrame >= NUM_ANIM_FRAMES) {
 			animeFrame -= NUM_ANIM_FRAMES;
+		}
+		if (angry){
+			System.out.println("angry!");
+			animator.setTexture(chasingTexture);
+		} else {
+			animator.setTexture(idleTexture);
 		}
 
 		body.setLinearVelocity(this.velocity);
