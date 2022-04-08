@@ -204,7 +204,6 @@ public class FlyModel extends CapsuleObstacle {
 			animeFrame -= NUM_ANIM_FRAMES;
 		}
 		if (angry){
-			System.out.println("angry!");
 			animator.setTexture(chasingTexture);
 		} else {
 			animator.setTexture(idleTexture);
