@@ -124,11 +124,11 @@ public class MenuMode implements Screen, InputProcessor {
     @Override
     public void hide() {
         active = false;
+        Gdx.input.setInputProcessor( null );
     }
 
     @Override
     public void dispose() {
-
     }
 
     @Override
