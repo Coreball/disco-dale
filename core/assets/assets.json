@@ -55,7 +55,10 @@
         "ragdoll:forearm":    "ragdoll/tux_forearm.png",
         "ragdoll:crosshair":  "ragdoll/crosshair.png",
         "ragdoll:foreground": "ragdoll/foreground.png",
-        "ragdoll:background": "ragdoll/background.png"
+        "ragdoll:background": "ragdoll/background.png",
+        "menu:play": "menu/play_button.png",
+        "menu:bg": "menu/background.png",
+        "menu:title": "menu/title.png"
     },
     "jsons"  : {
         "rocket:constants":  "rocket/constants.json",
