@@ -58,7 +58,9 @@
         "ragdoll:background": "ragdoll/background.png",
         "menu:play": "menu/play_button.png",
         "menu:bg": "menu/background.png",
-        "menu:title": "menu/title.png"
+        "menu:title": "menu/title.png",
+        "menu:level": "menu/level.png",
+        "menu:levelbutton": "menu/level_button.png"
     },
     "jsons"  : {
         "rocket:constants":  "rocket/constants.json",
@@ -84,6 +86,10 @@
         "shared:retro": {
             "file": "shared/RetroGame.ttf",
             "size": 64
+        },
+        "shared:retrosmall": {
+            "file": "shared/RetroGame.ttf",
+            "size": 48
         }
     }
 }

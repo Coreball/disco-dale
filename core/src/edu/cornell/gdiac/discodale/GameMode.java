@@ -512,6 +512,10 @@ public class GameMode implements Screen {
 			pause();
 			listener.exitScreen(this, Constants.EXIT_QUIT);
 			return false;
+		} else if (input.didMenu()){
+			pause();
+			listener.exitScreen(this, Constants.EXIT_MENU);
+			return false;
 		} else if (input.didAdvance()) {
 			pause();
 			listener.exitScreen(this, Constants.EXIT_NEXT);
