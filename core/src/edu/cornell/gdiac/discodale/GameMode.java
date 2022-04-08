@@ -113,11 +113,13 @@ public class GameMode implements Screen {
 	// Physics objects for the game
 	/** Physics constants for initialization */
 	private JsonValue constants;
+	private JsonValue testlevel;
 	/** Reference to the character avatar */
 	private DaleModel dale;
 	private FlyModel[] flies;
 	private SceneModel scene;
 
+	private LevelLoader levelLoader;
 
 	private DaleController daleController;
 	private CollisionController collisionController;
@@ -139,7 +141,7 @@ public class GameMode implements Screen {
 		setDebug(false);
 		setComplete(false);
 		setFailure(false);
-		this.scene = new SceneModel(bounds);
+//		this.scene = new SceneModel(bounds);
 	}
 
 	/**
@@ -386,6 +388,8 @@ public class GameMode implements Screen {
 		setFailure(false);
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
+		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
+		this.scene.setCanvas(canvas);
 		populateLevel();
 	}
 
@@ -396,7 +400,7 @@ public class GameMode implements Screen {
 		float dwidth = blueTexture.getRegionWidth() / scale.x;
 		float dheight = blueTexture.getRegionHeight() / scale.y;
 		TextureRegion[] textures = {pinkTexture, blueTexture, greenTexture};
-		dale = new DaleModel(constants.get("dale"), dwidth, dheight, textures);
+		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"), dwidth, dheight, textures);
 		dale.setDrawScale(scale);
 		dale.setDaleTexture();
 
@@ -436,10 +440,10 @@ public class GameMode implements Screen {
 
 		world.setContactListener(this.collisionController);
 
-		scene.setGoalTexture(goalTile);
-		scene.setWallTexture(earthTile);
-		scene.populateLevel(constants.get("walls"), constants.get("platforms"), constants.get("defaults"),
-				constants.get("goal"));
+//		scene.setGoalTexture(goalTile);
+//		scene.setWallTexture(earthTile);
+//		scene.populateLevel(constants.get("walls"), constants.get("platforms"), constants.get("defaults"),
+//				constants.get("goal"));
 		scene.activatePhysics(this.world);
 
 		JsonValue defaults = constants.get("defaults");
@@ -827,6 +831,10 @@ public class GameMode implements Screen {
 		earthTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:retro", BitmapFont.class);
+
+		this.testlevel = directory.getEntry("testlevel", JsonValue.class);
+		this.levelLoader = new LevelLoader(earthTile, earthTile, goalTile);
+		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
 	}
 
 }

@@ -12,19 +12,30 @@ import edu.cornell.gdiac.discodale.obstacle.BoxObstacle;
 import edu.cornell.gdiac.discodale.obstacle.Obstacle;
 import edu.cornell.gdiac.discodale.obstacle.PolygonObstacle;
 import edu.cornell.gdiac.util.PooledList;
-import java.util.LinkedList;
+
+import java.util.List;
 
 public class SceneModel {
+
+    public enum ColorMovement {
+        NO_MOVEMENT,
+        SCROLL_HORIZONTAL,
+        SCROLL_VERTICAL,
+        ROTATE;
+    }
+
     private static int GRID_WIDTH = 32;
     private static int GRID_HEIGHT = 18;
 
     /** Reference to the goalDoor (for collision detection) */
     public BoxObstacle goalDoor;
     /** Color regions */
-    private ColorRegionModel[] colorRegions;
+    private PooledList<ColorRegionModel> colorRegions;
+    private ColorMovement colorMovement;
 
     /** The texture for walls and platforms */
     protected TextureRegion wallTile;
+    protected TextureRegion platformTile;
     /** The texture for the exit condition */
     protected TextureRegion goalTile;
 
@@ -35,8 +46,8 @@ public class SceneModel {
     protected Rectangle bounds;
     protected Vector2 scale;
 
-    private int canvasWidth;
-    private int canvasHeight;
+    private Vector2 daleStart = new Vector2();
+    private PooledList<Vector2> flyLocations = new PooledList<>();
 
     /** */
     private Vector2 pointCache;
@@ -44,9 +55,11 @@ public class SceneModel {
     /** The grid: whether a tile has obstacle */
     private boolean[][] grid = new boolean[GRID_WIDTH][GRID_HEIGHT];
 
-    public SceneModel(Rectangle bounds) {
+    public SceneModel(Rectangle bounds, ColorMovement movement) {
         this.bounds = new Rectangle(bounds);
-        this.scale = new Vector2();
+        this.scale = new Vector2(1024 / bounds.getWidth(), 576 / bounds.getHeight());
+        this.colorMovement = movement;
+        this.colorRegions = new PooledList<>();
     }
 
     public void setWallTexture(TextureRegion texture) {
@@ -57,20 +70,44 @@ public class SceneModel {
         this.goalTile = texture;
     }
 
+    public void setPlatformTexture(TextureRegion texture) {
+        this.platformTile = texture;
+    }
+
+    public Vector2 getDaleStart() {
+        return daleStart;
+    }
+
+    public void setDaleStart(float x, float y) {
+        this.daleStart.set(x, y);
+    }
+
+    public PooledList<Vector2> getFlyLocations() {
+        return this.flyLocations;
+    }
+
+    public void addFly(float x, float y) {
+        this.flyLocations.add(new Vector2(x, y));
+    }
+
     public void setCanvas(GameCanvas canvas) {
-        this.canvasWidth = canvas.getWidth();
-        ;
-        this.canvasHeight = canvas.getHeight();
         this.scale.x = canvas.getWidth() / bounds.getWidth();
         this.scale.y = canvas.getHeight() / bounds.getHeight();
+        for (Obstacle object : this.objects) {
+            object.setDrawScale(this.scale);
+        }
     }
 
     public boolean[][] getGrid() {
         return grid;
     }
 
-    public ColorRegionModel[] getColorRegions() {
+    public List<ColorRegionModel> getColorRegions() {
         return colorRegions;
+    }
+
+    public void addColorRegion(ColorRegionModel crm) {
+        this.colorRegions.add(crm);
     }
 
     public void updateGrid() {
@@ -114,61 +151,104 @@ public class SceneModel {
      */
     public void populateLevel(JsonValue walljv, JsonValue platjv, JsonValue defaults, JsonValue goal) {
         // Add level goal
+//        float dwidth = goalTile.getRegionWidth() / (scale.x);
+//        float dheight = goalTile.getRegionHeight() / (scale.y);
+//        JsonValue goalpos = goal.get("pos");
+////        System.out.println(goalpos.getFloat(0));
+//        goalDoor = new BoxObstacle(goalpos.getFloat(0), goalpos.getFloat(1), dwidth, dheight);
+//        goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
+//        goalDoor.setDensity(goal.getFloat("density", 0));
+//        goalDoor.setFriction(goal.getFloat("friction", 0));
+//        goalDoor.setRestitution(goal.getFloat("restitution", 0));
+//        goalDoor.setSensor(true);
+//        goalDoor.setDrawScale(scale);
+//        goalDoor.setTexture(goalTile);
+//        goalDoor.setName("goal");
+//        addObject(goalDoor);
+
+        // Create color regions
+//        colorRegions = new ColorRegionModel[3];
+//        float[] vertices;
+//        vertices = new float[] { 0.0f, 0.0f, 0.0f, this.canvasHeight, this.canvasWidth / 2f, 0f };
+//        colorRegions[0] = new ColorRegionModel(DaleColor.RED, vertices);
+//        vertices = new float[] { this.canvasWidth / 2f, 0f, this.canvasWidth, this.canvasHeight, 0f,
+//                this.canvasHeight };
+//        colorRegions[1] = new ColorRegionModel(DaleColor.YELLOW, vertices);
+//        vertices = new float[] { this.canvasWidth, 0f, this.canvasWidth, this.canvasHeight, this.canvasWidth / 2f, 0f };
+//        colorRegions[2] = new ColorRegionModel(DaleColor.BLUE, vertices);
+
+//        String wname = "wall";
+//        for (int ii = 0; ii < walljv.size; ii++) {
+//            PolygonObstacle obj;
+//            obj = new PolygonObstacle(walljv.get(ii).asFloatArray(), 0, 0);
+//            obj.setBodyType(BodyDef.BodyType.StaticBody);
+//            obj.setDensity(defaults.getFloat("density", 0.0f));
+//            obj.setFriction(defaults.getFloat("friction", 0.0f));
+//            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
+//            obj.setDrawScale(scale);
+//            obj.setTexture(wallTile);
+//            obj.setName(wname + ii);
+//            addObject(obj);
+//        }
+//
+//        String pname = "platform";
+//        for (int ii = 0; ii < platjv.size; ii++) {
+//            PolygonObstacle obj;
+//            obj = new PolygonObstacle(platjv.get(ii).asFloatArray(), 0, 0);
+//            obj.setBodyType(BodyDef.BodyType.StaticBody);
+//            obj.setDensity(defaults.getFloat("density", 0.0f));
+//            obj.setFriction(defaults.getFloat("friction", 0.0f));
+//            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
+//            obj.setDrawScale(scale);
+//            obj.setTexture(wallTile);
+//            obj.setName(pname + ii);
+//            addObject(obj);
+//        }
+        System.out.println(objects.size());
+
+        updateGrid();
+    }
+
+    public void addPlatform(float[] vertices, String name, JsonValue defaults) {
+        PolygonObstacle obj;
+        obj = new PolygonObstacle(vertices, 0, 0);
+        obj.setBodyType(BodyDef.BodyType.StaticBody);
+        obj.setDensity(defaults.getFloat("density", 0.0f));
+        obj.setFriction(defaults.getFloat("friction", 0.0f));
+        obj.setRestitution(defaults.getFloat("restitution", 0.0f));
+        obj.setDrawScale(scale);
+        obj.setTexture(wallTile);
+        obj.setName(name);
+        addObject(obj);
+    }
+
+    public void addWall(float[] vertices, String name, JsonValue defaults) {
+        PolygonObstacle obj;
+        obj = new PolygonObstacle(vertices, 0, 0);
+        obj.setBodyType(BodyDef.BodyType.StaticBody);
+        obj.setDensity(defaults.getFloat("density", 0.0f));
+        obj.setFriction(defaults.getFloat("friction", 0.0f));
+        obj.setRestitution(defaults.getFloat("restitution", 0.0f));
+        obj.setDrawScale(scale);
+        obj.setTexture(wallTile);
+        obj.setName(name);
+        addObject(obj);
+    }
+
+    public void setGoal(float x, float y) {
         float dwidth = goalTile.getRegionWidth() / (scale.x);
         float dheight = goalTile.getRegionHeight() / (scale.y);
-        JsonValue goalpos = goal.get("pos");
-//        System.out.println(goalpos.getFloat(0));
-        goalDoor = new BoxObstacle(goalpos.getFloat(0), goalpos.getFloat(1), dwidth, dheight);
+        System.out.println(x + " " + y);
+        goalDoor = new BoxObstacle(x, y, dwidth, dheight);
         goalDoor.setBodyType(BodyDef.BodyType.StaticBody);
-        goalDoor.setDensity(goal.getFloat("density", 0));
-        goalDoor.setFriction(goal.getFloat("friction", 0));
-        goalDoor.setRestitution(goal.getFloat("restitution", 0));
+        goalDoor.setDensity(0);
+        goalDoor.setFriction(0);
+        goalDoor.setRestitution(0);
         goalDoor.setSensor(true);
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTile);
         goalDoor.setName("goal");
         addObject(goalDoor);
-
-        // Create color regions
-        colorRegions = new ColorRegionModel[3];
-        float[] vertices;
-        vertices = new float[] { 0.0f, 0.0f, 0.0f, this.canvasHeight, this.canvasWidth / 2f, 0f };
-        colorRegions[0] = new ColorRegionModel(DaleColor.RED, vertices);
-        vertices = new float[] { this.canvasWidth / 2f, 0f, this.canvasWidth, this.canvasHeight, 0f,
-                this.canvasHeight };
-        colorRegions[1] = new ColorRegionModel(DaleColor.YELLOW, vertices);
-        vertices = new float[] { this.canvasWidth, 0f, this.canvasWidth, this.canvasHeight, this.canvasWidth / 2f, 0f };
-        colorRegions[2] = new ColorRegionModel(DaleColor.BLUE, vertices);
-
-        String wname = "wall";
-        for (int ii = 0; ii < walljv.size; ii++) {
-            PolygonObstacle obj;
-            obj = new PolygonObstacle(walljv.get(ii).asFloatArray(), 0, 0);
-            obj.setBodyType(BodyDef.BodyType.StaticBody);
-            obj.setDensity(defaults.getFloat("density", 0.0f));
-            obj.setFriction(defaults.getFloat("friction", 0.0f));
-            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
-            obj.setDrawScale(scale);
-            obj.setTexture(wallTile);
-            obj.setName(wname + ii);
-            addObject(obj);
-        }
-
-        String pname = "platform";
-        for (int ii = 0; ii < platjv.size; ii++) {
-            PolygonObstacle obj;
-            obj = new PolygonObstacle(platjv.get(ii).asFloatArray(), 0, 0);
-            obj.setBodyType(BodyDef.BodyType.StaticBody);
-            obj.setDensity(defaults.getFloat("density", 0.0f));
-            obj.setFriction(defaults.getFloat("friction", 0.0f));
-            obj.setRestitution(defaults.getFloat("restitution", 0.0f));
-            obj.setDrawScale(scale);
-            obj.setTexture(wallTile);
-            obj.setName(pname + ii);
-            addObject(obj);
-        }
-
-        updateGrid();
     }
 
     /**
@@ -228,11 +308,11 @@ public class SceneModel {
     }
 
     public void updateColorRegions(){
-        DaleColor c1 = colorRegions[colorRegions.length-1].getColor();
-        for(int i=colorRegions.length-1;i>=1;i--){
-            colorRegions[i].setColor(colorRegions[i-1].getColor());
-        }
-        colorRegions[0].setColor(c1);
+//        DaleColor c1 = colorRegions[colorRegions.length-1].getColor();
+//        for(int i=colorRegions.length-1;i>=1;i--){
+//            colorRegions[i].setColor(colorRegions[i-1].getColor());
+//        }
+//        colorRegions[0].setColor(c1);
     }
 
 }
