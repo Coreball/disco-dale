@@ -579,7 +579,7 @@ public class GameMode implements Screen {
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
-		// themeId = playBGM(theme, themeId, volume);
+		themeId = playBGM(theme, themeId, volume);
 
 		if (dale.isJumping()) {
 			jumpId = playSound(jumpSound, jumpId, volume);
