@@ -145,22 +145,22 @@ public class LevelLoader {
     }
 
     private DaleColor mapColor(String colorType) {
-        DaleColor color = DaleColor.RED;
+        DaleColor color = DaleColor.PINK;
         switch (colorType) {
             case "color1":
-                color = DaleColor.RED;
+                color = DaleColor.PINK;
                 break;
             case "color2":
                 color = DaleColor.BLUE;
                 break;
             case "color3":
-                color = DaleColor.YELLOW;
+                color = DaleColor.GREEN;
                 break;
             case "color4":
-                color = DaleColor.YELLOW;
+                color = DaleColor.GREEN;
                 break;
             case "color5":
-                color = DaleColor.YELLOW;
+                color = DaleColor.GREEN;
                 break;
         }
         return color;

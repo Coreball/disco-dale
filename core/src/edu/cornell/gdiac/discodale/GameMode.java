@@ -101,6 +101,8 @@ public class GameMode implements Screen {
 	private Texture flyIdleTexture;
 	private Texture flyChaseTexture;
 
+	private Texture[] colors = new Texture[5];
+
 	/** Background music */
 	private Sound theme;
 	private long themeId = -1;
@@ -501,7 +503,11 @@ public class GameMode implements Screen {
 			System.out.println("Grapple force: " + dale.getGrappleForce());
 			System.out.println();
 		}
-		
+
+		if(input.didColor()){
+			ColorRegionModel.switchDisplay();
+		}
+
 		// Handle resets
 		if (input.didReset()) {
 			reset();
@@ -573,7 +579,7 @@ public class GameMode implements Screen {
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
-		themeId = playBGM(theme, themeId, volume);
+		// themeId = playBGM(theme, themeId, volume);
 
 		if (dale.isJumping()) {
 			jumpId = playSound(jumpSound, jumpId, volume);
@@ -837,6 +843,13 @@ public class GameMode implements Screen {
 		earthTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:retro", BitmapFont.class);
+
+		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
+		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);
+		colors[2] = directory.getEntry("platform:greencolor", Texture.class);
+		colors[3] = directory.getEntry("platform:purplecolor", Texture.class);
+		colors[4] = directory.getEntry("platform:orangecolor", Texture.class);
+		ColorRegionModel.setColorTexture(colors);
 
 		this.testlevel = directory.getEntry("testlevel", JsonValue.class);
 		this.levelLoader = new LevelLoader(earthTile, earthTile, goalTile);
