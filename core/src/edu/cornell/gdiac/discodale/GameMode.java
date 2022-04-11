@@ -382,7 +382,7 @@ public class GameMode implements Screen {
 		setFailure(false);
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
-		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
+		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
 		populateLevel();
 	}
@@ -817,8 +817,8 @@ public class GameMode implements Screen {
 		displayFont = directory.getEntry("shared:retro", BitmapFont.class);
 
 		this.testlevel = directory.getEntry("testlevel", JsonValue.class);
-		this.levelLoader = new LevelLoader(earthTile, earthTile, goalTile);
-		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
+		this.levelLoader = new LevelLoader(earthTile, earthTile, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT));
 	}
 
 }
