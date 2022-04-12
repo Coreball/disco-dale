@@ -32,6 +32,7 @@ public class SceneModel {
     /** Color regions */
     private PooledList<ColorRegionModel> colorRegions;
     private ColorMovement colorMovement;
+    private Vector2 centerOfRotation = null;
 
     /** The texture for walls and platforms */
     protected TextureRegion wallTile;
@@ -60,6 +61,14 @@ public class SceneModel {
         this.scale = new Vector2(1024 / bounds.getWidth(), 576 / bounds.getHeight());
         this.colorMovement = movement;
         this.colorRegions = new PooledList<>();
+    }
+
+    public Vector2 getCenterOfRotation() {
+        return centerOfRotation;
+    }
+
+    public void setCenterOfRotation(Vector2 centerOfRotation) {
+        this.centerOfRotation = centerOfRotation;
     }
 
     public void setWallTexture(TextureRegion texture) {

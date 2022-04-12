@@ -45,7 +45,7 @@ public class LevelLoader {
                 json.getInt("height") * this.tileHeight
         );
 
-        System.out.println(this.levelBounds.toString());
+//        System.out.println(this.levelBounds.toString());
 
         this.scale = new Vector2(
                 this.levelBounds.getWidth() / this.bounds.getWidth(),
@@ -91,12 +91,19 @@ public class LevelLoader {
         for (JsonValue o : colors.get("objects")) {
             float cx = o.getFloat("x");
             float cy = o.getFloat("y");
-            float[] vertices = toPrimitive(StreamSupport.stream(o.get("polygon").spliterator(), false)
-                    .flatMap(p -> Stream.of(p.getFloat("x") + cx, this.levelBounds.getHeight() - p.getFloat("y") - cy))
-                    .toArray(Float[]::new));
-            DaleColor color = mapColor(o.getString("type"));
-            ColorRegionModel crm = new ColorRegionModel(color, vertices);
-            model.addColorRegion(crm);
+            if (o.getString("name").equalsIgnoreCase("colorwheel")) {
+                model.setCenterOfRotation(new Vector2(
+                        cx + o.getFloat("width"),
+                        this.levelBounds.getHeight() - o.getFloat("height") - cy
+                ));
+            } else {
+                float[] vertices = toPrimitive(StreamSupport.stream(o.get("polygon").spliterator(), false)
+                        .flatMap(p -> Stream.of(p.getFloat("x") + cx, this.levelBounds.getHeight() - p.getFloat("y") - cy))
+                        .toArray(Float[]::new));
+                DaleColor color = mapColor(o.getString("type"));
+                ColorRegionModel crm = new ColorRegionModel(color, vertices);
+                model.addColorRegion(crm);
+            }
         }
     }
 
