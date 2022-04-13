@@ -370,6 +370,12 @@ public class GameCanvas {
 
     }
 
+	/**
+	 * Update the camera's origin based on the player's position.
+	 *
+	 * @param x the screen x-coordinate of the player
+	 * @param y the screen y-coordinate of the player
+	 */
 	public void updateCam(float x, float y) {
 		camera.position.x = x;
 		camera.position.y = y;
@@ -377,6 +383,14 @@ public class GameCanvas {
 		camera.update();
 	}
 
+	/**
+	 * Converts the screen coordinates to the world coordinates.
+	 *
+	 * @param x the screen x-coordinate of the mouse
+	 * @param y the screen y-coordinate of the mouse
+	 *
+	 * @return A vector representing the world coordinates
+	 */
 	public Vector3 cameraConvert(float x, float y) {
 		Vector3 vec = new Vector3(x, y, 1.0f);
 		return camera.unproject(vec);
