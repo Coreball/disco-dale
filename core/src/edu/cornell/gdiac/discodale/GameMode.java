@@ -601,8 +601,8 @@ public class GameMode implements Screen {
 		if(colorChangeCountdown>0){
 			colorChangeCountdown--;
 		}else {
-			scene.updateColorRegions();
 			colorChangeCountdown = CHANGE_COLOR_TIME;
+			scene.updateColorRegions();
 		}
 
 		 scene.updateGrid();

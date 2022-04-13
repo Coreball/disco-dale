@@ -83,8 +83,6 @@ public class SceneModel {
 
     public void setCenterOfRotation(Vector2 centerOfRotation) {
         this.centerOfRotation = centerOfRotation;
-        System.out.println(centerOfRotation.x);
-        System.out.println(centerOfRotation.y);
     }
 
     public void setWallTexture(TextureRegion texture) {
@@ -133,10 +131,12 @@ public class SceneModel {
 
     public void addColorRegion(ColorRegionModel crm) {
         if(colorMovement==ColorMovement.SCROLL_HORIZONTAL || colorMovement == ColorMovement.SCROLL_VERTICAL){
-            float[] vertices = crm.getVertices();
+            float[] vertices = crm.getVertices().clone();
+            DaleColor[] seq = crm.getSeq() == null ? null : crm.getSeq().clone();
+            DaleColor color = crm.getColor();
             for(int i=-1;i<=1;i++){
                 for(int j=-1;j<=1;j++){
-                    ColorRegionModel newCrm = new ColorRegionModel(crm.getColor(),vertices);
+                    ColorRegionModel newCrm = new ColorRegionModel(color,vertices,seq);
                     newCrm.move(i*window_width,j*window_height);
                     this.colorRegions.add(newCrm);
                 }
@@ -202,7 +202,6 @@ public class SceneModel {
                 }
                 break;
             case ROTATE:
-                //TODO: around which point? Now assume (512,288)
                 for(ColorRegionModel cr:colorRegions){
                     cr.rotateAround(centerOfRotation.x,centerOfRotation.y,colorMovementAmount);
                 }
@@ -379,6 +378,9 @@ public class SceneModel {
 //            colorRegions[i].setColor(colorRegions[i-1].getColor());
 //        }
 //        colorRegions[0].setColor(c1);
+        for (ColorRegionModel cr : colorRegions){
+            cr.switchColor();
+        }
     }
 
 }

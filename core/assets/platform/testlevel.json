@@ -87,6 +87,12 @@
                          "x":-416,
                          "y":576
                         }],
+                  "properties":[
+                    {
+                      "name":"colorseq",
+                      "type":"string",
+                      "value":"2, 1"
+                    }],
                  "rotation":0,
                  "type":"color2",
                  "visible":true,
@@ -115,6 +121,12 @@
                          "x":-416,
                          "y":576
                         }],
+                  "properties":[
+                    {
+                      "name":"colorseq",
+                      "type":"string",
+                      "value":"1, 3"
+                    }],
                  "rotation":0,
                  "type":"color1",
                  "visible":true,

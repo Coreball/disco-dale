@@ -11,9 +11,10 @@ import com.badlogic.gdx.math.Polygon;
 import edu.cornell.gdiac.discodale.GameCanvas;
 import edu.cornell.gdiac.discodale.models.DaleColor;
 
+import javax.swing.plaf.synth.SynthTextAreaUI;
 import javax.swing.text.Utilities;
 
-public class ColorRegionModel {
+public class ColorRegionModel implements Cloneable{
 	/** An earclipping triangular to make sure we work with convex shapes */
 	private static final EarClippingTriangulator TRIANGULATOR = new EarClippingTriangulator();
 
@@ -21,6 +22,7 @@ public class ColorRegionModel {
 	private DaleColor color;
 
 	private DaleColor[] seq;
+	private int seqIndex;
 	/** Shape of the color region */
 	public Polygon shape;
 	/** Polygon Region used for drawing */
@@ -35,9 +37,16 @@ public class ColorRegionModel {
 	/** Texture */
 	private Texture texture;
 
-	public ColorRegionModel(DaleColor color, float[] vertices) {
+	public Object clone() throws CloneNotSupportedException
+	{
+		return super.clone();
+	}
+
+	public ColorRegionModel(DaleColor color, float[] vertices, DaleColor[] seq) {
 		this.color = color;
 		this.shape = new Polygon(vertices);
+		this.seq = seq;
+		this.seqIndex = 0;
 		Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 		pixmap.setColor(Color.WHITE);
 		pixmap.fill();
@@ -52,9 +61,18 @@ public class ColorRegionModel {
 		return polygonRegion.getVertices();
 	}
 
-	public void setSeq(DaleColor[] seq) {
-		this.seq = seq;
+	public DaleColor[] getSeq(){
+		return seq;
 	}
+
+//	public void setSeq(DaleColor[] seq) {
+//		this.seq = seq;
+////		System.out.println("set");
+////		for(int i =0;i<seq.length;i++){
+////			System.out.println(seq[0].toColorTexture());
+////		}
+//
+//	}
 
 	public void move(float dx, float dy){
 		float[] vertices = getVertices().clone();
@@ -120,6 +138,13 @@ public class ColorRegionModel {
 
 	public void setColor(DaleColor c) {
 		color = c;
+	}
+
+	public void switchColor(){
+		if(seq != null){
+			this.seqIndex = (this.seqIndex+1)%seq.length;
+			setColor(seq[this.seqIndex]);
+		}
 	}
 
 	public static void setColorTexture(Texture[] c){

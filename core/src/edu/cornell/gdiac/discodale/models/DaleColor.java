@@ -4,17 +4,17 @@ import com.badlogic.gdx.graphics.Color;
 
 public enum DaleColor {
     PINK,
-    GREEN,
-    BLUE;
+    BLUE,
+    GREEN;
 
     public Color toGdxColor() {
         switch (this) {
             case PINK:
                 return Color.valueOf("FD3895");
-            case GREEN:
-                return Color.valueOf("02E847");
             case BLUE:
                 return Color.valueOf("04CDF8");
+            case GREEN:
+                return Color.valueOf("02E847");
             default:
                 return Color.WHITE;
         }
