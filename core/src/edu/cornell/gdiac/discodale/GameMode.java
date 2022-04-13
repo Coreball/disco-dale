@@ -703,14 +703,16 @@ public class GameMode implements Screen {
 		// Final message
 
 		if (complete) {
-			displayFont.setColor(Color.WHITE);
+			displayFont.setColor(Color.BLACK);
 			canvas.begin(); // DO NOT SCALE
-			canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
+			canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
+			//canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
 			canvas.end();
 		} else if (failed) {
-			displayFont.setColor(Color.BROWN);
+			displayFont.setColor(Color.BLACK);
 			canvas.begin(); // DO NOT SCALE
-			canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
+			canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
+			//canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
 			canvas.end();
 		}
 	}
