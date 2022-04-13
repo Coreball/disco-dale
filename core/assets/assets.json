@@ -58,7 +58,8 @@
     "jsons"  : {
         "rocket:constants":  "rocket/constants.json",
         "platform:constants": "platform/constants.json",
-        "ragdoll:constants":  "ragdoll/constants.json"
+        "ragdoll:constants":  "ragdoll/constants.json",
+        "testlevel": "platform/testlevel.json"
     },
     "sounds" : {
         "rocket:bump" : "rocket/bump.mp3",
