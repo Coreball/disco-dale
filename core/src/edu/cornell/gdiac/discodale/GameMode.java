@@ -678,7 +678,7 @@ public class GameMode implements Screen {
 		// Final message
 
 		if (complete) {
-			displayFont.setColor(Color.BLACK);
+			displayFont.setColor(Color.WHITE);
 			canvas.begin(); // DO NOT SCALE
 			canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
 			canvas.end();
@@ -836,7 +836,7 @@ public class GameMode implements Screen {
 		// Allocate the tiles
 		earthTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
-		displayFont = directory.getEntry("shared:retro", BitmapFont.class);
+		displayFont = directory.getEntry("shared:alien", BitmapFont.class);
 
 		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
 		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);
