@@ -43,9 +43,10 @@ public class DaleController {
 				break;
 			case EXTENDING:
 				dale.lookPosition(dale.getStickyPart().getPosition());
-				if (!InputController.getInstance().didClickHeld() || dale.getTongueLength() > dale.getMaxTongueLength()) {
+				if (!InputController.getInstance().didClickHeld() || dale.getTongueLength() > dale.getMaxTongueLength() || dale.isHitReflectiveFlag()) {
 					dale.setGrappleState(GrappleState.RETURNING);
 					dale.setStickyPartActive(false);
+					dale.setHitReflectiveFlag(false);
 				} else if (dale.getGrappleAttachedBody() != null) {
 					dale.setGrappleState(GrappleState.ATTACHED);
 					dale.createGrappleJoint(dale.getGrappleAttachedBody(), dale.getGrappleAttachedBodyLocalAnchor(), world);
