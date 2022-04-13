@@ -19,6 +19,8 @@ public class ColorRegionModel {
 
 	/** Color of this color region */
 	private DaleColor color;
+
+	private DaleColor[] seq;
 	/** Shape of the color region */
 	public Polygon shape;
 	/** Polygon Region used for drawing */
@@ -48,6 +50,10 @@ public class ColorRegionModel {
 
 	public float[] getVertices(){
 		return polygonRegion.getVertices();
+	}
+
+	public void setSeq(DaleColor[] seq) {
+		this.seq = seq;
 	}
 
 	public void move(float dx, float dy){
