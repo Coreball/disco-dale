@@ -374,9 +374,9 @@ public class InputController {
 		// Mouse results
         clickPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 		clickHeld = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
-		Vector3 vec = canvas.cameraConvert(Gdx.input.getX(), Gdx.input.getY());
-		//crosshair.set(Gdx.input.getX(), Gdx.input.getY());
-		crosshair.set(vec.x, vec.y);
+		//Vector3 vec = canvas.cameraConvert(Gdx.input.getX(), Gdx.input.getY());
+		crosshair.set(Gdx.input.getX(), Gdx.input.getY());
+		//crosshair.set(vec.x, vec.y);
 		crosshair.scl(1/scale.x,-1/scale.y);
 		crosshair.y += bounds.height;
 		clampPosition(bounds);

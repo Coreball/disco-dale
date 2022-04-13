@@ -49,6 +49,9 @@ public class DaleModel extends CapsuleObstacle {
 	/** Cooldown (in animation frames) for jumping */
 	private final int jumpLimit;
 
+
+	/** The factor to multiply by the input */
+	private final float walkForce;
 	/** The current horizontal movement of the character */
 	private float movement;
 	/** Which direction is the character facing */
@@ -188,6 +191,17 @@ public class DaleModel extends CapsuleObstacle {
 	}
 
 	/**
+	 * Returns how much force to apply to get the dude moving
+	 *
+	 * Multiply this by the input to get the movement value.
+	 *
+	 * @return how much force to apply to get the dude moving
+	 */
+	public float getWalkForce() {
+		return walkForce;
+	}
+
+	/**
 	 * Returns ow hard the brakes are applied to get a dude to stop moving
 	 *
 	 * @return ow hard the brakes are applied to get a dude to stop moving
@@ -217,6 +231,15 @@ public class DaleModel extends CapsuleObstacle {
 	public String getSensorName() {
 		return sensorName;
 	}
+	/**
+	 * Look at a position in the world
+	 * @param position position to look at
+	 */
+	public void lookPosition(Vector2 position) {
+		vectorCache.set(position).sub(getPosition());
+		setAngle(vectorCache.angleRad());
+	}
+
 
 	/**
 	 * Returns true if this character is facing right
@@ -493,6 +516,7 @@ public class DaleModel extends CapsuleObstacle {
 
 		maxspeed = data.getFloat("maxspeed", 0);
 		maxAirSpeed = data.getFloat("max_air_speed", 0);
+		walkForce = data.getFloat("walk_force", 0);
 		damping = data.getFloat("damping", 0);
 		force = data.getFloat("force", 0);
 		jump_force = data.getFloat("jump_force", 0);
