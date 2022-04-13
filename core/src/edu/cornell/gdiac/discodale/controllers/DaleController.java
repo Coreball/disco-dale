@@ -18,11 +18,9 @@ public class DaleController {
 	}
 
 	public void processMovement() {
-		dale.setMovement(InputController.getInstance().getHorizontal() * dale.getForce());
-	}
-
-	public void processJumping() {
-		dale.setJumping(InputController.getInstance().didJump());
+		if (dale.getGrappleState() != GrappleState.ATTACHED) {
+			dale.setMovement(InputController.getInstance().getHorizontal() * dale.getWalkForce());
+		}
 	}
 
 	public void processColorRotation() {
@@ -34,6 +32,7 @@ public class DaleController {
 	public void processGrappleAction(World world) {
 		switch (dale.getGrappleState()) {
 			case RETRACTED:
+				dale.lookPosition(InputController.getInstance().getCrossHair());
 				if (InputController.getInstance().didClickHeld()) {
 					dale.setGrappleState(GrappleState.EXTENDING);
 					vectorCache.set(InputController.getInstance().getCrossHair()).sub(dale.getPosition());
@@ -46,15 +45,18 @@ public class DaleController {
 				}
 				break;
 			case EXTENDING:
-				if (!InputController.getInstance().didClickHeld() || dale.getTongueLength() > dale.getMaxTongueLength()) {
+				dale.lookPosition(dale.getStickyPart().getPosition());
+				if (!InputController.getInstance().didClickHeld() || dale.getTongueLength() > dale.getMaxTongueLength() || dale.isHitReflectiveFlag()) {
 					dale.setGrappleState(GrappleState.RETURNING);
 					dale.setStickyPartActive(false);
+					dale.setHitReflectiveFlag(false);
 				} else if (dale.getGrappleAttachedBody() != null) {
 					dale.setGrappleState(GrappleState.ATTACHED);
 					dale.createGrappleJoint(dale.getGrappleAttachedBody(), dale.getGrappleAttachedBodyLocalAnchor(), world);
 				}
 				break;
 			case ATTACHED:
+				dale.lookPosition(dale.getStickyPart().getPosition());
 				if (!InputController.getInstance().didClickHeld()) {
 					dale.setGrappleState(GrappleState.RETURNING);
 					dale.setGrappleAttachedBody(null);
@@ -64,6 +66,7 @@ public class DaleController {
 				}
 				break;
 			case RETURNING:
+				dale.lookPosition(dale.getStickyPart().getPosition());
 				if (dale.getTongueLength() < 0.5) { // TODO don't use magic number here
 					dale.setGrappleState(GrappleState.RETRACTED);
 					dale.setStickyPartActive(true);
