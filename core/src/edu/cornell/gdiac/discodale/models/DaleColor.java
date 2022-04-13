@@ -25,17 +25,4 @@ public enum DaleColor {
                 return Color.WHITE;
         }
     }
-
-    public int toColorTexture() {
-        switch (this) {
-            case PINK:
-                return 0;
-            case BLUE:
-                return 1;
-            case GREEN:
-                return 2;
-            default:
-                return -1;
-        }
-    }
 }
