@@ -94,10 +94,12 @@ public class GameMode implements Screen {
 	/** Countdown active for winning or losing */
 	protected int countdown;
 
-	/** All body idle textures for Dale, in order of colors */
-	private TextureRegion[] bodyIdleTextures;
 	/** All head idle textures for Dale, in order of colors */
 	private TextureRegion[] headIdleTextures;
+	/** All body idle textures for Dale, in order of colors */
+	private TextureRegion[] bodyIdleTextures;
+	/** All body walk textures for Dale, in order of colors */
+	private FilmStrip[] bodyWalkTextures;
 
 	private Texture flyIdleTexture;
 	private Texture flyChaseTexture;
@@ -409,13 +411,14 @@ public class GameMode implements Screen {
 		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
 
 		DaleColor[] availableColors = {DaleColor.PINK, DaleColor.BLUE, DaleColor.GREEN};
-		TextureRegion[] headTextures = {headIdleTextures[0], headIdleTextures[1], headIdleTextures[2]};
-		TextureRegion[] bodyTextures = {bodyIdleTextures[0], bodyIdleTextures[1], bodyIdleTextures[2]};
+		TextureRegion[] availableHeadIdleTextures = {headIdleTextures[0], headIdleTextures[1], headIdleTextures[2]};
+		TextureRegion[] availableBodyIdleTextures = {bodyIdleTextures[0], bodyIdleTextures[1], bodyIdleTextures[2]};
+		FilmStrip[] availableBodyWalkTextures = {bodyWalkTextures[0], bodyWalkTextures[1], bodyWalkTextures[2]};
 
 		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
-				dradius, dwidth, dheight, bodyOffset, availableColors, headTextures, bodyTextures);
+				dradius, dwidth, dheight, bodyOffset, availableColors, availableHeadIdleTextures,
+				availableBodyIdleTextures, availableBodyWalkTextures);
 		dale.setDrawScale(scale);
-		dale.setDaleTexture();
 
 		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
 		tonguePixmap.setColor(Color.PINK);
@@ -833,6 +836,12 @@ public class GameMode implements Screen {
 				new TextureRegion(directory.getEntry("platform:head:idle:pink", Texture.class)),
 				new TextureRegion(directory.getEntry("platform:head:idle:blue", Texture.class)),
 				new TextureRegion(directory.getEntry("platform:head:idle:green", Texture.class))
+		};
+
+		bodyWalkTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:body:walk:pink", Texture.class), 1, 10),
+				new FilmStrip(directory.getEntry("platform:body:walk:blue", Texture.class), 1, 10),
+				new FilmStrip(directory.getEntry("platform:body:walk:green", Texture.class), 1, 10),
 		};
 
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);

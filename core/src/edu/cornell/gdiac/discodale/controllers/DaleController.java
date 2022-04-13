@@ -18,7 +18,9 @@ public class DaleController {
 	}
 
 	public void processMovement() {
-		dale.setMovement(InputController.getInstance().getHorizontal() * dale.getWalkForce());
+		if (dale.getGrappleState() != GrappleState.ATTACHED) {
+			dale.setMovement(InputController.getInstance().getHorizontal() * dale.getWalkForce());
+		}
 	}
 
 	public void processColorRotation() {

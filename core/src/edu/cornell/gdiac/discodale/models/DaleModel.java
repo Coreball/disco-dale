@@ -20,6 +20,7 @@ import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 import com.badlogic.gdx.utils.JsonValue;
 import edu.cornell.gdiac.discodale.*;
 import edu.cornell.gdiac.discodale.obstacle.*;
+import edu.cornell.gdiac.util.FilmStrip;
 
 /**
  * Player avatar for the plaform game.
@@ -90,8 +91,13 @@ public class DaleModel extends WheelObstacle {
 
 	private int colorIndex;
 	private DaleColor[] availableColors;
-	private TextureRegion[] headTextures;
-	private TextureRegion[] bodyTextures;
+	private TextureRegion[] headIdleTextures;
+	private TextureRegion[] bodyIdleTextures;
+	private FilmStrip[] bodyWalkTextures;
+
+	/** Seconds per frame */
+	private static final float ANIMATION_SPEED = 0.10f;
+	private float bodyWalkAnimationClock;
 
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -104,7 +110,6 @@ public class DaleModel extends WheelObstacle {
 
 	public void rotateColor() {
 		colorIndex = (colorIndex + 1) % availableColors.length;
-		setDaleTexture();
 	}
 
 	/**
@@ -433,11 +438,13 @@ public class DaleModel extends WheelObstacle {
 	 * @param bodyHeight        The body width in physics units
 	 * @param bodyOffset        Distance between Dale head and body centers
 	 * @param availableColors   Available colors for Dale, should be same length as headTextures and bodyTextures
-	 * @param headTextures      Head textures in order of colors
-	 * @param bodyTextures      Body textures in order of colors
+	 * @param headIdleTextures  Head idle textures in order of colors
+	 * @param bodyIdleTextures  Body idle textures in order of colors
+	 * @param bodyWalkTextures  Body walk textures in order of colors
 	 */
 	public DaleModel(float x, float y, JsonValue data, float headRadius, float bodyWidth, float bodyHeight,
-		             float bodyOffset, DaleColor[] availableColors, TextureRegion[] headTextures, TextureRegion[] bodyTextures) {
+					 float bodyOffset, DaleColor[] availableColors, TextureRegion[] headIdleTextures,
+					 TextureRegion[] bodyIdleTextures, FilmStrip[] bodyWalkTextures) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(x, y, headRadius);
 		setDensity(data.getFloat("density", 0));
@@ -491,8 +498,9 @@ public class DaleModel extends WheelObstacle {
 
 		colorIndex = 0;
 		this.availableColors = availableColors;
-		this.headTextures = headTextures;
-		this.bodyTextures = bodyTextures;
+		this.headIdleTextures = headIdleTextures;
+		this.bodyIdleTextures = bodyIdleTextures;
+		this.bodyWalkTextures = bodyWalkTextures;
 	}
 
 	/**
@@ -622,6 +630,8 @@ public class DaleModel extends WheelObstacle {
 		super.update(dt);
 		bodyPart.update(dt);
 		grappleStickyPart.update(dt);
+
+		bodyWalkAnimationClock = (bodyWalkAnimationClock + dt) % (ANIMATION_SPEED * bodyWalkTextures[0].getSize());
 	}
 
 	@Override
@@ -642,6 +652,8 @@ public class DaleModel extends WheelObstacle {
 		boolean bodyFacingRight = Math.cos(bodyPart.getAngle()) >= 0;
 		float bodyFlipY = bodyFacingRight ? 1.0f : -1.0f;
 
+		setDaleTexture();
+
 		// Reorder this to change if the tongue is on top of Dale or not
 		bodyPart.draw(canvas, 1.0f, bodyFlipY);
 		canvas.draw(tongueTexture, Color.WHITE, 0, tongueTexture.getHeight() / 2f, getX() * drawScale.x, getY() * drawScale.y,
@@ -651,8 +663,13 @@ public class DaleModel extends WheelObstacle {
 	}
 
 	public void setDaleTexture() {
-		this.setTexture(headTextures[colorIndex]);
-		bodyPart.setTexture(bodyTextures[colorIndex]);
+		this.setTexture(headIdleTextures[colorIndex]);
+		if (isGrounded && Math.abs(getVX()) > 2) {
+			bodyWalkTextures[colorIndex].setFrame((int) (bodyWalkAnimationClock / ANIMATION_SPEED));
+			bodyPart.setTexture(bodyWalkTextures[colorIndex]);
+		} else {
+			bodyPart.setTexture(bodyIdleTextures[colorIndex]);
+		}
 	}
 
 	/**
