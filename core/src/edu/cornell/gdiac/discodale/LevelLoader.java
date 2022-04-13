@@ -96,8 +96,8 @@ public class LevelLoader {
             float cy = o.getFloat("y");
             if (o.getString("name").equalsIgnoreCase("colorwheel")) {
                 model.setCenterOfRotation(new Vector2(
-                        cx + o.getFloat("width"),
-                        this.levelBounds.getHeight() - o.getFloat("height") - cy
+                        cx + o.getFloat("width")/2,
+                        this.levelBounds.getHeight() - o.getFloat("height")/2 - cy
                 ));
             } else {
                 float[] vertices = toPrimitive(StreamSupport.stream(o.get("polygon").spliterator(), false)

@@ -91,7 +91,7 @@ public class ColorRegionModel {
 	 *
 	 * @return 0 means not or only partially out of bounds, 1 means to the left or bottom, -1 means to the right or top
 	 */
-	public int testBound(int bound, int r){
+	public int testBound(float bound, int r){
 		boolean toLeftOrBottom = true;
 		boolean toRightOrTop = true;
 		float[] vertices = getVertices().clone();
