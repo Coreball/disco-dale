@@ -53,13 +53,17 @@ public class CollisionController implements ContactListener {
             // See if tongue sticky part has hit something
             if (dale.getGrappleState() == DaleModel.GrappleState.EXTENDING &&
                     ((bd1 == dale.getStickyPart() && bd2 != dale) || (bd2 == dale.getStickyPart() && bd1 != dale))) {
-                // Can't create the weld joint directly here because it violates locking assertions or something
-                // So set the attached body and local anchor location to create it when DaleController processes
-                Body bodyA = dale.getStickyPart() == bd1 ? body2 : body1;
-                Body stickyPartBody = dale.getStickyPart() == bd1 ? body1 : body2;
-                vectorCache.set(stickyPartBody.getPosition()).sub(bodyA.getPosition());
-                dale.setGrappleAttachedBody(bodyA);
-                dale.setGrappleAttachedBodyLocalAnchor(vectorCache);
+                if (bd1.getName().startsWith("reflective") || bd2.getName().startsWith("reflective")) {
+                    dale.setHitReflectiveFlag(true);
+                } else {
+                    // Can't create the weld joint directly here because it violates locking assertions or something
+                    // So set the attached body and local anchor location to create it when DaleController processes
+                    Body bodyA = dale.getStickyPart() == bd1 ? body2 : body1;
+                    Body stickyPartBody = dale.getStickyPart() == bd1 ? body1 : body2;
+                    vectorCache.set(stickyPartBody.getPosition()).sub(bodyA.getPosition());
+                    dale.setGrappleAttachedBody(bodyA);
+                    dale.setGrappleAttachedBodyLocalAnchor(vectorCache);
+                }
             }
 
             // See if we have landed on the ground.

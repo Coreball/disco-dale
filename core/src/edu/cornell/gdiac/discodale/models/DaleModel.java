@@ -85,6 +85,8 @@ public class DaleModel extends CapsuleObstacle {
 	private final Vector2 grappleAttachedBodyLocalAnchor = new Vector2();
 	/** Joint for welding sticky part to Dale or a wall */
 	private Joint grappleJoint;
+	/** Hit reflective surface flag */
+	private boolean hitReflectiveFlag;
 
 	// endregion
 
@@ -420,6 +422,22 @@ public class DaleModel extends CapsuleObstacle {
 	 */
 	public void setStickyPartActive(boolean active) {
 		grappleStickyPart.setActive(active);
+	}
+
+	/**
+	 * Get if did hit reflective surface flag is set
+	 * @return true if hit reflective
+	 */
+	public boolean isHitReflectiveFlag() {
+		return hitReflectiveFlag;
+	}
+
+	/**
+	 * Set hit reflective surface flag
+	 * @param value true if hit reflective
+	 */
+	public void setHitReflectiveFlag(boolean value) {
+		hitReflectiveFlag = value;
 	}
 
 	// endregion

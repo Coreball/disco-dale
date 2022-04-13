@@ -1,82 +1,59 @@
 {
-	"textures": {
-        "shared:earth" : {
+    "textures": {
+        "shared:brick" : {
             "file":  "platform/wall.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
+        "shared:reflective" : {
+            "file":  "platform/reflective.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
         "shared:goal":   "platform/disco.png",
-        "rocket:rocket": "rocket/rocket.png",
-        "rocket:main":  {
-            "file" : "rocket/flames.png",
-            "sprites" : {
-                "fire": {
-                    "rows": 1,
-                    "cols": 4
-                }
-            }
-        },
-        "rocket:left": {
-            "file" : "rocket/flames-left.png",
-            "sprites" : {
-                "fire": {
-                    "rows": 1,
-                    "cols": 4
-                }
-            }
-        },
-        "rocket:right": {
-            "file" : "rocket/flames-right.png",
-            "sprites" : {
-                "fire": {
-                    "rows": 1,
-                    "cols": 4
-                }
-            }
-        },
-        "rocket:crate01": "rocket/crate01.png",
-        "rocket:crate02": "rocket/crate02.png",
-        "platform:dude":  "platform/idle1blue.png",
         "platform:fly": "platform/fly.png",
-        "platform:rope":  "platform/ropebridge.png",
-        "platform:barrier": "platform/barrier.png",
-        "platform:bullet":  "platform/bullet.png",
-        "platform:blue": "platform/idle1blue.png",
-        "platform:green": "platform/idle1green.png",
-        "platform:pink": "platform/idle1pink.png",
-        "ragdoll:bubble": "ragdoll/bubble.png",
-        "ragdoll:torso":  "ragdoll/tux_body.png",
-        "ragdoll:head":   "ragdoll/ProfWhite.png",
-        "ragdoll:thigh":  "ragdoll/tux_thigh.png",
-        "ragdoll:shin":   "ragdoll/tux_shin.png",
-        "ragdoll:arm":    "ragdoll/tux_arm.png",
-        "ragdoll:forearm":    "ragdoll/tux_forearm.png",
-        "ragdoll:crosshair":  "ragdoll/crosshair.png",
-        "ragdoll:foreground": "ragdoll/foreground.png",
-        "ragdoll:background": "ragdoll/background.png"
+        "platform:head:idle:pink": "platform/idleheadpink.png",
+        "platform:head:idle:blue": "platform/idleheadblue.png",
+        "platform:head:idle:green": "platform/idleheadgreen.png",
+        "platform:body:idle:pink": "platform/idlebodypink.png",
+        "platform:body:idle:blue": "platform/idlebodyblue.png",
+        "platform:body:idle:green": "platform/idlebodygreen.png",
+        "platform:body:walk:pink": "platform/walkspritepink.png",
+        "platform:body:walk:blue": "platform/walkspriteblue.png",
+        "platform:body:walk:green": "platform/walkspritegreen.png",
+        "platform:flyidle": "platform/fly_idle_blue.png",
+        "platform:flychasing": "platform/fly_chasing.png",
+        "platform:pinkcolor": "platform/color_pink.png",
+        "platform:bluecolor": "platform/color_blue.png",
+        "platform:greencolor": "platform/color_green.png",
+        "platform:purplecolor": "platform/color_purple.png",
+        "platform:orangecolor": "platform/color_orange.png",
+        "menu:play": "menu/play_button.png",
+        "menu:bg": "menu/background.png",
+        "menu:title": "menu/title.png",
+        "menu:level": "menu/level.png",
+        "menu:levelbutton": "menu/level_button.png"
     },
     "jsons"  : {
-        "rocket:constants":  "rocket/constants.json",
         "platform:constants": "platform/constants.json",
-        "ragdoll:constants":  "ragdoll/constants.json"
+        "testlevel": "platform/testlevel.json",
+        "level1": "levels/1.json",
+        "level2": "levels/2.json"
     },
     "sounds" : {
-        "rocket:bump" : "rocket/bump.mp3",
-        "rocket:mainburn" : "rocket/afterburner.mp3",
-        "rocket:leftburn" : "rocket/sideburner-left.mp3",
-        "rocket:rightburn": "rocket/sideburner-right.mp3",
+        "theme" : "shared/theme.mp3",
         "platform:jump" : "platform/jump.mp3",
         "platform:pew"  : "platform/pew.mp3",
-        "platform:plop" : "platform/plop.mp3",
-        "ragdoll:glub1" : "ragdoll/bubble01.mp3",
-        "ragdoll:glub2" : "ragdoll/bubble02.mp3",
-        "ragdoll:glub3" : "ragdoll/bubble03.mp3",
-        "ragdoll:glub4" : "ragdoll/bubble04.mp3"
+        "platform:plop" : "platform/plop.mp3"
     },
     "fonts": {
         "shared:retro": {
             "file": "shared/RetroGame.ttf",
             "size": 64
+        },
+        "shared:alien": {
+            "file": "shared/AlienRemixItalic-EaoL4.ttf",
+            "size": 48
         }
     }
 }
