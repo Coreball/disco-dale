@@ -34,7 +34,7 @@ public class FlyModel extends CapsuleObstacle {
 	private static final int   NUM_ANIM_FRAMES = 8;
 
 	/** The scale to shrink the asset texture */
-	private static final float TEXTURE_SCALE = 25f;
+	private static final float TEXTURE_SCALE = 1f;
 
 	/** The initializing data (to avoid magic numbers) */
 	private final JsonValue data;
