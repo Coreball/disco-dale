@@ -19,16 +19,39 @@ public class LevelLoader {
     /** The texture for the exit condition */
     protected TextureRegion goalTile;
 
-    private Rectangle bounds = new Rectangle(0, 0, Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT);
-    private Vector2 scale = new Vector2(1024 / this.bounds.getWidth(), 576 / this.bounds.getHeight());
+    private int tileWidth;
+    private int tileHeight;
 
-    public LevelLoader(TextureRegion wallTile, TextureRegion platformTile, TextureRegion goalTile) {
+    private Rectangle canvasBounds; // = new Rectangle(0, 0, Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT);
+    private Rectangle levelBounds;
+    private Rectangle bounds;
+    private Vector2 scale;
+//    private Vector2 scale = new Vector2(1024 / Constants.DEFAULT_WIDTH, 576 / Constants.DEFAULT_HEIGHT);
+
+    public LevelLoader(TextureRegion wallTile, TextureRegion platformTile, TextureRegion goalTile, float width, float height) {
         this.wallTile = wallTile;
         this.platformTile = platformTile;
         this.goalTile = goalTile;
+        this.bounds = new Rectangle(0, 0, width, height);
     }
 
-    public SceneModel load(JsonValue json, JsonValue defaults) {
+    public SceneModel load(JsonValue json, JsonValue defaults, Rectangle canvasBounds) {
+        this.tileWidth = json.getInt("tilewidth");
+        this.tileHeight = json.getInt("tileheight");
+        this.canvasBounds = new Rectangle(canvasBounds);
+        this.levelBounds = new Rectangle(
+                0, 0,
+                json.getInt("width") * this.tileWidth,
+                json.getInt("height") * this.tileHeight
+        );
+
+//        System.out.println(this.levelBounds.toString());
+
+        this.scale = new Vector2(
+                this.levelBounds.getWidth() / this.bounds.getWidth(),
+                this.levelBounds.getHeight() / this.bounds.getHeight()
+        );
+
         SceneModel.ColorMovement m = SceneModel.ColorMovement.NO_MOVEMENT;
         for (JsonValue prop : json.get("properties")) {
             if (prop.getString("name").equals("colorMode")) {
@@ -68,12 +91,19 @@ public class LevelLoader {
         for (JsonValue o : colors.get("objects")) {
             float cx = o.getFloat("x");
             float cy = o.getFloat("y");
-            float[] vertices = toPrimitive(StreamSupport.stream(o.get("polygon").spliterator(), false)
-                    .flatMap(p -> Stream.of(p.getFloat("x") + cx, 576 - p.getFloat("y") - cy))
-                    .toArray(Float[]::new));
-            DaleColor color = mapColor(o.getString("type"));
-            ColorRegionModel crm = new ColorRegionModel(color, vertices);
-            model.addColorRegion(crm);
+            if (o.getString("name").equalsIgnoreCase("colorwheel")) {
+                model.setCenterOfRotation(new Vector2(
+                        cx + o.getFloat("width"),
+                        this.levelBounds.getHeight() - o.getFloat("height") - cy
+                ));
+            } else {
+                float[] vertices = toPrimitive(StreamSupport.stream(o.get("polygon").spliterator(), false)
+                        .flatMap(p -> Stream.of(p.getFloat("x") + cx, this.levelBounds.getHeight() - p.getFloat("y") - cy))
+                        .toArray(Float[]::new));
+                DaleColor color = mapColor(o.getString("type"));
+                ColorRegionModel crm = new ColorRegionModel(color, vertices);
+                model.addColorRegion(crm);
+            }
         }
     }
 
@@ -90,17 +120,17 @@ public class LevelLoader {
                     float[] v;
                     if (j == width - 1) {
                         v = new float[] {
-                                width * 32, (height - i) * 32,
-                                width * 32, (height - (i + 1)) * 32,
-                                (width - count - 1) * 32, (height - (i + 1)) * 32,
-                                (width - count - 1) * 32, (height - i) * 32,
+                                width * this.tileWidth, (height - i) * this.tileHeight,
+                                width * this.tileWidth, (height - (i + 1)) * this.tileHeight,
+                                (width - count - 1) * this.tileWidth, (height - (i + 1)) * this.tileHeight,
+                                (width - count - 1) * this.tileWidth, (height - i) * this.tileHeight,
                         };
                     } else {
                         v = new float[] {
-                                j * 32, (height - i) * 32,
-                                j * 32, (height - (i + 1)) * 32,
-                                (j - count) * 32, (height - (i + 1)) * 32,
-                                (j - count) * 32, (height - i) * 32,
+                                j * this.tileWidth, (height - i) * this.tileHeight,
+                                j * this.tileWidth, (height - (i + 1)) * this.tileHeight,
+                                (j - count) * this.tileWidth, (height - (i + 1)) * this.tileHeight,
+                                (j - count) * this.tileWidth, (height - i) * this.tileHeight,
                         };
                     }
 
@@ -116,13 +146,22 @@ public class LevelLoader {
                             model.addWall(v, "wall" + (j + i * width), defaults);
                             break;
                         case 8:
-                            model.setDaleStart((j * 32 - 16) / scale.x, ((height - i) * 32 - 16) / scale.y);
+                            model.setDaleStart(
+                                    (j * this.tileWidth - (float) this.tileWidth / 2) / scale.x,
+                                    ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
+                            );
                             break;
                         case 9:
-                            model.addFly((j * 32 - 16) / scale.x, ((height - i) * 32 - 16) / scale.y);
+                            model.addFly(
+                                    (j * this.tileWidth - (float) this.tileWidth / 2) / scale.x,
+                                    ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
+                            );
                             break;
                         case 11:
-                            model.setGoal((j * 32 - 16) / scale.x, ((height - i) * 32 - 16) / scale.y);
+                            model.setGoal(
+                                    (j * this.tileWidth - (float) this.tileWidth / 2) / scale.x,
+                                    ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
+                            );
                             break;
                     }
                     count = 1;
@@ -145,22 +184,22 @@ public class LevelLoader {
     }
 
     private DaleColor mapColor(String colorType) {
-        DaleColor color = DaleColor.RED;
+        DaleColor color = DaleColor.PINK;
         switch (colorType) {
             case "color1":
-                color = DaleColor.RED;
+                color = DaleColor.PINK;
                 break;
             case "color2":
                 color = DaleColor.BLUE;
                 break;
             case "color3":
-                color = DaleColor.YELLOW;
+                color = DaleColor.GREEN;
                 break;
             case "color4":
-                color = DaleColor.YELLOW;
+                color = DaleColor.GREEN;
                 break;
             case "color5":
-                color = DaleColor.YELLOW;
+                color = DaleColor.GREEN;
                 break;
         }
         return color;

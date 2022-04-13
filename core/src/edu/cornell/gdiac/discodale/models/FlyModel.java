@@ -11,11 +11,14 @@
 package edu.cornell.gdiac.discodale.models;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 import edu.cornell.gdiac.discodale.GameCanvas;
 import edu.cornell.gdiac.discodale.obstacle.CapsuleObstacle;
+import edu.cornell.gdiac.util.FilmStrip;
 
 /**
  * Player avatar for the plaform game.
@@ -24,6 +27,14 @@ import edu.cornell.gdiac.discodale.obstacle.CapsuleObstacle;
  * no other subclasses that we might loop through.
  */
 public class FlyModel extends CapsuleObstacle {
+
+	/** How fast we change frames (one frame per 4 calls to update) */
+	private static final float ANIMATION_SPEED = 0.25f;
+	/** The number of animation frames in our filmstrip */
+	private static final int   NUM_ANIM_FRAMES = 8;
+
+	/** The scale to shrink the asset texture */
+	private static final float TEXTURE_SCALE = 1f;
 
 	/** The initializing data (to avoid magic numbers) */
 	private final JsonValue data;
@@ -41,6 +52,14 @@ public class FlyModel extends CapsuleObstacle {
 
 	/** Flag angry, whether the fly is chasing Dale or not */
 	private boolean angry;
+
+	/** CURRENT image for this object. May change over time. */
+	protected FilmStrip animator;
+	/** Current animation frame for this fly */
+	private float animeFrame;
+
+	private Texture idleTexture;
+	private Texture chasingTexture;
 
 	public enum IdleType {
 		STATIONARY,
@@ -91,6 +110,14 @@ public class FlyModel extends CapsuleObstacle {
 		return sensorName;
 	}
 
+	public void initializeTexture (Texture idle, Texture chasing){
+		idleTexture = idle;
+		chasingTexture = chasing;
+		animator = new FilmStrip(idle,1,NUM_ANIM_FRAMES,NUM_ANIM_FRAMES);
+		origin = new Vector2(animator.getRegionWidth()/2.0f, animator.getRegionHeight()/2.0f);
+	}
+
+
 	/**
 	 * Creates a new dude avatar with the given physics data
 	 *
@@ -116,6 +143,9 @@ public class FlyModel extends CapsuleObstacle {
 		sensorName = "FlyGroundSensor";
 		this.data = data;
 		this.idleType = idleType;
+
+		// Animation
+		animeFrame = 0.0f;
 
 		// Gameplay attributes
 
@@ -172,8 +202,20 @@ public class FlyModel extends CapsuleObstacle {
 	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
+		// Increase animation frame
+		animeFrame += ANIMATION_SPEED;
+		if (animeFrame >= NUM_ANIM_FRAMES) {
+			animeFrame -= NUM_ANIM_FRAMES;
+		}
+		if (angry){
+			animator.setTexture(chasingTexture);
+		} else {
+			animator.setTexture(idleTexture);
+		}
+
 		body.setLinearVelocity(this.velocity);
 		super.update(dt);
+
 	}
 
 	/**
@@ -182,8 +224,13 @@ public class FlyModel extends CapsuleObstacle {
 	 * @param canvas Drawing context
 	 */
 	public void draw(GameCanvas canvas) {
-		canvas.draw(texture, Color.WHITE, origin.x, origin.y, getX() * drawScale.x, getY() * drawScale.y, getAngle(),
-				1.0f, 1.0f);
+		animator.setFrame((int)animeFrame);
+		float sx = 1f;
+		if (velocity.x > 0){
+			sx = -1f;
+		}
+		canvas.draw(animator, Color.WHITE, origin.x, origin.y, getX() * drawScale.x,
+				getY() * drawScale.y, getAngle(),sx / TEXTURE_SCALE, 1.0f / TEXTURE_SCALE);
 	}
 
 	/**
