@@ -37,6 +37,8 @@ public class GDXRoot extends Game implements ScreenListener {
 	private int current;
 
 	private GameMode controller;
+
+	private MenuMode menu;
 	
 	/**
 	 * Creates a new game from the configuration settings.
@@ -55,7 +57,7 @@ public class GDXRoot extends Game implements ScreenListener {
 	public void create() {
 		canvas  = new GameCanvas();
 		loading = new LoadingMode("assets.json",canvas,1);
-
+		menu = new MenuMode(canvas);
 		// Initialize the three game worlds
 		controller = new GameMode();
 //		controller[0] = new GameMode();
@@ -112,16 +114,32 @@ public class GDXRoot extends Game implements ScreenListener {
 	public void exitScreen(Screen screen, int exitCode) {
 		if (screen == loading) {
 			directory = loading.getAssets();
-			controller.gatherAssets(directory);
-			controller.setScreenListener(this);
-			controller.setCanvas(canvas);
-			controller.reset();
-			setScreen(controller);
+
+			menu.gatherAssets(directory);
+			menu.setCanvas(canvas);
+			menu.setScreenListener(this);
+			setScreen(menu);
 
 			loading.dispose();
 			loading = null;
+		} else if (exitCode == Constants.EXIT_LEVEL){
+			menu.hide();
+			controller.gatherAssets(directory);
+			controller.setCanvas(canvas);
+			controller.setScreenListener(this);
+			controller.setLevel(menu.getLevel());
+			controller.reset();
+			setScreen(controller);
+		} else if (exitCode == Constants.EXIT_MENU){
+			controller.hide();
+			menu.gatherAssets(directory);
+			menu.setCanvas(canvas);
+			menu.setScreenListener(this);
+			menu.setType(MenuMode.Type.START);
+			setScreen(menu);
 		} else if (exitCode == Constants.EXIT_NEXT) {
 //			current = (current+1) % controller.length;
+			controller.nextLevel();
 			controller.reset();
 			setScreen(controller);
 		} else if (exitCode == Constants.EXIT_PREV) {
