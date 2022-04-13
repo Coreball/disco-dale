@@ -34,6 +34,8 @@ public class InputController {
 
 	/** The singleton instance of the input controller */
 	private static InputController theController = null;
+
+	private static GameCanvas canvas = null;
 	
 	/** 
 	 * Return the singleton instance of the input controller
@@ -60,6 +62,9 @@ public class InputController {
 	/** Whether the rotating color action button was pressed. */
 	private boolean rotateColorPressed;
 	private boolean rotateColorPrevious;
+	/** Whether the jump action button was pressed. */
+	private boolean jumpPressed;
+	private boolean jumpPrevious;
 	/** Whether the click action button was pressed. */
 	private boolean clickPressed;
 	private boolean clickPrevious;
@@ -80,13 +85,7 @@ public class InputController {
 	/** Whether the decrease button was pressed. */
 	private boolean decreasePressed;
 	private boolean decreasePrevious;
-	/** Whether the menu button was pressed. */
-	private boolean menuPressed;
-	private boolean menuPrevious;
-	/** Whether the color button was pressed (for changing color region displays */
-	private boolean colorPressed;
-	private boolean colorPrevious;
-
+	
 	/** How much did we move horizontally? */
 	private float horizontal;
 	/** How much did we move vertically? */
@@ -100,6 +99,10 @@ public class InputController {
 	
 	/** An X-Box controller (if it is connected) */
 	XBoxController xbox;
+
+	public GameCanvas getCanvas() {return canvas;}
+
+	public void setCanvas(GameCanvas canvas) {this.canvas = canvas;}
 	
 	/**
 	 * Returns the amount of sideways movement. 
@@ -137,6 +140,18 @@ public class InputController {
 	 */
 	public boolean didRotateColor() {
 		return rotateColorPressed && !rotateColorPrevious;
+	}
+
+	/**
+	 * Returns true if the jump action button was pressed.
+	 *
+	 * This is a one-press button. It only returns true at the moment it was
+	 * pressed, and returns false at any frame afterwards.
+	 *
+	 * @return true if the secondary action button was pressed.
+	 */
+	public boolean didJump() {
+		return jumpPressed && !jumpPrevious;
 	}
 
 	/**
@@ -231,17 +246,6 @@ public class InputController {
 	public boolean didDecrease() {
 		return decreasePressed && !decreasePrevious;
 	}
-
-	/**
-	 * Returns true if the decrease button was pressed. (For technical prototype)
-	 *
-	 * @return true if the decrease button was pressed.
-	 */
-	public boolean didMenu() {
-		return menuPressed && !menuPrevious;
-	}
-
-	public boolean didColor() { return colorPressed && !colorPrevious; }
 	
 	/**
 	 * Creates a new input controller
@@ -275,6 +279,7 @@ public class InputController {
 		// Copy state from last animation frame
 		// Helps us ignore buttons that are held down
 		rotateColorPrevious  = rotateColorPressed;
+		jumpPrevious = jumpPressed;
 		clickPrevious = clickPressed;
 		resetPrevious  = resetPressed;
 		debugPrevious  = debugPressed;
@@ -284,8 +289,6 @@ public class InputController {
 		switchAdjustmentPrevious = switchAdjustmentPressed;
 		increasePrevious = increasePressed;
 		decreasePrevious = decreasePressed;
-		menuPrevious = menuPressed;
-		colorPrevious = colorPressed;
 		
 		// Check to see if a GamePad is connected
 		if (xbox != null && xbox.isConnected()) {
@@ -312,6 +315,8 @@ public class InputController {
 		nextPressed  = xbox.getRBumper();
 		prevPressed  = xbox.getLBumper();
 		rotateColorPressed = xbox.getA();
+		// TODO implement jumpPressed (maybe don't need it)
+		jumpPressed = false;
 		debugPressed  = xbox.getY();
 
 		// Increase animation frame, but only if trying to move
@@ -346,6 +351,7 @@ public class InputController {
 		// Give priority to gamepad results
 		resetPressed = (secondary && resetPressed) || (Gdx.input.isKeyPressed(Input.Keys.R));
 		debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.G));
+		jumpPressed = (secondary && jumpPressed) || (Gdx.input.isKeyPressed(Input.Keys.UP));
 		rotateColorPressed = (secondary && rotateColorPressed) || (Gdx.input.isKeyPressed(Input.Keys.SPACE));
 		prevPressed = (secondary && prevPressed) || (Gdx.input.isKeyPressed(Input.Keys.P));
 		nextPressed = (secondary && nextPressed) || (Gdx.input.isKeyPressed(Input.Keys.N));
@@ -364,13 +370,13 @@ public class InputController {
 		switchAdjustmentPressed = (secondary && switchAdjustmentPressed) || (Gdx.input.isKeyPressed(Input.Keys.NUM_0));
 		increasePressed = (secondary && increasePressed) || (Gdx.input.isKeyPressed(Input.Keys.EQUALS));
 		decreasePressed = (secondary && decreasePressed) || (Gdx.input.isKeyPressed(Input.Keys.MINUS));
-		menuPressed = (secondary && menuPressed) || (Gdx.input.isKeyPressed(Input.Keys.M));
-		colorPressed = (secondary && colorPressed) || (Gdx.input.isKeyPressed(Input.Keys.C));
 
 		// Mouse results
         clickPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 		clickHeld = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+		//Vector3 vec = canvas.cameraConvert(Gdx.input.getX(), Gdx.input.getY());
 		crosshair.set(Gdx.input.getX(), Gdx.input.getY());
+		//crosshair.set(vec.x, vec.y);
 		crosshair.scl(1/scale.x,-1/scale.y);
 		crosshair.y += bounds.height;
 		clampPosition(bounds);

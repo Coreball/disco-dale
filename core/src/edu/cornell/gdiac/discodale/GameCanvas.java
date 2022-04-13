@@ -52,17 +52,24 @@ public class GameCanvas {
 	 * (particularly with 2D games).
 	 */
 	public enum BlendState {
-		/** Alpha blending on, assuming the colors have pre-multipled alpha (DEFAULT) */
+		/**
+		 * Alpha blending on, assuming the colors have pre-multipled alpha (DEFAULT)
+		 */
 		ALPHA_BLEND,
-		/** Alpha blending on, assuming the colors have no pre-multipled alpha */
+		/**
+		 * Alpha blending on, assuming the colors have no pre-multipled alpha
+		 */
 		NO_PREMULT,
-		/** Color values are added together, causing a white-out effect */
+		/**
+		 * Color values are added together, causing a white-out effect
+		 */
 		ADDITIVE,
-		/** Color values are draw on top of one another with no transparency support */
+		/**
+		 * Color values are draw on top of one another with no transparency support
+		 */
 		OPAQUE
-	}	
+	}
 
-	
 	/** Drawing context to handle textures AND POLYGONS as sprites */
 	private PolygonSpriteBatch spriteBatch;
 	
@@ -77,11 +84,12 @@ public class GameCanvas {
 	
 	/** Camera for the underlying SpriteBatch */
 	private OrthographicCamera camera;
-	
+
 	/** Value to cache window width (if we are currently full screen) */
 	int width;
 	/** Value to cache window height (if we are currently full screen) */
 	int height;
+
 
 	// CACHE OBJECTS
 	/** Affine cache for current sprite to draw */
@@ -226,7 +234,6 @@ public class GameCanvas {
 		resize();
 
 	}
-	
 	/**
 	 * Returns whether this canvas is currently fullscreen.
 	 *
@@ -270,7 +277,9 @@ public class GameCanvas {
 	 */
 	 public void resize() {
 		// Resizing screws up the spriteBatch projection matrix
-		spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
+		camera.setToOrtho(false, getWidth(), getHeight());
+		spriteBatch.setProjectionMatrix(camera.combined);
+		//spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
 	}
 	
 	/**
@@ -358,7 +367,20 @@ public class GameCanvas {
 		
     	spriteBatch.begin();
     	active = DrawPass.STANDARD;
+
     }
+
+	public void updateCam(float x, float y) {
+		camera.position.x = x;
+		camera.position.y = y;
+		camera.zoom = 0.75f;
+		camera.update();
+	}
+
+	public Vector3 cameraConvert(float x, float y) {
+		Vector3 vec = new Vector3(x, y, 1.0f);
+		return camera.unproject(vec);
+	}
     
 	/**
 	 * Start a standard drawing sequence.
@@ -378,6 +400,61 @@ public class GameCanvas {
     	spriteBatch.end();
     	active = DrawPass.INACTIVE;
     }
+
+	/**
+	 * Sets the given matrix to a FOV perspective.
+	 *
+	 * The field of view matrix is computed as follows:
+	 *
+	 *        /
+	 *       /_
+	 *      /  \  <-  FOV
+	 * EYE /____|_____
+	 *
+	 * Let ys = cot(fov)
+	 * Let xs = ys / aspect
+	 * Let a = zfar / (znear - zfar)
+	 * The matrix is
+	 * | xs  0   0      0     |
+	 * | 0   ys  0      0     |
+	 * | 0   0   a  znear * a |
+	 * | 0   0  -1      0     |
+	 *
+	 * @param out Non-null matrix to store result
+	 * @param fov field of view y-direction in radians from center plane
+	 * @param aspect Width / Height
+	 * @param znear Near clip distance
+	 * @param zfar Far clip distance
+	 *
+	 * @returns Newly created matrix stored in out
+	 */
+	private Matrix4 setToPerspectiveFOV(Matrix4 out, float fov, float aspect, float znear, float zfar) {
+		float ys = (float)(1.0 / Math.tan(fov));
+		float xs = ys / aspect;
+		float a  = zfar / (znear - zfar);
+
+		out.val[0 ] = xs;
+		out.val[4 ] = 0.0f;
+		out.val[8 ] = 0.0f;
+		out.val[12] = 0.0f;
+
+		out.val[1 ] = 0.0f;
+		out.val[5 ] = ys;
+		out.val[9 ] = 0.0f;
+		out.val[13] = 0.0f;
+
+		out.val[2 ] = 0.0f;
+		out.val[6 ] = 0.0f;
+		out.val[10] = a;
+		out.val[14] = znear * a;
+
+		out.val[3 ] = 0.0f;
+		out.val[7 ] = 0.0f;
+		out.val[11] = -1.0f;
+		out.val[15] = 0.0f;
+
+		return out;
+	}
 
 	/**
 	 * Draws the tinted texture at the given position.

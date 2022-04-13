@@ -7,12 +7,11 @@ import edu.cornell.gdiac.discodale.models.FlyModel;
 import edu.cornell.gdiac.discodale.models.SceneModel;
 import edu.cornell.gdiac.discodale.obstacle.Obstacle;
 import edu.cornell.gdiac.discodale.models.DaleModel;
-import edu.cornell.gdiac.util.PooledList;
 
 public class CollisionController implements ContactListener {
 
     private DaleModel dale;
-    private PooledList<FlyModel> flies;
+    private FlyModel[] flies;
     private SceneModel sceneModel;
 
     /** Vector math cache */
@@ -21,7 +20,7 @@ public class CollisionController implements ContactListener {
     /** Mark set to handle more sophisticated collision callbacks */
     protected ObjectSet<Fixture> sensorFixtures;
 
-    public CollisionController(DaleModel dale, PooledList<FlyModel> flies, SceneModel sceneModel) {
+    public CollisionController(DaleModel dale, FlyModel[] flies, SceneModel sceneModel) {
         this.sensorFixtures = new ObjectSet<>();
         this.dale = dale;
         this.flies = flies;
