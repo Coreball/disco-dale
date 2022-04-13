@@ -457,6 +457,7 @@ public class GameMode implements Screen {
 	 */
 	public boolean preUpdate(float dt) {
 		InputController input = InputController.getInstance();
+		input.setCanvas(canvas);
 		input.readInput(bounds, scale);
 		if (listener == null) {
 			return true;
@@ -558,6 +559,8 @@ public class GameMode implements Screen {
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
+		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y);
+
 		if (dale.isJumping()) {
 			jumpId = playSound(jumpSound, jumpId, volume);
 		}
@@ -640,8 +643,8 @@ public class GameMode implements Screen {
 	 */
 	public void draw(float dt) {
 		canvas.clear();
-
 		canvas.begin();
+
 		scene.draw(canvas);
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);

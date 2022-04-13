@@ -37,6 +37,9 @@ public class DaleController {
 				if (InputController.getInstance().didClickHeld()) {
 					dale.setGrappleState(GrappleState.EXTENDING);
 					vectorCache.set(InputController.getInstance().getCrossHair()).sub(dale.getPosition());
+					System.out.println(vectorCache.x);
+					System.out.println(vectorCache.y);
+					System.out.println(vectorCache.angleRad());
 					dale.setGrappleAngle(vectorCache.angleRad());
 					dale.destroyGrappleJoint(world);
 					System.out.println("Grapple angle: " + dale.getGrappleAngle());

@@ -34,6 +34,8 @@ public class InputController {
 
 	/** The singleton instance of the input controller */
 	private static InputController theController = null;
+
+	private static GameCanvas canvas = null;
 	
 	/** 
 	 * Return the singleton instance of the input controller
@@ -97,6 +99,10 @@ public class InputController {
 	
 	/** An X-Box controller (if it is connected) */
 	XBoxController xbox;
+
+	public GameCanvas getCanvas() {return canvas;}
+
+	public void setCanvas(GameCanvas canvas) {this.canvas = canvas;}
 	
 	/**
 	 * Returns the amount of sideways movement. 
@@ -368,7 +374,9 @@ public class InputController {
 		// Mouse results
         clickPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 		clickHeld = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
-		crosshair.set(Gdx.input.getX(), Gdx.input.getY());
+		Vector3 vec = canvas.cameraConvert(Gdx.input.getX(), Gdx.input.getY());
+		//crosshair.set(Gdx.input.getX(), Gdx.input.getY());
+		crosshair.set(vec.x, vec.y);
 		crosshair.scl(1/scale.x,-1/scale.y);
 		crosshair.y += bounds.height;
 		clampPosition(bounds);
