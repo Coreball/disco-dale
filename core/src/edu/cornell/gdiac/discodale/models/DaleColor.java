@@ -3,33 +3,26 @@ package edu.cornell.gdiac.discodale.models;
 import com.badlogic.gdx.graphics.Color;
 
 public enum DaleColor {
-    RED,
-    YELLOW,
-    BLUE;
+    PINK,
+    BLUE,
+    GREEN,
+    PURPLE,
+    ORANGE;
 
     public Color toGdxColor() {
         switch (this) {
-            case RED:
-                return Color.valueOf("FD3895");
+            case PINK:
+                return Color.valueOf("FD3796");
             case BLUE:
-                return Color.valueOf("04CDF8");
-            case YELLOW:
-                return Color.valueOf("02E847");
+                return Color.valueOf("05CDF9");
+            case GREEN:
+                return Color.valueOf("0BE748");
+            case PURPLE:
+                return Color.valueOf("A933F1");
+            case ORANGE:
+                return Color.valueOf("FD7900");
             default:
                 return Color.WHITE;
-        }
-    }
-
-    public int toColorTexture() {
-        switch (this) {
-            case RED:
-                return 0;
-            case BLUE:
-                return 1;
-            case YELLOW:
-                return 2;
-            default:
-                return -1;
         }
     }
 }
