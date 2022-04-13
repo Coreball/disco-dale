@@ -58,6 +58,8 @@ public class GameMode implements Screen {
 
 	private static int CHANGE_COLOR_TIME = 300;
 
+	private static int FLY_SIZE = 32;
+
 	/** The texture for walls and platforms */
 	protected TextureRegion earthTile;
 	/** The texture for the exit condition */
@@ -96,7 +98,14 @@ public class GameMode implements Screen {
 	private TextureRegion blueTexture;
 	private TextureRegion greenTexture;
 	private TextureRegion pinkTexture;
-	private TextureRegion flyTexture;
+	private Texture flyIdleTexture;
+	private Texture flyChaseTexture;
+
+	private Texture[] colors = new Texture[5];
+
+	/** Background music */
+	private Sound theme;
+	private long themeId = -1;
 
 	/** The jump sound. We only want to play once. */
 	private Sound jumpSound;
@@ -414,14 +423,14 @@ public class GameMode implements Screen {
 
 		daleController = new DaleController(this.dale);
 
-		dwidth = flyTexture.getRegionWidth() / scale.x;
-		dheight = flyTexture.getRegionHeight() / scale.y;
+		dwidth = FLY_SIZE / scale.x;
+		dheight = FLY_SIZE / scale.y;
 		flies = new PooledList<>();
 		flyControllers = new PooledList<>();
 		for (Vector2 flyLocation : scene.getFlyLocations()) {
 			FlyModel fly = new FlyModel(constants.get("fly"), flyLocation.x, flyLocation.y, dwidth, dheight, FlyModel.IdleType.STATIONARY);
 			fly.setDrawScale(scale);
-			fly.setTexture(flyTexture);
+			fly.initializeTexture(flyIdleTexture, flyChaseTexture);
 			flies.add(fly);
 			addObject(fly);
 			flyControllers.add(new FlyController(fly, dale, scene));
@@ -487,7 +496,11 @@ public class GameMode implements Screen {
 			System.out.println("Grapple force: " + dale.getGrappleForce());
 			System.out.println();
 		}
-		
+
+		if(input.didColor()){
+			ColorRegionModel.switchDisplay();
+		}
+
 		// Handle resets
 		if (input.didReset()) {
 			reset();
@@ -497,6 +510,10 @@ public class GameMode implements Screen {
 		if (input.didExit()) {
 			pause();
 			listener.exitScreen(this, Constants.EXIT_QUIT);
+			return false;
+		} else if (input.didMenu()){
+			pause();
+			listener.exitScreen(this, Constants.EXIT_MENU);
 			return false;
 		} else if (input.didAdvance()) {
 			pause();
@@ -554,6 +571,8 @@ public class GameMode implements Screen {
 		daleController.processGrappleAction(world);
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
+
+		themeId = playBGM(theme, themeId, volume);
 
 		if (dale.isJumping()) {
 			jumpId = playSound(jumpSound, jumpId, volume);
@@ -710,6 +729,13 @@ public class GameMode implements Screen {
 		return sound.play(volume);
 	}
 
+	public long playBGM(Sound sound, long soundId, float volume) {
+		if (soundId != -1) {
+			return soundId;
+		}
+		return sound.loop(volume);
+	}
+
 	/**
 	 * Called when the Screen is resized.
 	 *
@@ -799,15 +825,24 @@ public class GameMode implements Screen {
 		greenTexture = new TextureRegion(directory.getEntry("platform:green", Texture.class));
 		pinkTexture = new TextureRegion(directory.getEntry("platform:pink", Texture.class));
 
-		flyTexture = new TextureRegion(directory.getEntry("platform:fly", Texture.class));
+		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
+		flyChaseTexture = directory.getEntry("platform:flychasing", Texture.class);
 
 		jumpSound = directory.getEntry("platform:jump", Sound.class);
+		theme = directory.getEntry("theme", Sound.class);
 
 		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles
 		earthTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:retro", BitmapFont.class);
+
+		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
+		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);
+		colors[2] = directory.getEntry("platform:greencolor", Texture.class);
+		colors[3] = directory.getEntry("platform:purplecolor", Texture.class);
+		colors[4] = directory.getEntry("platform:orangecolor", Texture.class);
+		ColorRegionModel.setColorTexture(colors);
 
 		this.testlevel = directory.getEntry("testlevel", JsonValue.class);
 		this.levelLoader = new LevelLoader(earthTile, earthTile, goalTile, this.bounds.getWidth(), this.bounds.getHeight());

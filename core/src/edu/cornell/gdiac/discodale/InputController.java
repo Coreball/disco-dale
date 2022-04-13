@@ -83,7 +83,13 @@ public class InputController {
 	/** Whether the decrease button was pressed. */
 	private boolean decreasePressed;
 	private boolean decreasePrevious;
-	
+	/** Whether the menu button was pressed. */
+	private boolean menuPressed;
+	private boolean menuPrevious;
+	/** Whether the color button was pressed (for changing color region displays */
+	private boolean colorPressed;
+	private boolean colorPrevious;
+
 	/** How much did we move horizontally? */
 	private float horizontal;
 	/** How much did we move vertically? */
@@ -240,6 +246,17 @@ public class InputController {
 	public boolean didDecrease() {
 		return decreasePressed && !decreasePrevious;
 	}
+
+	/**
+	 * Returns true if the decrease button was pressed. (For technical prototype)
+	 *
+	 * @return true if the decrease button was pressed.
+	 */
+	public boolean didMenu() {
+		return menuPressed && !menuPrevious;
+	}
+
+	public boolean didColor() { return colorPressed && !colorPrevious; }
 	
 	/**
 	 * Creates a new input controller
@@ -283,6 +300,8 @@ public class InputController {
 		switchAdjustmentPrevious = switchAdjustmentPressed;
 		increasePrevious = increasePressed;
 		decreasePrevious = decreasePressed;
+		menuPrevious = menuPressed;
+		colorPrevious = colorPressed;
 		
 		// Check to see if a GamePad is connected
 		if (xbox != null && xbox.isConnected()) {
@@ -364,6 +383,8 @@ public class InputController {
 		switchAdjustmentPressed = (secondary && switchAdjustmentPressed) || (Gdx.input.isKeyPressed(Input.Keys.NUM_0));
 		increasePressed = (secondary && increasePressed) || (Gdx.input.isKeyPressed(Input.Keys.EQUALS));
 		decreasePressed = (secondary && decreasePressed) || (Gdx.input.isKeyPressed(Input.Keys.MINUS));
+		menuPressed = (secondary && menuPressed) || (Gdx.input.isKeyPressed(Input.Keys.M));
+		colorPressed = (secondary && colorPressed) || (Gdx.input.isKeyPressed(Input.Keys.C));
 
 		// Mouse results
         clickPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);

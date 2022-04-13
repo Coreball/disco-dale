@@ -103,12 +103,14 @@ public class FlyController {
         switch (state) {
             case IDLE:
                 if (!dale.getMatch()) {
+                    fly.setAngry(true);
                     state = FSMState.CHASE;
                 }
                 break;
 
             case CHASE:
                 if (dale.getMatch()) {
+                    fly.setAngry(false);
                     state = FSMState.IDLE;
                 }
                 break;
