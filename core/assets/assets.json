@@ -1,7 +1,12 @@
 {
     "textures": {
-        "shared:earth" : {
+        "shared:brick" : {
             "file":  "platform/wall.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflective" : {
+            "file":  "platform/reflective.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },

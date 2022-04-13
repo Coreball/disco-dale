@@ -48,8 +48,8 @@ public class SceneModel {
 
 
     /** The texture for walls and platforms */
-    protected TextureRegion wallTile;
-    protected TextureRegion platformTile;
+    protected TextureRegion brickTile;
+    protected TextureRegion reflectiveTile;
     /** The texture for the exit condition */
     protected TextureRegion goalTile;
 
@@ -88,16 +88,16 @@ public class SceneModel {
         System.out.println(centerOfRotation.y);
     }
 
-    public void setWallTexture(TextureRegion texture) {
-        this.wallTile = texture;
+    public void setBrickTexture(TextureRegion texture) {
+        this.brickTile = texture;
     }
 
     public void setGoalTexture(TextureRegion texture) {
         this.goalTile = texture;
     }
 
-    public void setPlatformTexture(TextureRegion texture) {
-        this.platformTile = texture;
+    public void setReflectiveTexture(TextureRegion texture) {
+        this.reflectiveTile = texture;
     }
 
     public Vector2 getDaleStart() {
@@ -276,7 +276,7 @@ public class SceneModel {
         updateGrid();
     }
 
-    public void addPlatform(float[] vertices, String name, JsonValue defaults) {
+    public void addBrick(float[] vertices, String name, JsonValue defaults) {
         PolygonObstacle obj;
         obj = new PolygonObstacle(vertices, 0, 0);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
@@ -284,7 +284,7 @@ public class SceneModel {
         obj.setFriction(defaults.getFloat("friction", 0.0f));
         obj.setRestitution(defaults.getFloat("restitution", 0.0f));
         obj.setDrawScale(scale);
-        obj.setTexture(wallTile);
+        obj.setTexture(brickTile);
         obj.setName(name);
         Filter objFilter = new Filter();
         objFilter.categoryBits = 0b00000001;
@@ -293,7 +293,7 @@ public class SceneModel {
         addObject(obj);
     }
 
-    public void addWall(float[] vertices, String name, JsonValue defaults) {
+    public void addReflective(float[] vertices, String name, JsonValue defaults) {
         PolygonObstacle obj;
         obj = new PolygonObstacle(vertices, 0, 0);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
@@ -301,7 +301,7 @@ public class SceneModel {
         obj.setFriction(defaults.getFloat("friction", 0.0f));
         obj.setRestitution(defaults.getFloat("restitution", 0.0f));
         obj.setDrawScale(scale);
-        obj.setTexture(wallTile);
+        obj.setTexture(reflectiveTile);
         obj.setName(name);
         Filter objFilter = new Filter();
         objFilter.categoryBits = 0b00000001;
