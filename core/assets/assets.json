@@ -16,7 +16,7 @@
         "platform:body:walk:pink": "platform/walkspritepink.png",
         "platform:body:walk:blue": "platform/walkspriteblue.png",
         "platform:body:walk:green": "platform/walkspritegreen.png",
-        "platform:flyidle": "platform/fly_idle.png",
+        "platform:flyidle": "platform/fly_idle_blue.png",
         "platform:flychasing": "platform/fly_chasing.png",
         "platform:pinkcolor": "platform/color_pink.png",
         "platform:bluecolor": "platform/color_blue.png",
@@ -31,7 +31,9 @@
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json",
-        "testlevel": "platform/testlevel.json"
+        "testlevel": "platform/testlevel.json",
+        "level1": "levels/1.json",
+        "level2": "levels/2.json"
     },
     "sounds" : {
         "theme" : "shared/theme.mp3",
@@ -44,8 +46,8 @@
             "file": "shared/RetroGame.ttf",
             "size": 64
         },
-        "shared:retrosmall": {
-            "file": "shared/RetroGame.ttf",
+        "shared:alien": {
+            "file": "shared/AlienRemixItalic-EaoL4.ttf",
             "size": 48
         }
     }

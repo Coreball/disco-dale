@@ -6,9 +6,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.PolygonRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.EarClippingTriangulator;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import edu.cornell.gdiac.discodale.GameCanvas;
 import edu.cornell.gdiac.discodale.models.DaleColor;
+
+import javax.swing.text.Utilities;
 
 public class ColorRegionModel {
 	/** An earclipping triangular to make sure we work with convex shapes */
@@ -16,8 +19,10 @@ public class ColorRegionModel {
 
 	/** Color of this color region */
 	private DaleColor color;
+
+	private DaleColor[] seq;
 	/** Shape of the color region */
-	public final Polygon shape;
+	public Polygon shape;
 	/** Polygon Region used for drawing */
 	private PolygonRegion polygonRegion;
 
@@ -41,6 +46,72 @@ public class ColorRegionModel {
 				TRIANGULATOR.computeTriangles(vertices).toArray());
 		polygonRegionTexture = polygonRegion;
 		useTexture = false;
+	}
+
+	public float[] getVertices(){
+		return polygonRegion.getVertices();
+	}
+
+	public void setSeq(DaleColor[] seq) {
+		this.seq = seq;
+	}
+
+	public void move(float dx, float dy){
+		float[] vertices = getVertices().clone();
+		for(int i =0;i<vertices.length;i++){
+			if(i%2==0){
+				vertices[i]+=dx;
+			}else{
+				vertices[i]+=dy;
+			}
+		}
+		this.shape.setVertices(vertices);
+		this.polygonRegion = new PolygonRegion(new TextureRegion(texture), vertices, TRIANGULATOR.computeTriangles(vertices).toArray());
+	}
+
+	public void rotateAround(float x2, float y2, float d){
+		float[] vertices = getVertices().clone();
+		for(int i =0;i<vertices.length;i=i+2){
+			float x1 = vertices[i];
+			float y1 = vertices[i+1];
+			float x = (x1-x2)* MathUtils.cosDeg(d) - (y1-y2)*MathUtils.sinDeg(d)+x2;
+			float y = (x1-x2)* MathUtils.sinDeg(d) + (y1-y2)*MathUtils.cosDeg(d)+y2;
+			vertices[i]=x;
+			vertices[i+1]=y;
+		}
+		this.shape.setVertices(vertices);
+		this.polygonRegion = new PolygonRegion(new TextureRegion(texture), vertices, TRIANGULATOR.computeTriangles(vertices).toArray());
+	}
+
+	/**
+	 * Test if all the vertices are out of bounds
+	 *
+	 * @param bound The bound to test
+	 * @param r Either x or y coordinates to test. 0 means x coordinate, 1 means y coordinate
+	 *
+	 * @return 0 means not or only partially out of bounds, 1 means to the left or bottom, -1 means to the right or top
+	 */
+	public int testBound(float bound, int r){
+		boolean toLeftOrBottom = true;
+		boolean toRightOrTop = true;
+		float[] vertices = getVertices().clone();
+		for(int i=0;i<vertices.length;i++){
+			if(i%2==r){
+				if(vertices[i]>0){
+					toLeftOrBottom = false;
+				}
+				if(vertices[i]<=bound){
+					toRightOrTop = false;
+				}
+			}
+		}
+		if(toLeftOrBottom){
+			return 1;
+		}
+		if(toRightOrTop){
+			return -1;
+		}
+		return 0;
 	}
 
 	public DaleColor getColor() {

@@ -7,7 +7,10 @@ import com.badlogic.gdx.utils.JsonValue;
 import edu.cornell.gdiac.discodale.models.ColorRegionModel;
 import edu.cornell.gdiac.discodale.models.DaleColor;
 import edu.cornell.gdiac.discodale.models.SceneModel;
+import edu.cornell.gdiac.util.PooledList;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -93,8 +96,8 @@ public class LevelLoader {
             float cy = o.getFloat("y");
             if (o.getString("name").equalsIgnoreCase("colorwheel")) {
                 model.setCenterOfRotation(new Vector2(
-                        cx + o.getFloat("width"),
-                        this.levelBounds.getHeight() - o.getFloat("height") - cy
+                        cx + o.getFloat("width")/2,
+                        this.levelBounds.getHeight() - o.getFloat("height")/2 - cy
                 ));
             } else {
                 float[] vertices = toPrimitive(StreamSupport.stream(o.get("polygon").spliterator(), false)
@@ -102,6 +105,16 @@ public class LevelLoader {
                         .toArray(Float[]::new));
                 DaleColor color = mapColor(o.getString("type"));
                 ColorRegionModel crm = new ColorRegionModel(color, vertices);
+                if (o.has("properties")) for (JsonValue prop : o.get("properties")) {
+                    if (prop.getString("name").equalsIgnoreCase("colorseq")) {
+                        DaleColor[] seq = Arrays.stream(prop.getString("value").split(","))
+                                .map(String::trim)
+                                .map(Integer::parseInt)
+                                .map(LevelLoader::mapColor)
+                                .toArray(DaleColor[]::new);
+                        crm.setSeq(seq);
+                    }
+                }
                 model.addColorRegion(crm);
             }
         }
@@ -184,7 +197,7 @@ public class LevelLoader {
     }
 
     private DaleColor mapColor(String colorType) {
-        DaleColor color = DaleColor.PINK;
+        DaleColor color = null;
         switch (colorType) {
             case "color1":
                 color = DaleColor.PINK;
@@ -199,6 +212,28 @@ public class LevelLoader {
                 color = DaleColor.GREEN;
                 break;
             case "color5":
+                color = DaleColor.GREEN;
+                break;
+        }
+        return color;
+    }
+
+    private static DaleColor mapColor(int colorType) {
+        DaleColor color = DaleColor.PINK;
+        switch (colorType) {
+            case 1:
+                color = DaleColor.PINK;
+                break;
+            case 2:
+                color = DaleColor.BLUE;
+                break;
+            case 3:
+                color = DaleColor.GREEN;
+                break;
+            case 4:
+                color = DaleColor.GREEN;
+                break;
+            case 5:
                 color = DaleColor.GREEN;
                 break;
         }

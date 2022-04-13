@@ -60,6 +60,8 @@ public class GameMode implements Screen {
 
 	private static int FLY_SIZE = 32;
 
+	private static int NUM_LEVELS = 10;
+
 	/** The texture for walls and platforms */
 	protected TextureRegion earthTile;
 	/** The texture for the exit condition */
@@ -75,6 +77,8 @@ public class GameMode implements Screen {
 	protected PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
 	/** Listener that will update the player mode when we are done */
 	private ScreenListener listener;
+
+	private int levelIndex;
 
 	/** The Box2D world */
 	protected World world;
@@ -122,6 +126,8 @@ public class GameMode implements Screen {
 	/** Physics constants for initialization */
 	private JsonValue constants;
 	private JsonValue testlevel;
+
+	private JsonValue[] levels = new JsonValue[NUM_LEVELS];
 	/** Reference to the character avatar */
 	private DaleModel dale;
 	private PooledList<FlyModel> flies;
@@ -265,6 +271,14 @@ public class GameMode implements Screen {
 		this.scene.setCanvas(canvas);
 	}
 
+	public void setLevel(int index){
+		levelIndex = index;
+	}
+
+	public void nextLevel(){
+		levelIndex = (levelIndex + 1) % NUM_LEVELS;
+	}
+
 	/**
 	 * Creates a new game world with the default values.
 	 *
@@ -396,7 +410,8 @@ public class GameMode implements Screen {
 		setFailure(false);
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
-		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
+		loadLevel(levelIndex);
+		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
 		populateLevel();
 	}
@@ -611,6 +626,7 @@ public class GameMode implements Screen {
 		}
 
 		 scene.updateGrid();
+		scene.updateColorRegionMovement();
 	}
 
 	/**
@@ -682,7 +698,7 @@ public class GameMode implements Screen {
 		// Final message
 
 		if (complete) {
-			displayFont.setColor(Color.BLACK);
+			displayFont.setColor(Color.WHITE);
 			canvas.begin(); // DO NOT SCALE
 			canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
 			canvas.end();
@@ -853,7 +869,7 @@ public class GameMode implements Screen {
 		// Allocate the tiles
 		earthTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
-		displayFont = directory.getEntry("shared:retro", BitmapFont.class);
+		displayFont = directory.getEntry("shared:alien", BitmapFont.class);
 
 		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
 		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);
@@ -863,8 +879,26 @@ public class GameMode implements Screen {
 		ColorRegionModel.setColorTexture(colors);
 
 		this.testlevel = directory.getEntry("testlevel", JsonValue.class);
+
+		for (int i = 0; i < NUM_LEVELS; i++){
+			levels[i] = directory.getEntry("level" + Integer.toString(i + 1), JsonValue.class);
+		}
+
 		this.levelLoader = new LevelLoader(earthTile, earthTile, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		// loadLevel(levelIndex);
 		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT));
 	}
+
+	private void loadLevel(int index){
+		if (levels[index] != null) {
+			this.scene = levelLoader.load(levels[index], constants.get("defaults"), new Rectangle(0, 0,
+					canvas.width, canvas.height));
+		} else {
+			this.scene = levelLoader.load(testlevel, constants.get("defaults"), new Rectangle(0, 0,
+					canvas.width, canvas.height));
+		}
+
+	}
+
 
 }
