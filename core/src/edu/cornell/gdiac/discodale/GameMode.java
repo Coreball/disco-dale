@@ -423,8 +423,8 @@ public class GameMode implements Screen {
 
 		daleController = new DaleController(this.dale);
 
-		dwidth = flyTexture.getRegionWidth() / scale.x;
-		dheight = flyTexture.getRegionHeight() / scale.y;
+		dwidth = FLY_SIZE / scale.x;
+		dheight = FLY_SIZE / scale.y;
 		flies = new PooledList<>();
 		flyControllers = new PooledList<>();
 		for (Vector2 flyLocation : scene.getFlyLocations()) {
@@ -434,7 +434,6 @@ public class GameMode implements Screen {
 			flies.add(fly);
 			addObject(fly);
 			flyControllers.add(new FlyController(fly, dale, scene));
-
 		}
 
 		collisionController = new CollisionController(this.dale, this.flies, this.scene);
