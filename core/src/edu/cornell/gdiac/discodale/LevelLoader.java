@@ -102,17 +102,17 @@ public class LevelLoader {
                         .flatMap(p -> Stream.of(p.getFloat("x") + cx, this.levelBounds.getHeight() - p.getFloat("y") - cy))
                         .toArray(Float[]::new));
                 DaleColor color = mapColor(o.getString("type"));
-                ColorRegionModel crm = new ColorRegionModel(color, vertices);
+                DaleColor[] seq = null;
                 if (o.has("properties")) for (JsonValue prop : o.get("properties")) {
                     if (prop.getString("name").equalsIgnoreCase("colorseq")) {
-                        DaleColor[] seq = Arrays.stream(prop.getString("value").split(","))
+                        seq = Arrays.stream(prop.getString("value").split(","))
                                 .map(String::trim)
                                 .map(Integer::parseInt)
                                 .map(LevelLoader::mapColor)
                                 .toArray(DaleColor[]::new);
-                        crm.setSeq(seq);
                     }
                 }
+                ColorRegionModel crm = new ColorRegionModel(color, vertices, seq);
                 model.addColorRegion(crm);
             }
         }

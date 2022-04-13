@@ -56,7 +56,7 @@ public class GameMode implements Screen {
 	private static int LOSE_CODE = -1;
 	private static int PLAY_CODE = 0;
 
-	private static int CHANGE_COLOR_TIME = 300;
+	private static int CHANGE_COLOR_TIME = 440;
 
 	private static int FLY_SIZE = 32;
 
@@ -491,7 +491,6 @@ public class GameMode implements Screen {
 	 */
 	public boolean preUpdate(float dt) {
 		InputController input = InputController.getInstance();
-		input.setCanvas(canvas);
 		input.readInput(bounds, scale);
 		if (listener == null) {
 			return true;
@@ -600,10 +599,7 @@ public class GameMode implements Screen {
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
-		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y);
-
 		themeId = playBGM(theme, themeId, volume);
-
 
 		dale.setMatch(daleMatches());
 
@@ -627,8 +623,8 @@ public class GameMode implements Screen {
 		if(colorChangeCountdown>0){
 			colorChangeCountdown--;
 		}else {
-			scene.updateColorRegions();
 			colorChangeCountdown = CHANGE_COLOR_TIME;
+			scene.updateColorRegions();
 		}
 
 		 scene.updateGrid();
@@ -683,8 +679,8 @@ public class GameMode implements Screen {
 	 */
 	public void draw(float dt) {
 		canvas.clear();
-		canvas.begin();
 
+		canvas.begin();
 		scene.draw(canvas);
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
