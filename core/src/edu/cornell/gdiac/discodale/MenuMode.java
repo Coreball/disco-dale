@@ -24,8 +24,9 @@ public class MenuMode implements Screen, InputProcessor {
 
     private static final int LEVEL_BUTTONS_OFFSET_X = 200;
     private static final int LEVEL_BUTTONS_OFFSET_Y = 300;
-    private static final int LEVEL_BUTTONS_MARGIN = 150;
-    private static final int LEVEL_FONT_MARGIN = 19;
+    private static final int LEVEL_BUTTONS_MARGIN = 160;
+    private static final int LEVEL_FONT_MARGIN_X = 22;
+    private static final int LEVEL_FONT_MARGIN_Y = 15;
 
     private static final int LEVEL_BUTTON_ROWS = 2;
     private static final int LEVEL_BUTTON_COLS = 5;
@@ -139,7 +140,7 @@ public class MenuMode implements Screen, InputProcessor {
                         x, y, 0, 1f, 1f);
                 displayFont.setColor(Color.BLACK);
                 canvas.drawText(Integer.toString(num + 1), displayFont,
-                        x - LEVEL_FONT_MARGIN, y + LEVEL_FONT_MARGIN);
+                        x - LEVEL_FONT_MARGIN_X, y + LEVEL_FONT_MARGIN_Y);
             }
         }
     }
@@ -150,7 +151,7 @@ public class MenuMode implements Screen, InputProcessor {
         title = directory.getEntry("menu:title", Texture.class);
         levelSelect = directory.getEntry("menu:level", Texture.class);
         levelButton = directory.getEntry("menu:levelbutton", Texture.class);
-        displayFont = directory.getEntry("shared:retrosmall", BitmapFont.class);
+        displayFont = directory.getEntry("shared:alien", BitmapFont.class);
     }
 
     /**
