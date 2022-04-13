@@ -93,7 +93,7 @@ public class DaleModel extends CapsuleObstacle {
 	private int winLose;
 
 
-	private DaleColor color = DaleColor.RED;
+	private DaleColor color = DaleColor.PINK;
 	private TextureRegion[] textures;
 
 	/** Cache for internal force calculations */

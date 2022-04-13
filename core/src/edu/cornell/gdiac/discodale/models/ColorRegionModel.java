@@ -23,8 +23,15 @@ public class ColorRegionModel {
 	public Polygon shape;
 	/** Polygon Region used for drawing */
 	private PolygonRegion polygonRegion;
+
+	/** Polygon Region used for drawing */
+	private PolygonRegion polygonRegionTexture;
+	private static boolean useTexture;
+
+	/** Array of color textures */
+	private static TextureRegion[] colors = new TextureRegion[5];
 	/** Texture */
-	private final Texture texture;
+	private Texture texture;
 
 	public ColorRegionModel(DaleColor color, float[] vertices) {
 		this.color = color;
@@ -32,8 +39,11 @@ public class ColorRegionModel {
 		Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
 		pixmap.setColor(Color.WHITE);
 		pixmap.fill();
-		this.texture = new Texture(pixmap);
-		this.polygonRegion = new PolygonRegion(new TextureRegion(this.texture), vertices, TRIANGULATOR.computeTriangles(vertices).toArray());
+		texture = new Texture(pixmap);
+		this.polygonRegion = new PolygonRegion(new TextureRegion(texture), vertices,
+				TRIANGULATOR.computeTriangles(vertices).toArray());
+		polygonRegionTexture = polygonRegion;
+		useTexture = false;
 	}
 
 	public float[] getVertices(){
@@ -106,11 +116,29 @@ public class ColorRegionModel {
 		color = c;
 	}
 
+	public static void setColorTexture(Texture[] c){
+		for (int i = 0; i < c.length; i++){
+			c[i].setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+			colors[i] = new TextureRegion(c[i]);
+		}
+	}
+
 	public void draw(GameCanvas canvas) {
 //		for (PolygonShape tri : shapes) {
 //			canvas.drawFilledTri(tri, color.toGdxColor(),0f,0f,getAngle(), drawScale.x,drawScale.y);
 //		}
-		canvas.draw(polygonRegion, color.toGdxColor(), 0, 0);
-
+		if (useTexture){
+			polygonRegionTexture = new PolygonRegion(colors[color.toColorTexture()],
+					polygonRegion.getVertices(), polygonRegion.getTriangles());
+			canvas.draw(polygonRegionTexture, 0, 0);
+		} else {
+			canvas.draw(polygonRegion, color.toGdxColor(), 0, 0);
+		}
 	}
+
+	public static void switchDisplay(){
+		useTexture = !useTexture;
+	}
+
+
 }
