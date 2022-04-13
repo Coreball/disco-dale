@@ -372,7 +372,7 @@ public class InputController {
 		decreasePressed = (secondary && decreasePressed) || (Gdx.input.isKeyPressed(Input.Keys.MINUS));
 
 		// Mouse results
-        clickPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+		clickPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 		clickHeld = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 		//Vector3 vec = canvas.cameraConvert(Gdx.input.getX(), Gdx.input.getY());
 		crosshair.set(Gdx.input.getX(), Gdx.input.getY());
