@@ -271,6 +271,10 @@ public class GameMode implements Screen {
 		levelIndex = index;
 	}
 
+	public void nextLevel(){
+		levelIndex = (levelIndex + 1) % NUM_LEVELS;
+	}
+
 	/**
 	 * Creates a new game world with the default values.
 	 *
