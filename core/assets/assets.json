@@ -1,5 +1,5 @@
 {
-	"textures": {
+    "textures": {
         "shared:earth" : {
             "file":  "platform/wall.png",
             "wrapU": "repeated",
@@ -12,6 +12,12 @@
         "platform:pink": "platform/idle1pink.png",
         "platform:demo:grapple2": "platform/grapple2_scl.png",
         "platform:demo:idlebody1": "platform/idlebody1_scl.png",
+        "platform:head:idle:pink": "platform/idleheadpink.png",
+        "platform:head:idle:blue": "platform/idleheadblue.png",
+        "platform:head:idle:green": "platform/idleheadgreen.png",
+        "platform:body:idle:pink": "platform/idlebodypink.png",
+        "platform:body:idle:blue": "platform/idlebodyblue.png",
+        "platform:body:idle:green": "platform/idlebodygreen.png",
         "platform:flyidle": "platform/fly_idle.png",
         "platform:flychasing": "platform/fly_chasing.png",
         "platform:pinkcolor": "platform/color_pink.png",

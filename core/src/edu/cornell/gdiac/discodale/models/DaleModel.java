@@ -88,7 +88,8 @@ public class DaleModel extends WheelObstacle {
 	private boolean match;
 	private int winLose;
 
-	private DaleColor color = DaleColor.PINK;
+	private int colorIndex;
+	private DaleColor[] availableColors;
 	private TextureRegion[] headTextures;
 	private TextureRegion[] bodyTextures;
 
@@ -98,11 +99,11 @@ public class DaleModel extends WheelObstacle {
 	private final Vector2 vectorCache = new Vector2();
 
 	public DaleColor getColor() {
-		return color;
+		return availableColors[colorIndex];
 	}
 
 	public void rotateColor() {
-		this.color = DaleColor.values()[(this.color.ordinal() + 1) % DaleColor.values().length];
+		colorIndex = (colorIndex + 1) % availableColors.length;
 		setDaleTexture();
 	}
 
@@ -426,13 +427,17 @@ public class DaleModel extends WheelObstacle {
 	 * drawing to work properly, you MUST set the drawScale. The drawScale
 	 * converts the physics units to pixels.
 	 *
-	 * @param data   	 The physics constants for Dale
-	 * @param headRadius The head radius in physics units
-	 * @param bodyWidth  The body width in physics units
-	 * @param bodyHeight The body width in physics units
+	 * @param data              The physics constants for Dale
+	 * @param headRadius        The head radius in physics units
+	 * @param bodyWidth         The body width in physics units
+	 * @param bodyHeight        The body width in physics units
+	 * @param bodyOffset        Distance between Dale head and body centers
+	 * @param availableColors   Available colors for Dale, should be same length as headTextures and bodyTextures
+	 * @param headTextures      Head textures in order of colors
+	 * @param bodyTextures      Body textures in order of colors
 	 */
 	public DaleModel(float x, float y, JsonValue data, float headRadius, float bodyWidth, float bodyHeight,
-					 float bodyOffset, TextureRegion[] headTextures, TextureRegion[] bodyTextures) {
+		             float bodyOffset, DaleColor[] availableColors, TextureRegion[] headTextures, TextureRegion[] bodyTextures) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(x, y, headRadius);
 		setDensity(data.getFloat("density", 0));
@@ -484,6 +489,8 @@ public class DaleModel extends WheelObstacle {
 
 		setName(Constants.DALE_NAME_TAG);
 
+		colorIndex = 0;
+		this.availableColors = availableColors;
 		this.headTextures = headTextures;
 		this.bodyTextures = bodyTextures;
 	}
@@ -644,8 +651,8 @@ public class DaleModel extends WheelObstacle {
 	}
 
 	public void setDaleTexture() {
-		this.setTexture(headTextures[this.color.toColorTexture()]);
-		bodyPart.setTexture(bodyTextures[this.color.toColorTexture()]);
+		this.setTexture(headTextures[colorIndex]);
+		bodyPart.setTexture(bodyTextures[colorIndex]);
 	}
 
 	/**

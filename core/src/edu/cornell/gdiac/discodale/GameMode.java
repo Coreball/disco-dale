@@ -94,10 +94,11 @@ public class GameMode implements Screen {
 	/** Countdown active for winning or losing */
 	protected int countdown;
 
-	/** Texture asset for character avatar */
-	private TextureRegion blueTexture;
-	private TextureRegion greenTexture;
-	private TextureRegion pinkTexture;
+	/** All body idle textures for Dale, in order of colors */
+	private TextureRegion[] bodyIdleTextures;
+	/** All head idle textures for Dale, in order of colors */
+	private TextureRegion[] headIdleTextures;
+
 	private Texture flyIdleTexture;
 	private Texture flyChaseTexture;
 
@@ -402,13 +403,17 @@ public class GameMode implements Screen {
 	 * Lays out the game geography.
 	 */
 	private void populateLevel() {
-		float dradius = pinkGrapple2Texture.getRegionWidth() / scale.x / 2f;
-		float dwidth = pinkIdleBody1Texture.getRegionWidth() / scale.x;
-		float dheight = pinkIdleBody1Texture.getRegionHeight() / scale.y;
+		float dradius = headIdleTextures[0].getRegionWidth() / scale.x / 2f;
+		float dwidth = bodyIdleTextures[0].getRegionWidth() / scale.x;
+		float dheight = bodyIdleTextures[0].getRegionHeight() / scale.y;
 		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
-		TextureRegion[] headTextures = {pinkGrapple2Texture, pinkGrapple2Texture, pinkGrapple2Texture};
-		TextureRegion[] bodyTextures = {pinkIdleBody1Texture, blueTexture, greenTexture};
-		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"), dradius, dwidth, dheight, bodyOffset, headTextures, bodyTextures);
+
+		DaleColor[] availableColors = {DaleColor.PINK, DaleColor.BLUE, DaleColor.GREEN};
+		TextureRegion[] headTextures = {headIdleTextures[0], headIdleTextures[1], headIdleTextures[2]};
+		TextureRegion[] bodyTextures = {bodyIdleTextures[0], bodyIdleTextures[1], bodyIdleTextures[2]};
+
+		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
+				dradius, dwidth, dheight, bodyOffset, availableColors, headTextures, bodyTextures);
 		dale.setDrawScale(scale);
 		dale.setDaleTexture();
 
@@ -424,8 +429,6 @@ public class GameMode implements Screen {
 		dale.setStickyPartTexture(stickyPartTexture);
 
 		addObject(dale);
-
-
 		daleController = new DaleController(this.dale);
 
 		dwidth = FLY_SIZE / scale.x;
@@ -820,12 +823,17 @@ public class GameMode implements Screen {
 	 * @param directory Reference to global asset manager.
 	 */
 	public void gatherAssets(AssetDirectory directory) {
-		blueTexture = new TextureRegion(directory.getEntry("platform:blue", Texture.class));
-		greenTexture = new TextureRegion(directory.getEntry("platform:green", Texture.class));
-		pinkTexture = new TextureRegion(directory.getEntry("platform:pink", Texture.class));
+		bodyIdleTextures = new TextureRegion[]{
+				new TextureRegion(directory.getEntry("platform:body:idle:pink", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:body:idle:blue", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:body:idle:green", Texture.class))
+		};
 
-		pinkGrapple2Texture = new TextureRegion(directory.getEntry("platform:demo:grapple2", Texture.class));
-		pinkIdleBody1Texture = new TextureRegion(directory.getEntry("platform:demo:idlebody1", Texture.class));
+		headIdleTextures = new TextureRegion[]{
+				new TextureRegion(directory.getEntry("platform:head:idle:pink", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:head:idle:blue", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:head:idle:green", Texture.class))
+		};
 
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
 		flyChaseTexture = directory.getEntry("platform:flychasing", Texture.class);
