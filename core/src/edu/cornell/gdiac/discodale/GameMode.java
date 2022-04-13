@@ -62,8 +62,10 @@ public class GameMode implements Screen {
 
 	private static int NUM_LEVELS = 10;
 
-	/** The texture for walls and platforms */
-	protected TextureRegion earthTile;
+	/** The texture for neutral walls */
+	protected TextureRegion brickTile;
+	/** The texture for non-grappleable walls */
+	protected TextureRegion reflectiveTile;
 	/** The texture for the exit condition */
 	protected TextureRegion goalTile;
 	/** The font for giving messages to the player */
@@ -867,7 +869,8 @@ public class GameMode implements Screen {
 
 		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles
-		earthTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
+		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
+		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:alien", BitmapFont.class);
 
@@ -884,7 +887,7 @@ public class GameMode implements Screen {
 			levels[i] = directory.getEntry("level" + Integer.toString(i + 1), JsonValue.class);
 		}
 
-		this.levelLoader = new LevelLoader(earthTile, earthTile, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
 		// loadLevel(levelIndex);
 		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT));
 	}
@@ -897,8 +900,6 @@ public class GameMode implements Screen {
 			this.scene = levelLoader.load(testlevel, constants.get("defaults"), new Rectangle(0, 0,
 					canvas.width, canvas.height));
 		}
-
 	}
-
 
 }
