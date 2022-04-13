@@ -119,7 +119,7 @@ public class GameMode implements Screen {
 	private JsonValue testlevel;
 	/** Reference to the character avatar */
 	private DaleModel dale;
-	private FlyModel[] flies;
+	private PooledList<FlyModel> flies;
 	private SceneModel scene;
 
 	private LevelLoader levelLoader;
@@ -135,7 +135,7 @@ public class GameMode implements Screen {
 		GRAPPLE_FORCE,
 	}
 
-	private FlyController[] flyControllers;
+	private PooledList<FlyController> flyControllers;
 
 	private int colorChangeCountdown;
 
@@ -391,7 +391,7 @@ public class GameMode implements Screen {
 		setFailure(false);
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
-		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
+		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
 		populateLevel();
 	}
@@ -423,30 +423,24 @@ public class GameMode implements Screen {
 
 		daleController = new DaleController(this.dale);
 
-		dwidth = FLY_SIZE / scale.x;
-		dheight = FLY_SIZE / scale.y;
-		flies = new FlyModel[2];
-		flies[0] = new FlyModel(constants.get("fly"), 5f, 5f, dwidth, dheight, FlyModel.IdleType.STATIONARY);
-		flies[0].setDrawScale(scale);
-		flies[0].initializeTexture(flyIdleTexture, flyChaseTexture);
-		addObject(flies[0]);
-		flies[1] = new FlyModel(constants.get("fly"), 5f, 15f, dwidth, dheight, FlyModel.IdleType.HORIZONTAL);
-		flies[1].setDrawScale(scale);
-		flies[1].initializeTexture(flyIdleTexture, flyChaseTexture);
-		addObject(flies[1]);
-		flyControllers = new FlyController[2];
-		for (int i = 0; i < flies.length; i++) {
-			flyControllers[i] = new FlyController(flies[i], dale, scene);
+		dwidth = flyTexture.getRegionWidth() / scale.x;
+		dheight = flyTexture.getRegionHeight() / scale.y;
+		flies = new PooledList<>();
+		flyControllers = new PooledList<>();
+		for (Vector2 flyLocation : scene.getFlyLocations()) {
+			FlyModel fly = new FlyModel(constants.get("fly"), flyLocation.x, flyLocation.y, dwidth, dheight, FlyModel.IdleType.STATIONARY);
+			fly.setDrawScale(scale);
+			fly.initializeTexture(flyIdleTexture, flyChaseTexture);
+			flies.add(fly);
+			addObject(fly);
+			flyControllers.add(new FlyController(fly, dale, scene));
+
 		}
 
 		collisionController = new CollisionController(this.dale, this.flies, this.scene);
 
 		world.setContactListener(this.collisionController);
 
-//		scene.setGoalTexture(goalTile);
-//		scene.setWallTexture(earthTile);
-//		scene.populateLevel(constants.get("walls"), constants.get("platforms"), constants.get("defaults"),
-//				constants.get("goal"));
 		scene.activatePhysics(this.world);
 
 		JsonValue defaults = constants.get("defaults");
@@ -587,9 +581,9 @@ public class GameMode implements Screen {
 
 		dale.setMatch(daleMatches());
 
-		for (int i = 0; i < flyControllers.length; i++){
-			flyControllers[i].changeDirection();
-			flyControllers[i].setVelocity();
+		for (FlyController flyController : flyControllers) {
+			flyController.changeDirection();
+			flyController.setVelocity();
 		}
 
 
@@ -852,8 +846,8 @@ public class GameMode implements Screen {
 		ColorRegionModel.setColorTexture(colors);
 
 		this.testlevel = directory.getEntry("testlevel", JsonValue.class);
-		this.levelLoader = new LevelLoader(earthTile, earthTile, goalTile);
-		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
+		this.levelLoader = new LevelLoader(earthTile, earthTile, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT));
 	}
 
 }
