@@ -1,15 +1,26 @@
 {
-	"textures": {
-        "shared:earth" : {
+    "textures": {
+        "shared:brick" : {
             "file":  "platform/wall.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflective" : {
+            "file":  "platform/reflective.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
         "shared:goal":   "platform/disco.png",
         "platform:fly": "platform/fly.png",
-        "platform:blue": "platform/idle1blue.png",
-        "platform:green": "platform/idle1green.png",
-        "platform:pink": "platform/idle1pink.png",
+        "platform:head:idle:pink": "platform/idleheadpink.png",
+        "platform:head:idle:blue": "platform/idleheadblue.png",
+        "platform:head:idle:green": "platform/idleheadgreen.png",
+        "platform:body:idle:pink": "platform/idlebodypink.png",
+        "platform:body:idle:blue": "platform/idlebodyblue.png",
+        "platform:body:idle:green": "platform/idlebodygreen.png",
+        "platform:body:walk:pink": "platform/walkspritepink.png",
+        "platform:body:walk:blue": "platform/walkspriteblue.png",
+        "platform:body:walk:green": "platform/walkspritegreen.png",
         "platform:flyidle": "platform/fly_idle_blue.png",
         "platform:flychasing": "platform/fly_chasing.png",
         "platform:pinkcolor": "platform/color_pink.png",
@@ -25,13 +36,15 @@
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json",
-        "testlevel": "platform/testlevel.json"
+        "testlevel": "platform/testlevel.json",
+        "level1": "levels/1.json",
+        "level2": "levels/2.json"
     },
     "sounds" : {
         "theme" : "shared/theme.mp3",
         "platform:jump" : "platform/jump.mp3",
         "platform:pew"  : "platform/pew.mp3",
-        "platform:plop" : "platform/plop.mp3",
+        "platform:plop" : "platform/plop.mp3"
     },
     "fonts": {
         "shared:retro": {

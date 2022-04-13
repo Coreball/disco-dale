@@ -56,12 +56,16 @@ public class GameMode implements Screen {
 	private static int LOSE_CODE = -1;
 	private static int PLAY_CODE = 0;
 
-	private static int CHANGE_COLOR_TIME = 300;
+	private static int CHANGE_COLOR_TIME = 440;
 
 	private static int FLY_SIZE = 32;
 
-	/** The texture for walls and platforms */
-	protected TextureRegion earthTile;
+	private static int NUM_LEVELS = 10;
+
+	/** The texture for neutral walls */
+	protected TextureRegion brickTile;
+	/** The texture for non-grappleable walls */
+	protected TextureRegion reflectiveTile;
 	/** The texture for the exit condition */
 	protected TextureRegion goalTile;
 	/** The font for giving messages to the player */
@@ -75,6 +79,8 @@ public class GameMode implements Screen {
 	protected PooledList<Obstacle> addQueue = new PooledList<Obstacle>();
 	/** Listener that will update the player mode when we are done */
 	private ScreenListener listener;
+
+	private int levelIndex;
 
 	/** The Box2D world */
 	protected World world;
@@ -94,10 +100,13 @@ public class GameMode implements Screen {
 	/** Countdown active for winning or losing */
 	protected int countdown;
 
-	/** Texture asset for character avatar */
-	private TextureRegion blueTexture;
-	private TextureRegion greenTexture;
-	private TextureRegion pinkTexture;
+	/** All head idle textures for Dale, in order of colors */
+	private TextureRegion[] headIdleTextures;
+	/** All body idle textures for Dale, in order of colors */
+	private TextureRegion[] bodyIdleTextures;
+	/** All body walk textures for Dale, in order of colors */
+	private FilmStrip[] bodyWalkTextures;
+
 	private Texture flyIdleTexture;
 	private Texture flyChaseTexture;
 
@@ -107,9 +116,11 @@ public class GameMode implements Screen {
 	private Sound theme;
 	private long themeId = -1;
 
-	/** The jump sound. We only want to play once. */
-	private Sound jumpSound;
-	private long jumpId = -1;
+	// TODO support colors with the split-body model
+	/** Dale body texture */
+	private TextureRegion pinkGrapple2Texture;
+	private TextureRegion pinkIdleBody1Texture;
+
 	/** The default sound volume */
 	private float volume;
 
@@ -117,6 +128,8 @@ public class GameMode implements Screen {
 	/** Physics constants for initialization */
 	private JsonValue constants;
 	private JsonValue testlevel;
+
+	private JsonValue[] levels = new JsonValue[NUM_LEVELS];
 	/** Reference to the character avatar */
 	private DaleModel dale;
 	private PooledList<FlyModel> flies;
@@ -260,6 +273,14 @@ public class GameMode implements Screen {
 		this.scene.setCanvas(canvas);
 	}
 
+	public void setLevel(int index){
+		levelIndex = index;
+	}
+
+	public void nextLevel(){
+		levelIndex = (levelIndex + 1) % NUM_LEVELS;
+	}
+
 	/**
 	 * Creates a new game world with the default values.
 	 *
@@ -391,7 +412,8 @@ public class GameMode implements Screen {
 		setFailure(false);
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
-		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
+		loadLevel(levelIndex);
+		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
 		populateLevel();
 	}
@@ -400,12 +422,20 @@ public class GameMode implements Screen {
 	 * Lays out the game geography.
 	 */
 	private void populateLevel() {
-		float dwidth = blueTexture.getRegionWidth() / scale.x;
-		float dheight = blueTexture.getRegionHeight() / scale.y;
-		TextureRegion[] textures = {pinkTexture, blueTexture, greenTexture};
-		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"), dwidth, dheight, textures);
+		float dradius = headIdleTextures[0].getRegionWidth() / scale.x / 2f;
+		float dwidth = bodyIdleTextures[0].getRegionWidth() / scale.x;
+		float dheight = bodyIdleTextures[0].getRegionHeight() / scale.y;
+		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
+
+		DaleColor[] availableColors = {DaleColor.PINK, DaleColor.BLUE, DaleColor.GREEN};
+		TextureRegion[] availableHeadIdleTextures = {headIdleTextures[0], headIdleTextures[1], headIdleTextures[2]};
+		TextureRegion[] availableBodyIdleTextures = {bodyIdleTextures[0], bodyIdleTextures[1], bodyIdleTextures[2]};
+		FilmStrip[] availableBodyWalkTextures = {bodyWalkTextures[0], bodyWalkTextures[1], bodyWalkTextures[2]};
+
+		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
+				dradius, dwidth, dheight, bodyOffset, availableColors, availableHeadIdleTextures,
+				availableBodyIdleTextures, availableBodyWalkTextures);
 		dale.setDrawScale(scale);
-		dale.setDaleTexture();
 
 		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
 		tonguePixmap.setColor(Color.PINK);
@@ -419,8 +449,6 @@ public class GameMode implements Screen {
 		dale.setStickyPartTexture(stickyPartTexture);
 
 		addObject(dale);
-
-
 		daleController = new DaleController(this.dale);
 
 		dwidth = FLY_SIZE / scale.x;
@@ -566,7 +594,6 @@ public class GameMode implements Screen {
 	 */
 	public void update(float dt) {
 		daleController.processMovement();
-		daleController.processJumping();
 		daleController.processColorRotation();
 		daleController.processGrappleAction(world);
 		dale.applyForce();
@@ -574,17 +601,12 @@ public class GameMode implements Screen {
 
 		themeId = playBGM(theme, themeId, volume);
 
-		if (dale.isJumping()) {
-			jumpId = playSound(jumpSound, jumpId, volume);
-		}
-
 		dale.setMatch(daleMatches());
 
 		for (FlyController flyController : flyControllers) {
 			flyController.changeDirection();
 			flyController.setVelocity();
 		}
-
 
 		int winLose = dale.getWinLose();
 		if(winLose == WIN_CODE){
@@ -822,19 +844,33 @@ public class GameMode implements Screen {
 	 * @param directory Reference to global asset manager.
 	 */
 	public void gatherAssets(AssetDirectory directory) {
-		blueTexture = new TextureRegion(directory.getEntry("platform:blue", Texture.class));
-		greenTexture = new TextureRegion(directory.getEntry("platform:green", Texture.class));
-		pinkTexture = new TextureRegion(directory.getEntry("platform:pink", Texture.class));
+		bodyIdleTextures = new TextureRegion[]{
+				new TextureRegion(directory.getEntry("platform:body:idle:pink", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:body:idle:blue", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:body:idle:green", Texture.class))
+		};
+
+		headIdleTextures = new TextureRegion[]{
+				new TextureRegion(directory.getEntry("platform:head:idle:pink", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:head:idle:blue", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:head:idle:green", Texture.class))
+		};
+
+		bodyWalkTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:body:walk:pink", Texture.class), 1, 10),
+				new FilmStrip(directory.getEntry("platform:body:walk:blue", Texture.class), 1, 10),
+				new FilmStrip(directory.getEntry("platform:body:walk:green", Texture.class), 1, 10),
+		};
 
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
 		flyChaseTexture = directory.getEntry("platform:flychasing", Texture.class);
 
-		jumpSound = directory.getEntry("platform:jump", Sound.class);
 		theme = directory.getEntry("theme", Sound.class);
 
 		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles
-		earthTile = new TextureRegion(directory.getEntry("shared:earth", Texture.class));
+		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
+		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:alien", BitmapFont.class);
 
@@ -846,8 +882,24 @@ public class GameMode implements Screen {
 		ColorRegionModel.setColorTexture(colors);
 
 		this.testlevel = directory.getEntry("testlevel", JsonValue.class);
-		this.levelLoader = new LevelLoader(earthTile, earthTile, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+
+		for (int i = 0; i < NUM_LEVELS; i++){
+			levels[i] = directory.getEntry("level" + Integer.toString(i + 1), JsonValue.class);
+		}
+
+		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		// loadLevel(levelIndex);
 		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT));
+	}
+
+	private void loadLevel(int index){
+		if (levels[index] != null) {
+			this.scene = levelLoader.load(levels[index], constants.get("defaults"), new Rectangle(0, 0,
+					canvas.width, canvas.height));
+		} else {
+			this.scene = levelLoader.load(testlevel, constants.get("defaults"), new Rectangle(0, 0,
+					canvas.width, canvas.height));
+		}
 	}
 
 }

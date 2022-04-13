@@ -159,7 +159,7 @@ public class ColorRegionModel implements Cloneable{
 //			canvas.drawFilledTri(tri, color.toGdxColor(),0f,0f,getAngle(), drawScale.x,drawScale.y);
 //		}
 		if (useTexture){
-			polygonRegionTexture = new PolygonRegion(colors[color.toColorTexture()],
+			polygonRegionTexture = new PolygonRegion(colors[color.ordinal()],
 					polygonRegion.getVertices(), polygonRegion.getTriangles());
 			canvas.draw(polygonRegionTexture, 0, 0);
 		} else {

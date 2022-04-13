@@ -71,6 +71,10 @@ public class MenuMode implements Screen, InputProcessor {
         type = Type.START;
     }
 
+    public int getLevel(){
+        return levelPressed;
+    }
+
     /**
      * Called when the Screen should render itself.
      *
@@ -275,8 +279,8 @@ public class MenuMode implements Screen, InputProcessor {
             int up = LEVEL_BUTTONS_OFFSET_Y - i * LEVEL_BUTTONS_MARGIN + levelButton.getHeight() / 2;
             int down = LEVEL_BUTTONS_OFFSET_Y - i * LEVEL_BUTTONS_MARGIN - levelButton.getHeight() / 2;
             if (inBounds(screenX, screenY, left, right, up, down)){
-                levelPressed = -1;
                 listener.exitScreen(this, Constants.EXIT_LEVEL);
+                levelPressed = -1;
                 return false;
             }
             levelPressed = -1;

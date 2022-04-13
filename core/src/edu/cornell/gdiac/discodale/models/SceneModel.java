@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.JsonValue;
@@ -39,7 +40,8 @@ public class SceneModel {
     private PooledList<ColorRegionModel> colorRegions;
     private ColorMovement colorMovement;
     // TODO: as inputs of scenemodel?
-    private float colorMovementAmount = 1;
+    private float colorRotationAmount = 0.5f;
+    private float colorMovementAmount = 1f;
     private float colorMovementX = 512;
     private float colorMovementY = 288;
 
@@ -47,8 +49,8 @@ public class SceneModel {
 
 
     /** The texture for walls and platforms */
-    protected TextureRegion wallTile;
-    protected TextureRegion platformTile;
+    protected TextureRegion brickTile;
+    protected TextureRegion reflectiveTile;
     /** The texture for the exit condition */
     protected TextureRegion goalTile;
 
@@ -85,16 +87,16 @@ public class SceneModel {
         this.centerOfRotation = centerOfRotation;
     }
 
-    public void setWallTexture(TextureRegion texture) {
-        this.wallTile = texture;
+    public void setBrickTexture(TextureRegion texture) {
+        this.brickTile = texture;
     }
 
     public void setGoalTexture(TextureRegion texture) {
         this.goalTile = texture;
     }
 
-    public void setPlatformTexture(TextureRegion texture) {
-        this.platformTile = texture;
+    public void setReflectiveTexture(TextureRegion texture) {
+        this.reflectiveTile = texture;
     }
 
     public Vector2 getDaleStart() {
@@ -203,7 +205,7 @@ public class SceneModel {
                 break;
             case ROTATE:
                 for(ColorRegionModel cr:colorRegions){
-                    cr.rotateAround(centerOfRotation.x,centerOfRotation.y,colorMovementAmount);
+                    cr.rotateAround(centerOfRotation.x,centerOfRotation.y,colorRotationAmount);
                 }
                 break;
             default:
@@ -274,7 +276,7 @@ public class SceneModel {
         updateGrid();
     }
 
-    public void addPlatform(float[] vertices, String name, JsonValue defaults) {
+    public void addBrick(float[] vertices, String name, JsonValue defaults) {
         PolygonObstacle obj;
         obj = new PolygonObstacle(vertices, 0, 0);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
@@ -282,12 +284,16 @@ public class SceneModel {
         obj.setFriction(defaults.getFloat("friction", 0.0f));
         obj.setRestitution(defaults.getFloat("restitution", 0.0f));
         obj.setDrawScale(scale);
-        obj.setTexture(wallTile);
+        obj.setTexture(brickTile);
         obj.setName(name);
+        Filter objFilter = new Filter();
+        objFilter.categoryBits = 0b00000001;
+        objFilter.maskBits     = 0b00011100;
+        obj.setFilterData(objFilter);
         addObject(obj);
     }
 
-    public void addWall(float[] vertices, String name, JsonValue defaults) {
+    public void addReflective(float[] vertices, String name, JsonValue defaults) {
         PolygonObstacle obj;
         obj = new PolygonObstacle(vertices, 0, 0);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
@@ -295,8 +301,12 @@ public class SceneModel {
         obj.setFriction(defaults.getFloat("friction", 0.0f));
         obj.setRestitution(defaults.getFloat("restitution", 0.0f));
         obj.setDrawScale(scale);
-        obj.setTexture(wallTile);
+        obj.setTexture(reflectiveTile);
         obj.setName(name);
+        Filter objFilter = new Filter();
+        objFilter.categoryBits = 0b00000001;
+        objFilter.maskBits     = 0b00011100;
+        obj.setFilterData(objFilter);
         addObject(obj);
     }
 
@@ -313,6 +323,10 @@ public class SceneModel {
         goalDoor.setDrawScale(scale);
         goalDoor.setTexture(goalTile);
         goalDoor.setName("goal");
+        Filter goalFilter = new Filter();
+        goalFilter.categoryBits = 0b00000010;
+        goalFilter.maskBits     = 0b00001000;
+        goalDoor.setFilterData(goalFilter);
         addObject(goalDoor);
     }
 

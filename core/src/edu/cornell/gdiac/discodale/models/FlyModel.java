@@ -135,6 +135,10 @@ public class FlyModel extends CapsuleObstacle {
 				width * data.get("shrink").getFloat(0),
 				height * data.get("shrink").getFloat(1));
 		setFixedRotation(true);
+		Filter flyFilter = new Filter();
+		flyFilter.categoryBits = 0b00000100;
+		flyFilter.maskBits     = 0b00001001;
+		setFilterData(flyFilter);
 		setAngry(false);
 		sensorName = "FlyGroundSensor";
 		this.data = data;

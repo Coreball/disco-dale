@@ -7,18 +7,16 @@ import com.badlogic.gdx.utils.JsonValue;
 import edu.cornell.gdiac.discodale.models.ColorRegionModel;
 import edu.cornell.gdiac.discodale.models.DaleColor;
 import edu.cornell.gdiac.discodale.models.SceneModel;
-import edu.cornell.gdiac.util.PooledList;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class LevelLoader {
 
-    /** The texture for walls and platforms */
-    protected TextureRegion wallTile;
-    protected TextureRegion platformTile;
+    /** The texture for brick and reflective walls */
+    protected TextureRegion brickTile;
+    protected TextureRegion reflectiveTile;
     /** The texture for the exit condition */
     protected TextureRegion goalTile;
 
@@ -31,9 +29,9 @@ public class LevelLoader {
     private Vector2 scale;
 //    private Vector2 scale = new Vector2(1024 / Constants.DEFAULT_WIDTH, 576 / Constants.DEFAULT_HEIGHT);
 
-    public LevelLoader(TextureRegion wallTile, TextureRegion platformTile, TextureRegion goalTile, float width, float height) {
-        this.wallTile = wallTile;
-        this.platformTile = platformTile;
+    public LevelLoader(TextureRegion brickTile, TextureRegion reflectiveTile, TextureRegion goalTile, float width, float height) {
+        this.brickTile = brickTile;
+        this.reflectiveTile = reflectiveTile;
         this.goalTile = goalTile;
         this.bounds = new Rectangle(0, 0, width, height);
     }
@@ -75,9 +73,9 @@ public class LevelLoader {
             }
         }
         SceneModel model = new SceneModel(this.bounds, m);
-        model.setWallTexture(this.wallTile);
+        model.setBrickTexture(this.brickTile);
+        model.setReflectiveTexture(this.reflectiveTile);
         model.setGoalTexture(this.goalTile);
-        model.setPlatformTexture(this.platformTile);
 
         for (JsonValue layer : json.get("layers")) {
             if (layer.getString("name").equals("colors")) {
@@ -153,10 +151,10 @@ public class LevelLoader {
                         case 0:
                             break;
                         case 1:
-                            model.addPlatform(v, "platform" + (j + i * width), defaults);
+                            model.addBrick(v, "brick" + (j + i * width), defaults);
                             break;
                         case 2:
-                            model.addWall(v, "wall" + (j + i * width), defaults);
+                            model.addReflective(v, "reflective" + (j + i * width), defaults);
                             break;
                         case 8:
                             model.setDaleStart(

@@ -779,6 +779,19 @@ public abstract class SimpleObstacle extends Obstacle {
 			canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),1,1);
 		}
 	}
+
+	/**
+	 * Draws the physics object with scaling
+	 *
+	 * @param canvas Drawing context
+	 * @param sx     X scale
+	 * @param sy     Y scale
+	 */
+	public void draw(GameCanvas canvas, float sx, float sy) {
+		if (texture != null) {
+			canvas.draw(texture,Color.WHITE,origin.x,origin.y,getX()*drawScale.x,getY()*drawScale.x,getAngle(),sx,sy);
+		}
+	}
 	
 	/**
 	 * Returns the Box2D body for this object.
