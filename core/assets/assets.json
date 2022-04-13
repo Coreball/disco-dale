@@ -25,7 +25,9 @@
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json",
-        "testlevel": "platform/testlevel.json"
+        "testlevel": "platform/testlevel.json",
+        "level1": "levels/1.json",
+        "level2": "levels/2.json"
     },
     "sounds" : {
         "theme" : "shared/theme.mp3",
