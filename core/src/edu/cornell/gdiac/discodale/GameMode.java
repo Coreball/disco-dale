@@ -275,6 +275,7 @@ public class GameMode implements Screen {
 
 	public void setLevel(int index){
 		levelIndex = index;
+
 	}
 
 	public void nextLevel(){
@@ -397,7 +398,6 @@ public class GameMode implements Screen {
 	 */
 	public void reset() {
 		Vector2 gravity = new Vector2(world.getGravity());
-
 		for (Obstacle obj : objects) {
 			obj.deactivatePhysics(world);
 		}
@@ -412,6 +412,7 @@ public class GameMode implements Screen {
 		setFailure(false);
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
+		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f);
 		loadLevel(levelIndex);
 		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
@@ -533,6 +534,7 @@ public class GameMode implements Screen {
 		// Handle resets
 		if (input.didReset()) {
 			reset();
+			canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 		}
 
 		// Now it is time to maybe switch screens.
@@ -548,10 +550,12 @@ public class GameMode implements Screen {
 		} else if (input.didAdvance()) {
 			pause();
 			listener.exitScreen(this, Constants.EXIT_NEXT);
+			//canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 			return false;
 		} else if (input.didRetreat()) {
 			pause();
 			listener.exitScreen(this, Constants.EXIT_PREV);
+			//canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 			return false;
 		} else if (countdown > 0) {
 			countdown--;
@@ -601,7 +605,12 @@ public class GameMode implements Screen {
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
-		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f);
+		if (canvas.getCameraZoom() > 0.75f) {
+			float zoom = canvas.getCameraZoom();
+			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - 0.01f);
+		} else {
+			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f);
+		}
 
 		themeId = playBGM(theme, themeId, volume);
 

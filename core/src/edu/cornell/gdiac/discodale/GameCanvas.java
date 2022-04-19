@@ -360,6 +360,8 @@ public class GameCanvas {
     	active = DrawPass.STANDARD;
     }
 
+	public float getCameraZoom() {return camera.zoom;}
+
 	/**
 	 * Update the camera's origin based on the player's position.
 	 *
