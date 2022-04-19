@@ -369,7 +369,7 @@ public class GameCanvas {
 	public void updateCam(float x, float y) {
 		camera.position.x = x;
 		camera.position.y = y;
-		camera.zoom = 1f;
+		camera.zoom = 0.75f;
 		camera.update();
 	}
 
@@ -382,7 +382,6 @@ public class GameCanvas {
 	 * @return A vector representing the world coordinates
 	 */
 	public Vector3 cameraConvert(float x, float y) {
-		System.out.println("Coordinates: (" + x + "," + y + ")");
 		Vector3 vec = new Vector3(x, y, 0.0f);
 		return camera.unproject(vec);
 	}

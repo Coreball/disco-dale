@@ -600,8 +600,6 @@ public class GameMode implements Screen {
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
-		//canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y);
-
 		themeId = playBGM(theme, themeId, volume);
 
 		dale.setMatch(daleMatches());
