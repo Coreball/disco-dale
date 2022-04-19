@@ -366,10 +366,27 @@ public class GameCanvas {
 	 * @param x the screen x-coordinate of the player
 	 * @param y the screen y-coordinate of the player
 	 */
-	public void updateCam(float x, float y) {
-		camera.position.x = x;
-		camera.position.y = y;
-		camera.zoom = 0.75f;
+	public void updateCam(float x, float y, float zoom) {
+		float scaledViewportHalfX = camera.viewportWidth * zoom * 0.5f;
+		float scaledViewportHalfY = camera.viewportHeight * zoom * 0.5f;
+
+		if (x < scaledViewportHalfX) {
+			camera.position.x = scaledViewportHalfX;
+		} else if (x > getWidth() - scaledViewportHalfX) {
+			camera.position.x = getWidth() - scaledViewportHalfX;
+		} else {
+			camera.position.x = x;
+		}
+
+		if (y < scaledViewportHalfY) {
+			camera.position.y = scaledViewportHalfY;
+		} else if (y > getHeight() - scaledViewportHalfY) {
+			camera.position.y = getHeight() - scaledViewportHalfY;
+		} else {
+			camera.position.y = y;
+		}
+
+		camera.zoom = zoom;
 		camera.update();
 	}
 

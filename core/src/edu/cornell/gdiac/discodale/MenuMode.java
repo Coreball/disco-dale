@@ -69,6 +69,7 @@ public class MenuMode implements Screen, InputProcessor {
         this.canvas = canvas;
         active = false;
         type = Type.START;
+        canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f);
     }
 
     public int getLevel(){

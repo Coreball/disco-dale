@@ -543,6 +543,7 @@ public class GameMode implements Screen {
 		} else if (input.didMenu()){
 			pause();
 			listener.exitScreen(this, Constants.EXIT_MENU);
+			canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 			return false;
 		} else if (input.didAdvance()) {
 			pause();
@@ -599,6 +600,8 @@ public class GameMode implements Screen {
 		daleController.processGrappleAction(world);
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
+
+		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f);
 
 		themeId = playBGM(theme, themeId, volume);
 
@@ -703,14 +706,12 @@ public class GameMode implements Screen {
 		if (complete) {
 			displayFont.setColor(Color.BLACK);
 			canvas.begin(); // DO NOT SCALE
-			//canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
-			canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
+			canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
 			canvas.end();
 		} else if (failed) {
 			displayFont.setColor(Color.BLACK);
 			canvas.begin(); // DO NOT SCALE
-			//canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
-			canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
+			canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
 			canvas.end();
 		}
 	}
