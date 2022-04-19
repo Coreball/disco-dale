@@ -534,7 +534,6 @@ public class GameMode implements Screen {
 		// Handle resets
 		if (input.didReset()) {
 			reset();
-			canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 		}
 
 		// Now it is time to maybe switch screens.
@@ -550,12 +549,10 @@ public class GameMode implements Screen {
 		} else if (input.didAdvance()) {
 			pause();
 			listener.exitScreen(this, Constants.EXIT_NEXT);
-			//canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 			return false;
 		} else if (input.didRetreat()) {
 			pause();
 			listener.exitScreen(this, Constants.EXIT_PREV);
-			//canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 			return false;
 		} else if (countdown > 0) {
 			countdown--;
