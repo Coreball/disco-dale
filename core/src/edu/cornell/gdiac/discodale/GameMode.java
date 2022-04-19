@@ -81,6 +81,7 @@ public class GameMode implements Screen {
 	private ScreenListener listener;
 
 	private int levelIndex;
+	private float zoomFactor;
 
 	/** The Box2D world */
 	protected World world;
@@ -602,21 +603,30 @@ public class GameMode implements Screen {
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
+		themeId = playBGM(theme, themeId, volume);
+		dale.setMatch(daleMatches());
+
 		if (canvas.getCameraZoom() > 0.75f) {
 			float zoom = canvas.getCameraZoom();
 			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - 0.01f);
 		} else {
 			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f);
+
+			for (FlyController flyController : flyControllers) {
+				flyController.changeDirection();
+				flyController.setVelocity();
+			}
+
+			if(colorChangeCountdown>0){
+				colorChangeCountdown--;
+			} else {
+				colorChangeCountdown = CHANGE_COLOR_TIME;
+				scene.updateColorRegions();
+			}
+
+			scene.updateColorRegionMovement();
 		}
 
-		themeId = playBGM(theme, themeId, volume);
-
-		dale.setMatch(daleMatches());
-
-		for (FlyController flyController : flyControllers) {
-			flyController.changeDirection();
-			flyController.setVelocity();
-		}
 
 		int winLose = dale.getWinLose();
 		if(winLose == WIN_CODE){
@@ -630,15 +640,8 @@ public class GameMode implements Screen {
 //			System.out.println("lose");
 		}
 
-		if(colorChangeCountdown>0){
-			colorChangeCountdown--;
-		}else {
-			colorChangeCountdown = CHANGE_COLOR_TIME;
-			scene.updateColorRegions();
-		}
-
-		 scene.updateGrid();
-		scene.updateColorRegionMovement();
+		scene.updateGrid();
+		//scene.updateColorRegionMovement();
 	}
 
 	/**
