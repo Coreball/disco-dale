@@ -81,6 +81,7 @@ public class GameMode implements Screen {
 	private ScreenListener listener;
 
 	private int levelIndex;
+	private float zoomFactor;
 
 	/** The Box2D world */
 	protected World world;
@@ -275,6 +276,7 @@ public class GameMode implements Screen {
 
 	public void setLevel(int index){
 		levelIndex = index;
+
 	}
 
 	public void nextLevel(){
@@ -397,7 +399,6 @@ public class GameMode implements Screen {
 	 */
 	public void reset() {
 		Vector2 gravity = new Vector2(world.getGravity());
-
 		for (Obstacle obj : objects) {
 			obj.deactivatePhysics(world);
 		}
@@ -412,6 +413,7 @@ public class GameMode implements Screen {
 		setFailure(false);
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
+		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f);
 		loadLevel(levelIndex);
 		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
@@ -496,12 +498,10 @@ public class GameMode implements Screen {
 		if (listener == null) {
 			return true;
 		}
-
 		// Toggle debug
 		if (input.didDebug()) {
 			debug = !debug;
 		}
-
 
 		// Adjust values for technical prototype if buttons pressed
 		if (input.didSwitchAdjust()) {
@@ -543,6 +543,7 @@ public class GameMode implements Screen {
 		} else if (input.didMenu()){
 			pause();
 			listener.exitScreen(this, Constants.EXIT_MENU);
+			canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 			return false;
 		} else if (input.didAdvance()) {
 			pause();
@@ -594,22 +595,42 @@ public class GameMode implements Screen {
 	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
-		daleController.processMovement();
-		daleController.processColorRotation();
-		daleController.processGrappleAction(world);
+//		daleController.processMovement();
+//		daleController.processColorRotation();
+//		daleController.processGrappleAction(world);
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
-		// canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y);
-
 		themeId = playBGM(theme, themeId, volume);
-
 		dale.setMatch(daleMatches());
 
-		for (FlyController flyController : flyControllers) {
-			flyController.changeDirection();
-			flyController.setVelocity();
+		// zoom at the start of the level
+		if (canvas.getCameraZoom() > 0.75f) {
+			float zoom = canvas.getCameraZoom();
+			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - 0.005f);
+			scene.updateGrid();
+		// consistent zoom for the rest of the level
+		} else {
+			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f);
+			daleController.processMovement();
+			daleController.processColorRotation();
+			daleController.processGrappleAction(world);
+			for (FlyController flyController : flyControllers) {
+				flyController.changeDirection();
+				flyController.setVelocity();
+			}
+
+			if(colorChangeCountdown>0){
+				colorChangeCountdown--;
+			} else {
+				colorChangeCountdown = CHANGE_COLOR_TIME;
+				scene.updateColorRegions();
+			}
+
+			scene.updateGrid();
+			scene.updateColorRegionMovement();
 		}
+
 
 		int winLose = dale.getWinLose();
 		if(winLose == WIN_CODE){
@@ -622,16 +643,6 @@ public class GameMode implements Screen {
 //			//debugging message
 //			System.out.println("lose");
 		}
-
-		if(colorChangeCountdown>0){
-			colorChangeCountdown--;
-		}else {
-			colorChangeCountdown = CHANGE_COLOR_TIME;
-			scene.updateColorRegions();
-		}
-
-		 scene.updateGrid();
-		scene.updateColorRegionMovement();
 	}
 
 	/**
@@ -705,14 +716,12 @@ public class GameMode implements Screen {
 		if (complete) {
 			displayFont.setColor(Color.BLACK);
 			canvas.begin(); // DO NOT SCALE
-			//canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
-			canvas.drawTextCentered("VICTORY!", displayFont, 0.0f);
+			canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
 			canvas.end();
 		} else if (failed) {
 			displayFont.setColor(Color.BLACK);
 			canvas.begin(); // DO NOT SCALE
-			//canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
-			canvas.drawTextCentered("FAILURE!", displayFont, 0.0f);
+			canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
 			canvas.end();
 		}
 	}

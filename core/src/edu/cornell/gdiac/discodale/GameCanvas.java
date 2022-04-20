@@ -360,16 +360,35 @@ public class GameCanvas {
     	active = DrawPass.STANDARD;
     }
 
+	public float getCameraZoom() {return camera.zoom;}
+
 	/**
 	 * Update the camera's origin based on the player's position.
 	 *
 	 * @param x the screen x-coordinate of the player
 	 * @param y the screen y-coordinate of the player
 	 */
-	public void updateCam(float x, float y) {
-		camera.position.x = x;
-		camera.position.y = y;
-		camera.zoom = 0.75f;
+	public void updateCam(float x, float y, float zoom) {
+		float scaledViewportHalfX = camera.viewportWidth * zoom * 0.5f;
+		float scaledViewportHalfY = camera.viewportHeight * zoom * 0.5f;
+
+		if (x < scaledViewportHalfX) {
+			camera.position.x = scaledViewportHalfX;
+		} else if (x > getWidth() - scaledViewportHalfX) {
+			camera.position.x = getWidth() - scaledViewportHalfX;
+		} else {
+			camera.position.x = x;
+		}
+
+		if (y < scaledViewportHalfY) {
+			camera.position.y = scaledViewportHalfY;
+		} else if (y > getHeight() - scaledViewportHalfY) {
+			camera.position.y = getHeight() - scaledViewportHalfY;
+		} else {
+			camera.position.y = y;
+		}
+
+		camera.zoom = zoom;
 		camera.update();
 	}
 
@@ -382,7 +401,7 @@ public class GameCanvas {
 	 * @return A vector representing the world coordinates
 	 */
 	public Vector3 cameraConvert(float x, float y) {
-		Vector3 vec = new Vector3(x, y, 1.0f);
+		Vector3 vec = new Vector3(x, y, 0.0f);
 		return camera.unproject(vec);
 	}
     
