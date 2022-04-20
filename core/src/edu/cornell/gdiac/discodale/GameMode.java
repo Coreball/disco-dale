@@ -498,12 +498,10 @@ public class GameMode implements Screen {
 		if (listener == null) {
 			return true;
 		}
-
 		// Toggle debug
 		if (input.didDebug()) {
 			debug = !debug;
 		}
-
 
 		// Adjust values for technical prototype if buttons pressed
 		if (input.didSwitchAdjust()) {
@@ -597,21 +595,26 @@ public class GameMode implements Screen {
 	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
-		daleController.processMovement();
-		daleController.processColorRotation();
-		daleController.processGrappleAction(world);
+//		daleController.processMovement();
+//		daleController.processColorRotation();
+//		daleController.processGrappleAction(world);
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
 		themeId = playBGM(theme, themeId, volume);
 		dale.setMatch(daleMatches());
 
+		// zoom at the start of the level
 		if (canvas.getCameraZoom() > 0.75f) {
 			float zoom = canvas.getCameraZoom();
-			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - 0.01f);
+			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - 0.005f);
+			scene.updateGrid();
+		// consistent zoom for the rest of the level
 		} else {
 			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f);
-
+			daleController.processMovement();
+			daleController.processColorRotation();
+			daleController.processGrappleAction(world);
 			for (FlyController flyController : flyControllers) {
 				flyController.changeDirection();
 				flyController.setVelocity();
@@ -624,6 +627,7 @@ public class GameMode implements Screen {
 				scene.updateColorRegions();
 			}
 
+			scene.updateGrid();
 			scene.updateColorRegionMovement();
 		}
 
@@ -639,9 +643,6 @@ public class GameMode implements Screen {
 //			//debugging message
 //			System.out.println("lose");
 		}
-
-		scene.updateGrid();
-		//scene.updateColorRegionMovement();
 	}
 
 	/**
