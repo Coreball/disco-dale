@@ -68,10 +68,10 @@ public class CollisionController implements ContactListener {
             }
 
             // See if we have landed on the ground.
-            if ((dale.getSensorName().equals(fd2) && dale != bd1) ||
-                    (dale.getSensorName().equals(fd1) && dale != bd2)) {
+            if ((dale.getSensorName().equals(fd2) && dale != bd1 && dale.getBodyPart() != bd1) ||
+                    (dale.getSensorName().equals(fd1) && dale != bd2 && dale.getBodyPart() != bd2)) {
                 dale.setGrounded(true);
-                sensorFixtures.add(dale == bd1 ? fix2 : fix1); // Could have more than one ground
+                sensorFixtures.add(dale == bd1 || dale.getBodyPart() == bd1 ? fix2 : fix1); // Could have more than one ground
             }
 
             // Check for win condition
@@ -119,9 +119,9 @@ public class CollisionController implements ContactListener {
         Object bd1 = body1.getUserData();
         Object bd2 = body2.getUserData();
 
-        if ((dale.getSensorName().equals(fd2) && dale != bd1) ||
-                (dale.getSensorName().equals(fd1) && dale != bd2)) {
-            sensorFixtures.remove(dale == bd1 ? fix2 : fix1);
+        if ((dale.getSensorName().equals(fd2) && dale != bd1 && dale.getBodyPart() != bd1) ||
+                (dale.getSensorName().equals(fd1) && dale != bd2 && dale.getBodyPart() != bd2)) {
+            sensorFixtures.remove(dale == bd1 || dale.getBodyPart() == bd1 ? fix2 : fix1);
             if (sensorFixtures.size == 0) {
                 dale.setGrounded(false);
             }

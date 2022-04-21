@@ -191,6 +191,14 @@ public class DaleModel extends WheelObstacle {
 		return sensorName;
 	}
 
+	/**
+	 * Returns the obstacle representing Dale's body part
+	 * @return Dale's body part
+	 */
+	public Obstacle getBodyPart() {
+		return bodyPart;
+	}
+
 	// region Grapple Methods
 
 	/**
@@ -464,7 +472,7 @@ public class DaleModel extends WheelObstacle {
 					 float bodyOffset, DaleColor[] availableColors, TextureRegion[] headIdleTextures,
 					 TextureRegion[] bodyIdleTextures, FilmStrip[] bodyWalkTextures) {
 		// The shrink factors fit the image to a tigher hitbox
-		super(x, y, headRadius);
+		super(x, y, headRadius * data.getFloat("head_shrink", 1));
 		setDensity(data.getFloat("density", 0));
 		setFriction(data.getFloat("friction", 0)); /// HE WILL STICK TO WALLS IF YOU FORGET
 		setFixedRotation(true);
@@ -557,7 +565,7 @@ public class DaleModel extends WheelObstacle {
 		// We only allow Dale to walk when he's on the ground.
 		JsonValue sensorjv = data.get("sensor");
 		FixtureDef sensorDef = new FixtureDef();
-		sensorDef.density = data.getFloat("density", 0);
+		sensorDef.density = 0;
 		sensorDef.isSensor = true;
 
 		// Sensor for facing right is on the bottom
