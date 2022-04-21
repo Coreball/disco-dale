@@ -269,9 +269,16 @@ public class GameMode implements Screen {
 	 */
 	public void setCanvas(GameCanvas canvas) {
 		this.canvas = canvas;
-		this.scale.x = canvas.getWidth() / bounds.getWidth();
-		this.scale.y = canvas.getHeight() / bounds.getHeight();
 		this.scene.setCanvas(canvas);
+		updateScale();
+	}
+
+	public void updateScale() {
+//		this.scale.x = canvas.getWidth() / bounds.getWidth();
+//		this.scale.y = canvas.getHeight() / bounds.getHeight();
+		this.scale.x = 32f;
+		this.scale.y = 32f;
+		System.out.println("gamemode scale " + this.scale);
 	}
 
 	public void setLevel(int index){
@@ -413,7 +420,7 @@ public class GameMode implements Screen {
 		setFailure(false);
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
-		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f);
+		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f, this.bounds);
 		loadLevel(levelIndex);
 		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
@@ -543,7 +550,7 @@ public class GameMode implements Screen {
 		} else if (input.didMenu()){
 			pause();
 			listener.exitScreen(this, Constants.EXIT_MENU);
-			canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
+			canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f, this.bounds);
 			return false;
 		} else if (input.didAdvance()) {
 			pause();
@@ -607,11 +614,11 @@ public class GameMode implements Screen {
 		// zoom at the start of the level
 		if (canvas.getCameraZoom() > 0.75f) {
 			float zoom = canvas.getCameraZoom();
-			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - 0.005f);
+			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - 0.005f, this.bounds);
 			scene.updateGrid();
 		// consistent zoom for the rest of the level
 		} else {
-			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f);
+			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y,  0.75f, this.bounds);
 			daleController.processMovement();
 			daleController.processColorRotation();
 			daleController.processGrappleAction(world);
@@ -906,7 +913,7 @@ public class GameMode implements Screen {
 		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT));
 	}
 
-	private void loadLevel(int index){
+	private void loadLevel(int index) {
 		if (levels[index] != null) {
 			this.scene = levelLoader.load(levels[index], constants.get("defaults"), new Rectangle(0, 0,
 					canvas.width, canvas.height));
@@ -914,6 +921,17 @@ public class GameMode implements Screen {
 			this.scene = levelLoader.load(testlevel, constants.get("defaults"), new Rectangle(0, 0,
 					canvas.width, canvas.height));
 		}
+		this.bounds = new Rectangle(scene.getBounds());
+		updateScale();
+		canvas.updateCam(
+				(float) canvas.getWidth() / 2,
+				(float) canvas.getHeight() / 2,
+				Math.max(
+						this.bounds.getWidth() * 32 / this.canvas.getWidth(),
+						this.bounds.getHeight() * 32 / this.canvas.getHeight()
+				),
+				this.bounds
+		);
 	}
 
 }

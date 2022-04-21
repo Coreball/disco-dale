@@ -105,7 +105,7 @@ public class GameCanvas {
 		debugRender = new ShapeRenderer();
 		
 		// Set the projection matrix (for proper scaling)
-		camera = new OrthographicCamera(getWidth(),getHeight());
+		camera = new OrthographicCamera(getWidth(), getHeight());
 		camera.setToOrtho(false);
 		spriteBatch.setProjectionMatrix(camera.combined);
 		debugRender.setProjectionMatrix(camera.combined);
@@ -368,22 +368,24 @@ public class GameCanvas {
 	 * @param x the screen x-coordinate of the player
 	 * @param y the screen y-coordinate of the player
 	 */
-	public void updateCam(float x, float y, float zoom) {
+	public void updateCam(float x, float y, float zoom, Rectangle bounds) {
+		float xBound = bounds.getWidth() * 32;
+		float yBound = bounds.getHeight() * 32;
 		float scaledViewportHalfX = camera.viewportWidth * zoom * 0.5f;
 		float scaledViewportHalfY = camera.viewportHeight * zoom * 0.5f;
 
 		if (x < scaledViewportHalfX) {
 			camera.position.x = scaledViewportHalfX;
-		} else if (x > getWidth() - scaledViewportHalfX) {
-			camera.position.x = getWidth() - scaledViewportHalfX;
+		} else if (x > xBound - scaledViewportHalfX) {
+			camera.position.x = xBound - scaledViewportHalfX;
 		} else {
 			camera.position.x = x;
 		}
 
 		if (y < scaledViewportHalfY) {
 			camera.position.y = scaledViewportHalfY;
-		} else if (y > getHeight() - scaledViewportHalfY) {
-			camera.position.y = getHeight() - scaledViewportHalfY;
+		} else if (y > yBound - scaledViewportHalfY) {
+			camera.position.y = yBound - scaledViewportHalfY;
 		} else {
 			camera.position.y = y;
 		}

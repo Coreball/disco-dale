@@ -39,6 +39,11 @@ public class LevelLoader {
     public SceneModel load(JsonValue json, JsonValue defaults, Rectangle canvasBounds) {
         this.tileWidth = json.getInt("tilewidth");
         this.tileHeight = json.getInt("tileheight");
+        this.bounds = new Rectangle(
+                0, 0,
+                json.getInt("width"),
+                json.getInt("height")
+        );
         this.canvasBounds = new Rectangle(canvasBounds);
         this.levelBounds = new Rectangle(
                 0, 0,
