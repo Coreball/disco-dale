@@ -126,6 +126,8 @@ public class GDXRoot extends Game implements ScreenListener {
 			menu.hide();
 			controller.gatherAssets(directory);
 			controller.setCanvas(canvas);
+			controller.setVolumeBgm(menu.getVolumeBgm());
+			controller.setVolumeSfx(menu.getVolumeSfx());
 			controller.setScreenListener(this);
 			controller.setLevel(menu.getLevel());
 			controller.reset();
@@ -138,17 +140,21 @@ public class GDXRoot extends Game implements ScreenListener {
 			menu.setType(MenuMode.Type.START);
 			setScreen(menu);
 		} else if (exitCode == Constants.EXIT_NEXT) {
-//			current = (current+1) % controller.length;
+			controller.setVolumeBgm(menu.getVolumeBgm());
+			controller.setVolumeSfx(menu.getVolumeSfx());
 			controller.nextLevel();
 			controller.reset();
 			setScreen(controller);
 		} else if (exitCode == Constants.EXIT_PREV) {
 //			current = (current+ controller.length-1) % controller.length;
+			controller.setVolumeBgm(menu.getVolumeBgm());
+			controller.setVolumeSfx(menu.getVolumeSfx());
 			controller.reset();
 			setScreen(controller);
 		} else if (exitCode == Constants.EXIT_QUIT) {
 			// We quit the main application
 			Gdx.app.exit();
+			System.exit(0);
 		}
 	}
 

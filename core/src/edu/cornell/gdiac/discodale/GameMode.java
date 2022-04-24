@@ -113,9 +113,6 @@ public class GameMode implements Screen {
 
 	private Texture[] colors = new Texture[5];
 
-	/** Background music */
-	private Sound theme;
-	private long themeId = -1;
 
 	// TODO support colors with the split-body model
 	/** Dale body texture */
@@ -123,7 +120,8 @@ public class GameMode implements Screen {
 	private TextureRegion pinkIdleBody1Texture;
 
 	/** The default sound volume */
-	private float volume;
+	private float volumeBgm;
+	private float volumeSfx;
 
 	// Physics objects for the game
 	/** Physics constants for initialization */
@@ -160,6 +158,9 @@ public class GameMode implements Screen {
 		setFailure(false);
 //		this.scene = new SceneModel(bounds);
 	}
+
+	public void setVolumeBgm(int volumeBgm) { this.volumeBgm = volumeBgm / 100f; }
+	public void setVolumeSfx(int volumeSfx) { this.volumeSfx = volumeSfx / 100f; }
 
 	/**
 	 * Returns true if debug mode is active.
@@ -477,7 +478,7 @@ public class GameMode implements Screen {
 		// This world is heavier
 		world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
 
-		volume = constants.getFloat("volume", 1.0f);
+		// volumeBgm = constants.getFloat("volume", 1.0f);
 	}
 
 	/**
@@ -601,7 +602,6 @@ public class GameMode implements Screen {
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
-		themeId = playBGM(theme, themeId, volume);
 		dale.setMatch(daleMatches());
 
 		// zoom at the start of the level
@@ -766,12 +766,6 @@ public class GameMode implements Screen {
 		return sound.play(volume);
 	}
 
-	public long playBGM(Sound sound, long soundId, float volume) {
-		if (soundId != -1) {
-			return soundId;
-		}
-		return sound.loop(volume);
-	}
 
 	/**
 	 * Called when the Screen is resized.
@@ -879,7 +873,6 @@ public class GameMode implements Screen {
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
 		flyChaseTexture = directory.getEntry("platform:flychasing", Texture.class);
 
-		theme = directory.getEntry("theme", Sound.class);
 
 		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles

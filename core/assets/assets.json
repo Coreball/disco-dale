@@ -29,10 +29,20 @@
         "platform:purplecolor": "platform/color_purple.png",
         "platform:orangecolor": "platform/color_orange.png",
         "menu:play": "menu/play_button.png",
+        "menu:options": "menu/options_button.png",
+        "menu:exit": "menu/exit.png",
         "menu:bg": "menu/background.png",
+        "menu:optionsbg": "menu/options_bg.png",
         "menu:title": "menu/title.png",
         "menu:level": "menu/level.png",
-        "menu:levelbutton": "menu/level_button.png"
+        "menu:levelbutton": "menu/level_button.png",
+        "menu:toggleon": "menu/toggle_on.png",
+        "menu:toggleoff": "menu/toggle_off.png",
+        "menu:slideon": "menu/slide_on.png",
+        "menu:slideonleft": "menu/slide_on_left.png",
+        "menu:slideoff": "menu/slide_off.png",
+        "menu:slideoffright": "menu/slide_off_right.png",
+        "menu:slidethumb": "menu/slide_thumb.png",
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json",
@@ -56,6 +66,18 @@
         "shared:alien": {
             "file": "shared/AlienRemixItalic-EaoL4.ttf",
             "size": 48
-        }
+        },
+        "shared:aliensmall": {
+             "file": "shared/AlienRemix-ZVL7J.ttf",
+             "size": 24
+        },
+       "shared:gothic": {
+             "file": "shared/league-gothic-semiexpanded.ttf",
+             "size": 32
+        }, 
+        "shared:gothicsmall": {
+             "file": "shared/league-gothic-semiexpanded.ttf",
+             "size": 24
+        }, 
     }
 }
