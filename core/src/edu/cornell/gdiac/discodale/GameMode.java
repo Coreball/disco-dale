@@ -16,7 +16,10 @@
  */
 package edu.cornell.gdiac.discodale;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.*;
@@ -149,7 +152,7 @@ public class GameMode implements Screen {
 		GRAPPLE_FORCE,
 	}
 
-	private PooledList<FlyController> flyControllers;
+	private LinkedList<FlyController> flyControllers;
 
 	private int colorChangeCountdown;
 
@@ -456,7 +459,7 @@ public class GameMode implements Screen {
 		dwidth = FLY_SIZE / scale.x;
 		dheight = FLY_SIZE / scale.y;
 		flies = new PooledList<>();
-		flyControllers = new PooledList<>();
+		flyControllers = new LinkedList<>();
 		for (Vector2 flyLocation : scene.getFlyLocations()) {
 			FlyModel fly = new FlyModel(constants.get("fly"), flyLocation.x, flyLocation.y, dwidth, dheight, FlyModel.IdleType.STATIONARY);
 			fly.setDrawScale(scale);
@@ -643,6 +646,87 @@ public class GameMode implements Screen {
 //			//debugging message
 //			System.out.println("lose");
 		}
+
+		class FixtureAndDistance{
+			public Fixture fixture;
+			public float distance;
+			public FixtureAndDistance(Fixture fixture,float distance){
+				this.fixture = fixture;
+				this.distance = distance;
+			}
+		}
+
+		class CustomizedRayCastCallBack implements RayCastCallback{
+			public LinkedList<FixtureAndDistance> fixtureAndDistances = new LinkedList<>();
+			public void reset(){
+				fixtureAndDistances = new LinkedList<>();
+			}
+			@Override
+			public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+				float diffX = Math.abs(point.x - dale.getX());
+				float diffY = Math.abs(point.y - dale.getY());
+				float distance = (float) Math.sqrt((double)(diffX*diffX) + (double)(diffY*diffY));
+				fixtureAndDistances.add(new FixtureAndDistance(fixture,distance));
+
+				return 1;
+			}
+		}
+
+		CustomizedRayCastCallBack callback = new CustomizedRayCastCallBack();
+
+		if(scene.isRealSightMode()){
+			for(FlyController f:flyControllers){
+				f.setSeeDaleInRealWorld(false);
+			}
+			for(FlyController f:flyControllers){
+				FlyModel fly = f.getFly();
+//				System.out.println("startRay");
+//				System.out.println(dale.getX() +"  "+ dale.getY() +"  "+fly.getX() +"  "+fly.getY());
+				callback.reset();
+				world.rayCast(callback,dale.getX(),dale.getY(),fly.getX(),fly.getY());
+				LinkedList<FixtureAndDistance> fixtureAndDistances = callback.fixtureAndDistances;
+				Collections.sort(fixtureAndDistances,new Comparator<FixtureAndDistance>(){
+					public int compare(FixtureAndDistance f1,FixtureAndDistance f2){
+						if(f1.distance>f2.distance){
+							return 1;
+						}
+						else if(f1.distance==f2.distance){
+							return 0;
+						}else{
+							return -1;
+						}
+					}
+				});
+				for(FixtureAndDistance fd: fixtureAndDistances){
+					Fixture fixture = fd.fixture;
+					boolean isFly = false;
+					for(FlyController ff:flyControllers){
+						FlyModel flyModel = ff.getFly();
+						for(Fixture flyModelFixture: flyModel.getBody().getFixtureList()){
+							if (fixture==flyModelFixture){
+//								System.out.println(flyModel.getX() +"  "+flyModel.getY() + fd.distance);
+								isFly = true;
+								ff.setSeeDaleInRealWorld(true);
+							}
+						}
+					}
+					if(!isFly){
+						if(!dale.checkFixtureInDale(fixture)){
+//							System.out.println("Distance to obstacle: "+fd.distance);
+							break;
+						}
+					}
+				}
+//				System.out.println("endRay");
+			}
+//			for(FlyController f:flyControllers){
+//				if(f.getSeeDaleInRealWorld()){
+//					System.out.println("Can see");
+//				}
+//			}
+
+		}
+
 	}
 
 	/**
