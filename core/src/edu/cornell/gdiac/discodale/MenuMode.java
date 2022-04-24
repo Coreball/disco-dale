@@ -207,7 +207,7 @@ public class MenuMode implements Screen, InputProcessor {
     }
 
     public void update(float dt) {
-        themeId = playBGM(theme, themeId, volumeBgm / 100f);
+        themeId = SoundPlayer.playBGM(theme, themeId, volumeBgm / 100f);
     }
 
     public void draw(){
@@ -322,13 +322,7 @@ public class MenuMode implements Screen, InputProcessor {
         buttonFont.setColor(labelColor);
     }
 
-    public long playBGM(Sound sound, long soundId, float volume) {
-        if (soundId != -1) {
-            sound.setVolume(soundId, volume);
-            return soundId;
-        }
-        return sound.loop(volume);
-    }
+
 
     /**
      * Sets the ScreenListener for this mode

@@ -113,6 +113,15 @@ public class GameMode implements Screen {
 
 	private Texture[] colors = new Texture[5];
 
+	/** Sound effects */
+	private Sound died;
+	private Sound extend;
+	private Sound stick;
+
+	private long diedId = -1;
+	private long extendId = -1;
+	private long stickId = -1;
+
 
 	// TODO support colors with the split-body model
 	/** Dale body texture */
@@ -478,7 +487,6 @@ public class GameMode implements Screen {
 		// This world is heavier
 		world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
 
-		// volumeBgm = constants.getFloat("volume", 1.0f);
 	}
 
 	/**
@@ -603,6 +611,14 @@ public class GameMode implements Screen {
 		dale.applyStickyPartMovement(dt);
 
 		dale.setMatch(daleMatches());
+		switch (daleController.sfx){
+			case TONGUE_EXTEND:
+				extendId = SoundPlayer.playSound(extend, extendId, volumeSfx);
+				break;
+			case TONGUE_STICK:
+				stickId = SoundPlayer.playSound(stick, stickId, volumeSfx);
+				break;
+		}
 
 		// zoom at the start of the level
 		if (canvas.getCameraZoom() > 0.75f) {
@@ -719,53 +735,13 @@ public class GameMode implements Screen {
 			canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
 			canvas.end();
 		} else if (failed) {
+			diedId = SoundPlayer.playSound(died, diedId, volumeSfx);
 			displayFont.setColor(Color.BLACK);
 			canvas.begin(); // DO NOT SCALE
 			canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
 			canvas.end();
 		}
 	}
-
-	/**
-	 * Method to ensure that a sound asset is only played once.
-	 *
-	 * Every time you play a sound asset, it makes a new instance of that sound.
-	 * If you play the sounds to close together, you will have overlapping copies.
-	 * To prevent that, you must stop the sound before you play it again. That
-	 * is the purpose of this method. It stops the current instance playing (if
-	 * any) and then returns the id of the new instance for tracking.
-	 *
-	 * @param sound   The sound asset to play
-	 * @param soundId The previously playing sound instance
-	 *
-	 * @return the new sound instance for this asset.
-	 */
-	public long playSound(Sound sound, long soundId) {
-		return playSound(sound, soundId, 1.0f);
-	}
-
-	/**
-	 * Method to ensure that a sound asset is only played once.
-	 *
-	 * Every time you play a sound asset, it makes a new instance of that sound.
-	 * If you play the sounds to close together, you will have overlapping copies.
-	 * To prevent that, you must stop the sound before you play it again. That
-	 * is the purpose of this method. It stops the current instance playing (if
-	 * any) and then returns the id of the new instance for tracking.
-	 *
-	 * @param sound   The sound asset to play
-	 * @param soundId The previously playing sound instance
-	 * @param volume  The sound volume
-	 *
-	 * @return the new sound instance for this asset.
-	 */
-	public long playSound(Sound sound, long soundId, float volume) {
-		if (soundId != -1) {
-			sound.stop(soundId);
-		}
-		return sound.play(volume);
-	}
-
 
 	/**
 	 * Called when the Screen is resized.
@@ -880,6 +856,10 @@ public class GameMode implements Screen {
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:alien", BitmapFont.class);
+
+		died = directory.getEntry("died", Sound.class);
+		extend = directory.getEntry("extend", Sound.class);
+		stick = directory.getEntry("stick", Sound.class);
 
 		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
 		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);

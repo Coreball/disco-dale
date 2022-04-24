@@ -53,10 +53,13 @@
         "level4": "levels/4.json"
     },
     "sounds" : {
-        "theme" : "shared/theme.mp3",
+        "theme" : "sound/theme.mp3",
+        "died": "sound/died.mp3",
+        "stick": "sound/stick.mp3",
+        "extend": "sound/extend.mp3",
         "platform:jump" : "platform/jump.mp3",
         "platform:pew"  : "platform/pew.mp3",
-        "platform:plop" : "platform/plop.mp3"
+        "platform:plop" : "platform/plop.mp3",
     },
     "fonts": {
         "shared:retro": {
