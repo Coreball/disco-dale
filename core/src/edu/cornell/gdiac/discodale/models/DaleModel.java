@@ -39,7 +39,7 @@ public class DaleModel extends WheelObstacle {
 	/** The factor to multiply by the input */
 	private final float walkForce;
 	/** The maximum character speed */
-	private final float maxSpeed;
+	private final float maxWalkSpeed;
 	/** The maximum character speed in the AIR */
 	private final float maxAirSpeed;
 	/** Identifier to allow us to track the sensor in ContactListener */
@@ -176,8 +176,8 @@ public class DaleModel extends WheelObstacle {
 	 *
 	 * @return the upper limit on dude left-right movement.
 	 */
-	public float getMaxSpeed() {
-		return maxSpeed;
+	public float getMaxWalkSpeed() {
+		return maxWalkSpeed;
 	}
 
 	/**
@@ -483,7 +483,7 @@ public class DaleModel extends WheelObstacle {
 		daleFilter.maskBits     = 0b00000111;
 		setFilterData(daleFilter);
 
-		maxSpeed = data.getFloat("max_speed", 0);
+		maxWalkSpeed = data.getFloat("max_walk_speed", 0);
 		maxAirSpeed = data.getFloat("max_air_speed", 0);
 		walkForce = data.getFloat("walk_force", 0);
 		sensorName = Constants.DALE_GROUND_SENSOR_NAME;
@@ -606,16 +606,14 @@ public class DaleModel extends WheelObstacle {
 			// Apply grapple force
 			forceCache.set(grappleForce, 0).rotateRad(getTongueAngle());
 			body.applyForce(forceCache, getPosition(), true);
-		} else if (!isGrounded()) {
-			// Limit max air speed
-			if (getLinearVelocity().len2() >= maxAirSpeed) {
-				setLinearVelocity(vectorCache.set(getLinearVelocity()).limit(maxAirSpeed));
-			}
-		} else {
-			// Clamp walking speed
-			if (Math.abs(getVX()) >= getMaxSpeed()) {
-				setVX(Math.signum(getVX()) * getMaxSpeed());
-			} else {
+		} else if (!isGrounded() && getLinearVelocity().len() >= maxAirSpeed) {
+			// Limit max air speed when not attached
+			setLinearVelocity(vectorCache.set(getLinearVelocity()).limit(maxAirSpeed));
+		}
+
+		if (getMovement() != 0) {
+			// Only add walk force if below max walk speed
+			if (Math.abs(getVX()) < getMaxWalkSpeed()) {
 				forceCache.set(getMovement(),0);
 				body.applyForce(forceCache,getPosition(),true);
 			}
@@ -690,7 +688,7 @@ public class DaleModel extends WheelObstacle {
 
 	public void setDaleTexture() {
 		this.setTexture(headIdleTextures[colorIndex]);
-		if (isGrounded && Math.abs(getVX()) > 2) {
+		if (isGrounded && Math.abs(getVX()) > 1) {
 			bodyWalkTextures[colorIndex].setFrame((int) (bodyWalkAnimationClock / ANIMATION_SPEED));
 			bodyPart.setTexture(bodyWalkTextures[colorIndex]);
 		} else {
