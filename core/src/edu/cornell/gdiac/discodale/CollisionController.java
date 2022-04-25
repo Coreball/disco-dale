@@ -74,13 +74,13 @@ public class CollisionController implements ContactListener {
             }
 
             // Check for win condition
-            if ((bd1 == dale && bd2 == sceneModel.goalDoor) ||
-                    (bd1 == sceneModel.goalDoor && bd2 == dale)) {
+            if (((bd1 == dale || bd1 == dale.getBodyPart()) && bd2 == sceneModel.goalDoor) ||
+                    (bd1 == sceneModel.goalDoor && (bd2 == dale && bd2 == dale.getBodyPart()))) {
                 dale.setWinLose(true);
             }
 
-            if ((bd1 == dale   && isFly(bd2)) ||
-                    (isFly(bd2) && bd2 == dale)) {
+            if (((bd1 == dale || bd1 == dale.getBodyPart()) && isFly(bd2)) ||
+                    (isFly(bd2) && (bd1 == dale || bd1 == dale.getBodyPart()))) {
                 dale.setWinLose(false);
             }
         } catch (Exception e) {
