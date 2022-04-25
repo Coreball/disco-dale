@@ -570,7 +570,8 @@ public class GameMode implements Screen {
 				reset();
 			} else if (complete) {
 				pause();
-				listener.exitScreen(this, Constants.EXIT_NEXT);
+				canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
+				listener.exitScreen(this, Constants.EXIT_COMPLETE);
 				return false;
 			}
 		}

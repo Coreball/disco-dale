@@ -33,6 +33,8 @@
         "menu:exit": "menu/exit.png",
         "menu:bg": "menu/background.png",
         "menu:optionsbg": "menu/options_bg.png",
+        "menu:completebg": "menu/complete_bg.png",
+        "menu:complete": "menu/complete.png",
         "menu:title": "menu/title.png",
         "menu:level": "menu/level.png",
         "menu:levelbutton": "menu/level_button.png",
@@ -43,6 +45,9 @@
         "menu:slideoff": "menu/slide_off.png",
         "menu:slideoffright": "menu/slide_off_right.png",
         "menu:slidethumb": "menu/slide_thumb.png",
+        "menu:exittomenu": "menu/exit_to_menu.png",
+        "menu:nextlevel": "menu/next_level.png",
+        "menu:restart": "menu/restart.png"
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json",

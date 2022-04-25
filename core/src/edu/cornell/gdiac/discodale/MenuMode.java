@@ -7,7 +7,11 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import edu.cornell.gdiac.assets.AssetDirectory;
+import edu.cornell.gdiac.assets.TextureRegionLoader;
 import edu.cornell.gdiac.discodale.models.ColorRegionModel;
 import edu.cornell.gdiac.util.ScreenListener;
 
@@ -16,7 +20,8 @@ public class MenuMode implements Screen, InputProcessor {
     public enum Type {
         START,
         LEVEL_SELECT,
-        OPTIONS
+        OPTIONS,
+        LEVEL_COMPLETE
     }
     private Type type;
 
@@ -27,7 +32,7 @@ public class MenuMode implements Screen, InputProcessor {
     private static final int EXIT_OFFSET_Y = 100;
     private static final int TITLE_OFFSET_Y = 450;
 
-    private static final int OPTIONS_BG_OFFSET_Y = 10;
+    private static final int WINDOW_BG_OFFSET_Y = 10;
     private static final int OPTIONS_RETURN_OFFSET_X = 670;
     private static final int OPTIONS_RETURN_OFFSET_Y = 70;
     private static final int OPTIONS_LABEL_OFFSET_X = 225;
@@ -36,11 +41,9 @@ public class MenuMode implements Screen, InputProcessor {
     private static final int OPTIONS_VOLUME_NUM_OFFSET_X = 750;
     private static final int OPTIONS_BGM_LABEL_OFFSET_Y = 325;
     private static final int OPTIONS_SFX_LABEL_OFFSET_Y = 275;
-
     private static final int OPTIONS_SLIDE_OFFSET_X = 340;
     private static final int OPTIONS_SLIDE_BGM_OFFSET_Y = 310;
     private static final int OPTIONS_SLIDE_SFX_OFFSET_Y = 260;
-
     private static final int OPTIONS_ACCESS_OFFSET_X = 500;
     private static final int OPTIONS_ACCESS_OFFSET_Y = 165;
     private static final int OPTIONS_ACCESS_LABEL_OFFSET_Y = 200;
@@ -50,9 +53,14 @@ public class MenuMode implements Screen, InputProcessor {
     private static final int LEVEL_BUTTONS_MARGIN = 160;
     private static final int LEVEL_FONT_MARGIN_X = 22;
     private static final int LEVEL_FONT_MARGIN_Y = 15;
-
     private static final int LEVEL_BUTTON_ROWS = 2;
     private static final int LEVEL_BUTTON_COLS = 5;
+
+    private static final int COMPLETE_MENU_OFFSET_X = 160;
+    private static final int COMPLETE_RESTART_OFFSET_X = 450;
+    private static final int COMPLETE_NEXT_OFFSET_X = 590;
+    private static final int COMPLETE_BUTTONS_OFFSET_Y = 50;
+//    private static final int COMPLET
 
     /** Whether this is an active controller */
     protected boolean active;
@@ -69,17 +77,24 @@ public class MenuMode implements Screen, InputProcessor {
     protected Texture background;
     /** The texture for options background */
     protected Texture optionsBg;
+    /** The textures for the level complete screen */
+    protected Texture completeBg;
+    protected Texture complete;
     /** The texture for title */
     protected Texture title;
     /** The textures for toggle button */
     protected Texture toggleOn;
     protected Texture toggleOff;
-    /** The textures fo the slide bars */
+    /** The textures for the slide bars */
     protected Texture slideOn;
     protected Texture slideOnLeft;
     protected Texture slideOff;
     protected Texture slideOffRight;
     protected Texture slideThumb;
+    /** The textures for the level complete buttons */
+    protected Texture exitToMenu;
+    protected Texture restart;
+    protected Texture nextLevel;
     /** The texture for level select */
     protected Texture levelSelect;
     /** The texture for level buttons */
@@ -102,8 +117,11 @@ public class MenuMode implements Screen, InputProcessor {
     private boolean optionsReturnPressed;
     private boolean accessibilitySelected;
     private boolean bgmPressed, sfxPressed;
+    private boolean toMenuPressed, nextLevelPressed, restartPressed;
     private int volumeBgm = 100, volumeSfx = 100;
 
+//    private TextureRegionDrawable test;
+//    private Button testButton;
 
     /** Reference to the game canvas */
     protected GameCanvas canvas;
@@ -202,6 +220,21 @@ public class MenuMode implements Screen, InputProcessor {
                 OPTIONS_SLIDE_SFX_OFFSET_Y - slideThumb.getHeight() / 2f);
     }
 
+    public boolean inToMenuBounds(int x, int y){
+        return inBounds(x, y, COMPLETE_MENU_OFFSET_X, COMPLETE_MENU_OFFSET_X + exitToMenu.getWidth(),
+                COMPLETE_BUTTONS_OFFSET_Y +  exitToMenu.getHeight(), COMPLETE_BUTTONS_OFFSET_Y);
+    }
+
+    public boolean inRestartBounds(int x, int y){
+        return inBounds(x, y, COMPLETE_RESTART_OFFSET_X, COMPLETE_RESTART_OFFSET_X + restart.getWidth(),
+                COMPLETE_BUTTONS_OFFSET_Y +  restart.getHeight(), COMPLETE_BUTTONS_OFFSET_Y);
+    }
+
+    public boolean inNextLevelBounds(int x, int y){
+        return inBounds(x, y, COMPLETE_NEXT_OFFSET_X, COMPLETE_NEXT_OFFSET_X + nextLevel.getWidth(),
+                COMPLETE_BUTTONS_OFFSET_Y +  nextLevel.getHeight(), COMPLETE_BUTTONS_OFFSET_Y);
+    }
+
     public boolean inBounds(int x, int y, float left, float right, float up, float down){
         return left <= x && x <= right && down <= y && y <= up;
     }
@@ -219,6 +252,8 @@ public class MenuMode implements Screen, InputProcessor {
             drawLevelSelect();
         else if (type == Type.OPTIONS)
             drawOptions();
+        else if (type == Type.LEVEL_COMPLETE)
+            drawComplete();
         canvas.end();
     }
 
@@ -256,7 +291,7 @@ public class MenuMode implements Screen, InputProcessor {
     }
 
     public void drawOptions(){
-        canvas.draw(optionsBg, canvas.getWidth()/2f - optionsBg.getWidth()/2f, OPTIONS_BG_OFFSET_Y);
+        canvas.draw(optionsBg, canvas.getWidth()/2f - optionsBg.getWidth()/2f, WINDOW_BG_OFFSET_Y);
         canvas.drawText("return", buttonFont, OPTIONS_RETURN_OFFSET_X, OPTIONS_RETURN_OFFSET_Y);
 
         canvas.drawText("Volume", labelFont, OPTIONS_LABEL_OFFSET_X, OPTIONS_VOLUME_LABEL_OFFSET_Y);
@@ -295,12 +330,26 @@ public class MenuMode implements Screen, InputProcessor {
         canvas.drawText(Integer.toString(volumeSfx), labelFont2, OPTIONS_VOLUME_NUM_OFFSET_X, OPTIONS_SFX_LABEL_OFFSET_Y);
     }
 
+    public void drawComplete() {
+        canvas.draw(completeBg, canvas.getWidth()/2f - completeBg.getWidth()/2f, WINDOW_BG_OFFSET_Y);
+        canvas.draw(complete, canvas.getWidth()/2f - complete.getWidth()/2f,
+                canvas.getHeight()/2f - complete.getHeight()/2f);
+        canvas.draw(exitToMenu, toMenuPressed?Color.GRAY:Color.WHITE, COMPLETE_MENU_OFFSET_X,
+                COMPLETE_BUTTONS_OFFSET_Y, exitToMenu.getWidth(), exitToMenu.getHeight());
+        canvas.draw(restart, restartPressed?Color.GRAY:Color.WHITE, COMPLETE_RESTART_OFFSET_X,
+                COMPLETE_BUTTONS_OFFSET_Y, restart.getWidth(), restart.getHeight());
+        canvas.draw(nextLevel, nextLevelPressed?Color.GRAY:Color.WHITE, COMPLETE_NEXT_OFFSET_X,
+                COMPLETE_BUTTONS_OFFSET_Y, nextLevel.getWidth(), nextLevel.getHeight());
+    }
+
     public void gatherAssets(AssetDirectory directory) {
         playButton = directory.getEntry("menu:play", Texture.class);
         optionsButton = directory.getEntry("menu:options", Texture.class);
         exitButton = directory.getEntry("menu:exit", Texture.class);
         background = directory.getEntry("menu:bg", Texture.class);
         optionsBg = directory.getEntry("menu:optionsbg", Texture.class);
+        completeBg = directory.getEntry("menu:completebg", Texture.class);
+        complete = directory.getEntry("menu:complete", Texture.class);
         title = directory.getEntry("menu:title", Texture.class);
         levelSelect = directory.getEntry("menu:level", Texture.class);
         levelButton = directory.getEntry("menu:levelbutton", Texture.class);
@@ -311,6 +360,9 @@ public class MenuMode implements Screen, InputProcessor {
         slideOff = directory.getEntry("menu:slideoff", Texture.class);
         slideOffRight = directory.getEntry("menu:slideoffright", Texture.class);
         slideThumb = directory.getEntry("menu:slidethumb", Texture.class);
+        exitToMenu = directory.getEntry("menu:exittomenu", Texture.class);
+        restart = directory.getEntry("menu:restart", Texture.class);
+        nextLevel = directory.getEntry("menu:nextlevel", Texture.class);
         displayFont = directory.getEntry("shared:alien", BitmapFont.class);
         buttonFont = directory.getEntry("shared:aliensmall", BitmapFont.class);
         labelFont = directory.getEntry("shared:gothic", BitmapFont.class);
@@ -320,8 +372,10 @@ public class MenuMode implements Screen, InputProcessor {
         labelFont.setColor(labelColor);
         labelFont2.setColor(labelColor);
         buttonFont.setColor(labelColor);
-    }
 
+//        test = new TextureRegionDrawable(exitToMenu);
+//        testButton = new Button(test);
+    }
 
 
     /**
@@ -389,6 +443,8 @@ public class MenuMode implements Screen, InputProcessor {
             return touchDownLevel(screenX, screenY);
         else if (type == Type.OPTIONS)
             return touchDownOptions(screenX, screenY);
+        else if (type == Type.LEVEL_COMPLETE)
+            return touchDownComplete(screenX, screenY);
         else
             return false;
     }
@@ -443,6 +499,20 @@ public class MenuMode implements Screen, InputProcessor {
         return true;
     }
 
+    private boolean touchDownComplete(int screenX, int screenY){
+        if (inToMenuBounds(screenX, screenY)) {
+            toMenuPressed = true;
+            return false;
+        } else if (inRestartBounds(screenX, screenY)){
+            restartPressed = true;
+            return false;
+        } else if (inNextLevelBounds(screenX, screenY)) {
+            nextLevelPressed = true;
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         screenY = canvas.getHeight() - screenY;
@@ -452,6 +522,8 @@ public class MenuMode implements Screen, InputProcessor {
             return touchUpLevel(screenX, screenY);
         else if (type == Type.OPTIONS)
             return touchUpOptions(screenX, screenY);
+        else if (type == Type.LEVEL_COMPLETE)
+            return touchUpComplete(screenX, screenY);
         else
             return false;
     }
@@ -504,6 +576,26 @@ public class MenuMode implements Screen, InputProcessor {
             this.type = Type.START;
             return false;
         }
+        return true;
+    }
+
+    private boolean touchUpComplete(int screenX, int screenY){
+        if (inToMenuBounds(screenX, screenY) && toMenuPressed) {
+            toMenuPressed = false;
+            this.type = Type.START;
+            return false;
+        } else if (inRestartBounds(screenX, screenY) && restartPressed) {
+            restartPressed = false;
+            listener.exitScreen(this, Constants.EXIT_LEVEL);
+            return false;
+        } else if (inNextLevelBounds(screenX, screenY) && nextLevelPressed) {
+            nextLevelPressed = false;
+            listener.exitScreen(this, Constants.EXIT_NEXT);
+            return false;
+        }
+        toMenuPressed = false;
+        restartPressed = false;
+        nextLevelPressed = false;
         return true;
     }
 

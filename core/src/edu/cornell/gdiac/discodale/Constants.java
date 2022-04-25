@@ -13,6 +13,8 @@ public class Constants {
     public static final int EXIT_LEVEL = 3;
     /** Exit code for going to the menu */
     public static final int EXIT_MENU = 4;
+    /** Exit code for the level complete screen */
+    public static final int EXIT_COMPLETE = 5;
     /** How many frames after winning/losing do we continue? */
     public static final int EXIT_COUNT = 120;
     /** The amount of time for a physics engine step. */
