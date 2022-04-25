@@ -601,9 +601,8 @@ public class DaleModel extends WheelObstacle {
 			return;
 		}
 
-
 		if (grappleState == GrappleState.ATTACHED) {
-			// Apply grapple force
+			// Apply grapple force if attached
 			forceCache.set(grappleForce, 0).rotateRad(getTongueAngle());
 			body.applyForce(forceCache, getPosition(), true);
 		} else if (!isGrounded() && getLinearVelocity().len() >= maxAirSpeed) {
@@ -611,12 +610,10 @@ public class DaleModel extends WheelObstacle {
 			setLinearVelocity(vectorCache.set(getLinearVelocity()).limit(maxAirSpeed));
 		}
 
-		if (getMovement() != 0) {
-			// Only add walk force if below max walk speed
-			if (Math.abs(getVX()) < getMaxWalkSpeed()) {
-				forceCache.set(getMovement(),0);
-				body.applyForce(forceCache,getPosition(),true);
-			}
+		if (isGrounded() && getMovement() != 0 && Math.abs(getVX()) < getMaxWalkSpeed()) {
+			// Only add walk force if below max walk speed and on ground
+			forceCache.set(getMovement(),0);
+			body.applyForce(forceCache,getPosition(),true);
 		}
 	}
 

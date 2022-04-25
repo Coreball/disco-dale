@@ -18,7 +18,7 @@ public class DaleController {
 	}
 
 	public void processMovement() {
-		if (dale.getGrappleState() != GrappleState.ATTACHED) {
+		if (dale.isGrounded()) {
 			dale.setMovement(InputController.getInstance().getHorizontal() * dale.getWalkForce());
 		}
 	}
