@@ -62,6 +62,8 @@ public class GameMode implements Screen {
 
 	private static int NUM_LEVELS = 10;
 
+	private static float ZOOM_AMOUNT = 0.75f;
+
 	/** The texture for neutral walls */
 	protected TextureRegion brickTile;
 	/** The texture for non-grappleable walls */
@@ -82,6 +84,8 @@ public class GameMode implements Screen {
 
 	private int levelIndex;
 	private float zoomFactor;
+	private float zoomValue;
+	private int ticks;
 
 	/** The Box2D world */
 	protected World world;
@@ -140,6 +144,8 @@ public class GameMode implements Screen {
 
 	private DaleController daleController;
 	private CollisionController collisionController;
+
+	private CameraState camState;
 
 	/** Which value to change with the increase/decrease buttons */
 	private AdjustTarget adjustTarget = AdjustTarget.GRAPPLE_SPEED;
@@ -420,7 +426,6 @@ public class GameMode implements Screen {
 		setFailure(false);
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
-		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f, this.bounds);
 		loadLevel(levelIndex);
 		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
@@ -588,6 +593,10 @@ public class GameMode implements Screen {
 		return dale.getColor() == daleBackground();
 	}
 
+	public CameraState getCameraState() {return camState;}
+
+	public void setCameraState(CameraState state) {camState = state;}
+
 	/**
 	 * The core gameplay loop of this world.
 	 *
@@ -602,53 +611,69 @@ public class GameMode implements Screen {
 	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
-//		daleController.processMovement();
-//		daleController.processColorRotation();
-//		daleController.processGrappleAction(world);
-		dale.applyForce();
-		dale.applyStickyPartMovement(dt);
-
 		themeId = playBGM(theme, themeId, volume);
 		dale.setMatch(daleMatches());
 
-		// zoom at the start of the level
-		if (canvas.getCameraZoom() > 0.75f) {
-			float zoom = canvas.getCameraZoom();
-			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - 0.005f, this.bounds);
-			scene.updateGrid();
-		// consistent zoom for the rest of the level
-		} else {
-			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y,  0.75f, this.bounds);
-			daleController.processMovement();
-			daleController.processColorRotation();
-			daleController.processGrappleAction(world);
-			for (FlyController flyController : flyControllers) {
-				flyController.changeDirection();
-				flyController.setVelocity();
-			}
+		switch (getCameraState()) {
+			case START:
+				zoomValue = Math.max(this.bounds.getWidth() * 32 / this.canvas.getWidth(), this.bounds.getHeight() * 32 / this.canvas.getHeight());
+				canvas.updateCam(
+						(float) canvas.getWidth() / 2,
+						(float) canvas.getHeight() / 2,
+						zoomValue,
+						this.bounds
+				);
+				if (ticks >= 30) {
+					zoomFactor = (zoomValue - ZOOM_AMOUNT) / 75;
+					setCameraState(CameraState.ZOOM);
+				} else {
+					ticks++;
+				}
+				break;
+			case ZOOM:
+				if (canvas.getCameraZoom() <= ZOOM_AMOUNT) {
+					setCameraState(CameraState.PLAY);
+				} else {
+					float zoom = canvas.getCameraZoom();
+					System.out.println("Zoom Factor: " + zoomFactor);
+					canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - zoomFactor, this.bounds);
+					scene.updateGrid();
+				}
+				break;
+			case PLAY:
+				canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y,  ZOOM_AMOUNT, this.bounds);
 
-			if(colorChangeCountdown>0){
-				colorChangeCountdown--;
-			} else {
-				colorChangeCountdown = CHANGE_COLOR_TIME;
-				scene.updateColorRegions();
-			}
+				daleController.processMovement();
+				daleController.processColorRotation();
+				daleController.processGrappleAction(world);
+				dale.applyForce();
+				dale.applyStickyPartMovement(dt);
 
-			scene.updateGrid();
-			scene.updateColorRegionMovement();
+				for (FlyController flyController : flyControllers) {
+					flyController.changeDirection();
+					flyController.setVelocity();
+				}
+
+				if(colorChangeCountdown>0){
+					colorChangeCountdown--;
+				} else {
+					colorChangeCountdown = CHANGE_COLOR_TIME;
+					scene.updateColorRegions();
+				}
+
+				scene.updateGrid();
+				scene.updateColorRegionMovement();
+				break;
 		}
-
 
 		int winLose = dale.getWinLose();
+
 		if(winLose == WIN_CODE){
 			setComplete(true);
-//			//debugging message
-//			System.out.println("win");
 		}
+
 		if(winLose == LOSE_CODE){
 			setFailure(true);
-//			//debugging message
-//			System.out.println("lose");
 		}
 	}
 
@@ -703,6 +728,7 @@ public class GameMode implements Screen {
 
 		canvas.begin();
 		scene.draw(canvas);
+
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
@@ -923,15 +949,8 @@ public class GameMode implements Screen {
 		}
 		this.bounds = new Rectangle(scene.getBounds());
 		updateScale();
-		canvas.updateCam(
-				(float) canvas.getWidth() / 2,
-				(float) canvas.getHeight() / 2,
-				Math.max(
-						this.bounds.getWidth() * 32 / this.canvas.getWidth(),
-						this.bounds.getHeight() * 32 / this.canvas.getHeight()
-				),
-				this.bounds
-		);
+		ticks = 0;
+		setCameraState(CameraState.START);
 	}
 
 }
