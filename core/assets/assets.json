@@ -32,6 +32,7 @@
         "menu:options": "menu/options_button.png",
         "menu:exit": "menu/exit.png",
         "menu:bg": "menu/background.png",
+        "menu:windowbg": "menu/window_bg.png",
         "menu:optionsbg": "menu/options_bg.png",
         "menu:completebg": "menu/complete_bg.png",
         "menu:complete": "menu/complete.png",
@@ -47,7 +48,11 @@
         "menu:slidethumb": "menu/slide_thumb.png",
         "menu:exittomenu": "menu/exit_to_menu.png",
         "menu:nextlevel": "menu/next_level.png",
-        "menu:restart": "menu/restart.png"
+        "menu:restart": "menu/restart.png",
+        "menu:resume": "menu/resume.png",
+        "menu:restartpause": "menu/restart_long.png",
+        "menu:optionspause": "menu/options.png",
+        "menu:menu": "menu/main_menu.png"
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json",
@@ -71,9 +76,13 @@
             "file": "shared/RetroGame.ttf",
             "size": 64
         },
-        "shared:alien": {
+        "shared:alienitalic": {
             "file": "shared/AlienRemixItalic-EaoL4.ttf",
             "size": 48
+        },
+        "shared:alien": {
+             "file": "shared/AlienRemix-ZVL7J.ttf",
+             "size": 48
         },
         "shared:aliensmall": {
              "file": "shared/AlienRemix-ZVL7J.ttf",

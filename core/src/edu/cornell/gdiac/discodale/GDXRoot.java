@@ -114,12 +114,10 @@ public class GDXRoot extends Game implements ScreenListener {
 	public void exitScreen(Screen screen, int exitCode) {
 		if (screen == loading) {
 			directory = loading.getAssets();
-
 			menu.gatherAssets(directory);
 			menu.setCanvas(canvas);
 			menu.setScreenListener(this);
 			setScreen(menu);
-
 			loading.dispose();
 			loading = null;
 		} else if (exitCode == Constants.EXIT_LEVEL){
@@ -135,14 +133,10 @@ public class GDXRoot extends Game implements ScreenListener {
 			setScreen(controller);
 		} else if (exitCode == Constants.EXIT_MENU) {
 			controller.hide();
-			menu.setCanvas(canvas);
-			menu.setScreenListener(this);
 			menu.setType(MenuMode.Type.START);
 			setScreen(menu);
 		} else if (exitCode == Constants.EXIT_COMPLETE) {
 			controller.pause();
-			menu.setCanvas(canvas);
-			menu.setScreenListener(this);
 			menu.setType(MenuMode.Type.LEVEL_COMPLETE);
 			setScreen(menu);
 		} else if (exitCode == Constants.EXIT_NEXT) {
@@ -156,6 +150,15 @@ public class GDXRoot extends Game implements ScreenListener {
 			controller.setVolumeBgm(menu.getVolumeBgm());
 			controller.setVolumeSfx(menu.getVolumeSfx());
 			controller.reset();
+			setScreen(controller);
+		} else if (exitCode == Constants.EXIT_PAUSE) {
+			controller.pause();
+			menu.setType(MenuMode.Type.PAUSE);
+			setScreen(menu);
+		} else if (exitCode == Constants.EXIT_RESUME) {
+			controller.setVolumeBgm(menu.getVolumeBgm());
+			controller.setVolumeSfx(menu.getVolumeSfx());
+			controller.resume();
 			setScreen(controller);
 		} else if (exitCode == Constants.EXIT_QUIT) {
 			// We quit the main application

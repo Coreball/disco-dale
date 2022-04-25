@@ -545,14 +545,13 @@ public class GameMode implements Screen {
 		}
 
 		// Now it is time to maybe switch screens.
-		if (input.didExit()) {
+		if (input.didPause()) {
 			pause();
-			listener.exitScreen(this, Constants.EXIT_QUIT);
+			listener.exitScreen(this, Constants.EXIT_PAUSE);
 			return false;
 		} else if (input.didMenu()){
 			pause();
 			listener.exitScreen(this, Constants.EXIT_MENU);
-			canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 			return false;
 		} else if (input.didAdvance()) {
 			pause();
@@ -570,7 +569,6 @@ public class GameMode implements Screen {
 				reset();
 			} else if (complete) {
 				pause();
-				canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 				listener.exitScreen(this, Constants.EXIT_COMPLETE);
 				return false;
 			}
@@ -784,6 +782,7 @@ public class GameMode implements Screen {
 	 */
 	public void pause() {
 		// TODO Auto-generated method stub
+		canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 	}
 
 	/**
@@ -793,6 +792,7 @@ public class GameMode implements Screen {
 	 */
 	public void resume() {
 		// TODO Auto-generated method stub
+		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f);
 	}
 
 	/**
@@ -856,7 +856,7 @@ public class GameMode implements Screen {
 		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
-		displayFont = directory.getEntry("shared:alien", BitmapFont.class);
+		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
 
 		died = directory.getEntry("died", Sound.class);
 		extend = directory.getEntry("extend", Sound.class);
