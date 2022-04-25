@@ -56,6 +56,9 @@ public class SceneModel {
     /** The radius of area of fly's sight */
     private float areaSightRadius = 10f;
 
+    /** Whether Dale can only see an area around him or not. */
+    private boolean darkMode = true;
+
     /** The texture for walls and platforms */
     protected TextureRegion brickTile;
     protected TextureRegion reflectiveTile;
@@ -133,6 +136,13 @@ public class SceneModel {
 
     public float getAreaSightRadius() {
         return areaSightRadius;
+    }
+    public boolean isDarkMode() {
+        return darkMode;
+    }
+
+    public void setDarkMode(boolean darkMode) {
+        this.darkMode = darkMode;
     }
 
     public void setCanvas(GameCanvas canvas) {

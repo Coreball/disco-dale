@@ -116,6 +116,9 @@ public class GameMode implements Screen {
 
 	private Texture[] colors = new Texture[5];
 
+	private TextureRegion light;
+	private TextureRegion darkness;
+
 	/** Background music */
 	private Sound theme;
 	private long themeId = -1;
@@ -785,6 +788,24 @@ public class GameMode implements Screen {
 		}
 		canvas.end();
 
+		if(scene.isDarkMode()){
+			// Draw light
+			canvas.beginLight();
+			float ch = canvas.getHeight();
+			float cw = canvas.getWidth();
+			float h = light.getRegionHeight();
+			float w = light.getRegionWidth();
+			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
+			float lightScale = 2f;
+			canvas.draw(light,new Color(256,256,256,0f),w*lightScale/2f,h*lightScale/2f,dale.getX()*scale.x,dale.getY()*scale.y,w*lightScale,h*lightScale);
+			canvas.endLight();
+
+			// Draw darkness around light
+			canvas.beginLight2();
+			canvas.draw(darkness,new Color(256,256,256,0.5f),cw/2f,ch/2f,canvas.getCameraX(),canvas.getCameraY(),cw,ch);
+			canvas.endLight();
+		}
+
 		if (debug) {
 			canvas.beginDebug();
 
@@ -963,6 +984,9 @@ public class GameMode implements Screen {
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
 		flyChaseTexture = directory.getEntry("platform:flychasing", Texture.class);
 
+		light = new TextureRegion(directory.getEntry("platform:light",Texture.class));
+		darkness = new TextureRegion(directory.getEntry("platform:darkness",Texture.class));
+
 		theme = directory.getEntry("theme", Sound.class);
 
 		constants = directory.getEntry("platform:constants", JsonValue.class);
@@ -978,6 +1002,8 @@ public class GameMode implements Screen {
 		colors[3] = directory.getEntry("platform:purplecolor", Texture.class);
 		colors[4] = directory.getEntry("platform:orangecolor", Texture.class);
 		ColorRegionModel.setColorTexture(colors);
+
+
 
 		this.testlevel = directory.getEntry("testlevel", JsonValue.class);
 
