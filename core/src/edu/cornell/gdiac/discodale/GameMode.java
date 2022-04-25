@@ -429,10 +429,17 @@ public class GameMode implements Screen {
 		float dheight = bodyIdleTextures[0].getRegionHeight() / scale.y;
 		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
 
-		DaleColor[] availableColors = {DaleColor.PINK, DaleColor.BLUE, DaleColor.GREEN};
-		TextureRegion[] availableHeadIdleTextures = {headIdleTextures[0], headIdleTextures[1], headIdleTextures[2]};
-		TextureRegion[] availableBodyIdleTextures = {bodyIdleTextures[0], bodyIdleTextures[1], bodyIdleTextures[2]};
-		FilmStrip[] availableBodyWalkTextures = {bodyWalkTextures[0], bodyWalkTextures[1], bodyWalkTextures[2]};
+		DaleColor[] availableColors = scene.getPossibleColors();
+
+		TextureRegion[] availableHeadIdleTextures = new TextureRegion[availableColors.length];
+		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
+		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
+		for (int i = 0; i < availableColors.length; i++) {
+			int colorIndex = availableColors[i].ordinal();
+			availableHeadIdleTextures[i] = headIdleTextures[colorIndex];
+			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
+			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
+		}
 
 		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
 				dradius, dwidth, dheight, bodyOffset, availableColors, availableHeadIdleTextures,

@@ -15,6 +15,7 @@ import edu.cornell.gdiac.discodale.obstacle.PolygonObstacle;
 import edu.cornell.gdiac.util.PooledList;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class SceneModel {
 
@@ -149,6 +150,23 @@ public class SceneModel {
 
 
 
+    }
+
+    /**
+     * Get all the colors present in a level.
+     * Includes colors that are part of color sequences and not visible at the start.
+     *
+     * @return ordered array of Dale colors present in the level
+     */
+    public DaleColor[] getPossibleColors() {
+        return getColorRegions()
+                .stream()
+                .flatMap(colorRegion -> colorRegion.getSeq() == null
+                        ? Stream.of(colorRegion.getColor())
+                        : Stream.of(colorRegion.getSeq()))
+                .distinct()
+                .sorted()
+                .toArray(DaleColor[]::new);
     }
 
     public void updateGrid() {
