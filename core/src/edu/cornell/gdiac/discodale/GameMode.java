@@ -124,9 +124,15 @@ public class GameMode implements Screen {
 	private TextureRegion light;
 	private TextureRegion darkness;
 
-	/** Background music */
-	private Sound theme;
-	private long themeId = -1;
+	/** Sound effects */
+	private Sound died;
+	private Sound extend;
+	private Sound stick;
+
+	private long diedId = -1;
+	private long extendId = -1;
+	private long stickId = -1;
+
 
 	// TODO support colors with the split-body model
 	/** Dale body texture */
@@ -134,7 +140,8 @@ public class GameMode implements Screen {
 	private TextureRegion pinkIdleBody1Texture;
 
 	/** The default sound volume */
-	private float volume;
+	private float volumeBgm;
+	private float volumeSfx;
 
 	// Physics objects for the game
 	/** Physics constants for initialization */
@@ -173,6 +180,9 @@ public class GameMode implements Screen {
 		setFailure(false);
 //		this.scene = new SceneModel(bounds);
 	}
+
+	public void setVolumeBgm(int volumeBgm) { this.volumeBgm = volumeBgm / 100f; }
+	public void setVolumeSfx(int volumeSfx) { this.volumeSfx = volumeSfx / 100f; }
 
 	/**
 	 * Returns true if debug mode is active.
@@ -497,7 +507,6 @@ public class GameMode implements Screen {
 		// This world is heavier
 		world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
 
-		volume = constants.getFloat("volume", 1.0f);
 	}
 
 	/**
@@ -556,14 +565,13 @@ public class GameMode implements Screen {
 		}
 
 		// Now it is time to maybe switch screens.
-		if (input.didExit()) {
+		if (input.didPause()) {
 			pause();
-			listener.exitScreen(this, Constants.EXIT_QUIT);
+			listener.exitScreen(this, Constants.EXIT_PAUSE);
 			return false;
 		} else if (input.didMenu()){
 			pause();
 			listener.exitScreen(this, Constants.EXIT_MENU);
-			canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f, this.bounds, this.scene.getTileSize());
 			return false;
 		} else if (input.didAdvance()) {
 			pause();
@@ -581,7 +589,7 @@ public class GameMode implements Screen {
 				reset();
 			} else if (complete) {
 				pause();
-				listener.exitScreen(this, Constants.EXIT_NEXT);
+				listener.exitScreen(this, Constants.EXIT_COMPLETE);
 				return false;
 			}
 		}
@@ -619,8 +627,21 @@ public class GameMode implements Screen {
 	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
-		themeId = playBGM(theme, themeId, volume);
+//		daleController.processMovement();
+//		daleController.processColorRotation();
+//		daleController.processGrappleAction(world);
+		dale.applyForce();
+		dale.applyStickyPartMovement(dt);
+
 		dale.setMatch(daleMatches());
+		switch (daleController.sfx){
+			case TONGUE_EXTEND:
+				extendId = SoundPlayer.playSound(extend, extendId, volumeSfx);
+				break;
+			case TONGUE_STICK:
+				stickId = SoundPlayer.playSound(stick, stickId, volumeSfx);
+				break;
+		}
 
 		switch (getCameraState()) {
 			case START:
@@ -874,58 +895,12 @@ public class GameMode implements Screen {
 			canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
 			canvas.end();
 		} else if (failed) {
+			diedId = SoundPlayer.playSound(died, diedId, volumeSfx);
 			displayFont.setColor(Color.BLACK);
 			canvas.begin(); // DO NOT SCALE
 			canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
 			canvas.end();
 		}
-	}
-
-	/**
-	 * Method to ensure that a sound asset is only played once.
-	 *
-	 * Every time you play a sound asset, it makes a new instance of that sound.
-	 * If you play the sounds to close together, you will have overlapping copies.
-	 * To prevent that, you must stop the sound before you play it again. That
-	 * is the purpose of this method. It stops the current instance playing (if
-	 * any) and then returns the id of the new instance for tracking.
-	 *
-	 * @param sound   The sound asset to play
-	 * @param soundId The previously playing sound instance
-	 *
-	 * @return the new sound instance for this asset.
-	 */
-	public long playSound(Sound sound, long soundId) {
-		return playSound(sound, soundId, 1.0f);
-	}
-
-	/**
-	 * Method to ensure that a sound asset is only played once.
-	 *
-	 * Every time you play a sound asset, it makes a new instance of that sound.
-	 * If you play the sounds to close together, you will have overlapping copies.
-	 * To prevent that, you must stop the sound before you play it again. That
-	 * is the purpose of this method. It stops the current instance playing (if
-	 * any) and then returns the id of the new instance for tracking.
-	 *
-	 * @param sound   The sound asset to play
-	 * @param soundId The previously playing sound instance
-	 * @param volume  The sound volume
-	 *
-	 * @return the new sound instance for this asset.
-	 */
-	public long playSound(Sound sound, long soundId, float volume) {
-		if (soundId != -1) {
-			sound.stop(soundId);
-		}
-		return sound.play(volume);
-	}
-
-	public long playBGM(Sound sound, long soundId, float volume) {
-		if (soundId != -1) {
-			return soundId;
-		}
-		return sound.loop(volume);
 	}
 
 	/**
@@ -968,6 +943,7 @@ public class GameMode implements Screen {
 	 */
 	public void pause() {
 		// TODO Auto-generated method stub
+		canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f, this.bounds, this.scene.getTileSize());
 	}
 
 	/**
@@ -977,6 +953,7 @@ public class GameMode implements Screen {
 	 */
 	public void resume() {
 		// TODO Auto-generated method stub
+		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f, this.bounds, this.scene.getTileSize());
 	}
 
 	/**
@@ -1037,14 +1014,16 @@ public class GameMode implements Screen {
 		light = new TextureRegion(directory.getEntry("platform:light",Texture.class));
 		darkness = new TextureRegion(directory.getEntry("platform:darkness",Texture.class));
 
-		theme = directory.getEntry("theme", Sound.class);
-
 		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles
 		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
-		displayFont = directory.getEntry("shared:alien", BitmapFont.class);
+		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
+
+		died = directory.getEntry("died", Sound.class);
+		extend = directory.getEntry("extend", Sound.class);
+		stick = directory.getEntry("stick", Sound.class);
 
 		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
 		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);

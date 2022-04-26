@@ -54,7 +54,6 @@ public class ColorRegionModel implements Cloneable{
 		this.polygonRegion = new PolygonRegion(new TextureRegion(texture), vertices,
 				TRIANGULATOR.computeTriangles(vertices).toArray());
 		polygonRegionTexture = polygonRegion;
-		useTexture = false;
 	}
 
 	public float[] getVertices(){
@@ -171,5 +170,8 @@ public class ColorRegionModel implements Cloneable{
 		useTexture = !useTexture;
 	}
 
+	public static void setDisplay(boolean useColorTexture){ useTexture = useColorTexture;}
+
+	public static boolean getDisplay(){ return useTexture;}
 
 }

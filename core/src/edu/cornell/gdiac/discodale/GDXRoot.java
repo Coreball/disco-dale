@@ -114,41 +114,56 @@ public class GDXRoot extends Game implements ScreenListener {
 	public void exitScreen(Screen screen, int exitCode) {
 		if (screen == loading) {
 			directory = loading.getAssets();
-
 			menu.gatherAssets(directory);
 			menu.setCanvas(canvas);
 			menu.setScreenListener(this);
 			setScreen(menu);
-
 			loading.dispose();
 			loading = null;
 		} else if (exitCode == Constants.EXIT_LEVEL){
 			menu.hide();
 			controller.gatherAssets(directory);
 			controller.setCanvas(canvas);
+			controller.setVolumeBgm(menu.getVolumeBgm());
+			controller.setVolumeSfx(menu.getVolumeSfx());
 			controller.setScreenListener(this);
-			controller.setLevel(menu.getLevel());
+			if(menu.getLevel() != -1)
+				controller.setLevel(menu.getLevel());
 			controller.reset();
 			setScreen(controller);
-		} else if (exitCode == Constants.EXIT_MENU){
+		} else if (exitCode == Constants.EXIT_MENU) {
 			controller.hide();
-			menu.gatherAssets(directory);
-			menu.setCanvas(canvas);
-			menu.setScreenListener(this);
 			menu.setType(MenuMode.Type.START);
 			setScreen(menu);
+		} else if (exitCode == Constants.EXIT_COMPLETE) {
+			controller.pause();
+			menu.setType(MenuMode.Type.LEVEL_COMPLETE);
+			setScreen(menu);
 		} else if (exitCode == Constants.EXIT_NEXT) {
-//			current = (current+1) % controller.length;
+			controller.setVolumeBgm(menu.getVolumeBgm());
+			controller.setVolumeSfx(menu.getVolumeSfx());
 			controller.nextLevel();
 			controller.reset();
 			setScreen(controller);
 		} else if (exitCode == Constants.EXIT_PREV) {
 //			current = (current+ controller.length-1) % controller.length;
+			controller.setVolumeBgm(menu.getVolumeBgm());
+			controller.setVolumeSfx(menu.getVolumeSfx());
 			controller.reset();
+			setScreen(controller);
+		} else if (exitCode == Constants.EXIT_PAUSE) {
+			controller.pause();
+			menu.setType(MenuMode.Type.PAUSE);
+			setScreen(menu);
+		} else if (exitCode == Constants.EXIT_RESUME) {
+			controller.setVolumeBgm(menu.getVolumeBgm());
+			controller.setVolumeSfx(menu.getVolumeSfx());
+			controller.resume();
 			setScreen(controller);
 		} else if (exitCode == Constants.EXIT_QUIT) {
 			// We quit the main application
 			Gdx.app.exit();
+			System.exit(0);
 		}
 	}
 

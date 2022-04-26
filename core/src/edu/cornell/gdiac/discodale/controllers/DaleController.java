@@ -1,5 +1,6 @@
 package edu.cornell.gdiac.discodale.controllers;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import edu.cornell.gdiac.discodale.InputController;
@@ -11,6 +12,13 @@ public class DaleController {
 	private final DaleModel dale;
 	/** Vector math cache */
 	private final Vector2 vectorCache;
+
+	public enum SFX {
+		TONGUE_EXTEND,
+		TONGUE_STICK,
+		NONE
+	}
+	public SFX sfx = SFX.NONE;
 
 	public DaleController(DaleModel dale) {
 		this.dale = dale;
@@ -30,6 +38,7 @@ public class DaleController {
 	}
 
 	public void processGrappleAction(World world) {
+		sfx = SFX.NONE;
 		switch (dale.getGrappleState()) {
 			case RETRACTED:
 				dale.lookPosition(InputController.getInstance().getCrossHair());
@@ -39,6 +48,7 @@ public class DaleController {
 					dale.setGrappleAngle(vectorCache.angleRad());
 					dale.destroyGrappleJoint(world);
 					System.out.println("Grapple angle: " + dale.getGrappleAngle());
+					sfx = SFX.TONGUE_EXTEND;
 				}
 				break;
 			case EXTENDING:
@@ -50,6 +60,7 @@ public class DaleController {
 				} else if (dale.getGrappleAttachedBody() != null) {
 					dale.setGrappleState(GrappleState.ATTACHED);
 					dale.createGrappleJoint(dale.getGrappleAttachedBody(), dale.getGrappleAttachedBodyLocalAnchor(), world);
+					sfx = SFX.TONGUE_STICK;
 				}
 				break;
 			case ATTACHED:
