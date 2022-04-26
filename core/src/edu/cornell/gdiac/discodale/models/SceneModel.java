@@ -52,7 +52,7 @@ public class SceneModel {
     private float areaSightRadius = 10f;
 
     /** Whether Dale can only see an area around him or not. */
-    private boolean darkMode = true;
+    private boolean darkMode = false;
 
     /** The texture for walls and platforms */
     protected TextureRegion brickTile;
