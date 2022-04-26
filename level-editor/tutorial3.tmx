@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.4" orientation="orthogonal" renderorder="right-down" width="32" height="18" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="6">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="32" height="18" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="6">
+ <editorsettings>
+  <export target="../core/assets/levels/tutorial3.json" format="json"/>
+ </editorsettings>
  <properties>
   <property name="colorMode" type="int" value="1"/>
  </properties>
@@ -28,10 +31,10 @@
  </layer>
  <objectgroup id="2" name="colors" locked="1">
   <object id="2" type="color2" x="512" y="0">
-   <polygon points="0,0 0,544 -480,544 -480,0"/>
+   <polygon points="0,0 0,576 -512,576 -512,0"/>
   </object>
   <object id="5" type="color4" x="512" y="0">
-   <polygon points="0,0 0,544 480,544 480,0"/>
+   <polygon points="0,0 0,576 480,544 512,0"/>
   </object>
  </objectgroup>
 </map>
