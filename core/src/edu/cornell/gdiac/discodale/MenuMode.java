@@ -7,9 +7,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.math.Rectangle;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.assets.TextureRegionLoader;
 import edu.cornell.gdiac.discodale.models.ColorRegionModel;
@@ -162,7 +160,7 @@ public class MenuMode implements Screen, InputProcessor {
         this.canvas = canvas;
         active = false;
         type = Type.START;
-        canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f);
+        canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f, new Rectangle(0, 0, 32, 18), 32);
     }
 
 
