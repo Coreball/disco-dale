@@ -721,6 +721,10 @@ public class GameMode implements Screen {
 					scene.updateColorRegions();
 				}
 
+				if (dale.getY() * scale.y < -150) {
+					reset();
+				}
+
 				scene.updateGrid();
 				scene.updateColorRegionMovement();
 				break;
