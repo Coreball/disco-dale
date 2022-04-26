@@ -64,10 +64,10 @@
         "level3": "levels/tutorial3.json",
         "level4": "levels/tutorial5.json",
         "level5": "levels/4.json",
-        "level6": "levels/oliverlvl1.json",
+        "level6": "levels/funkylevel.json",
         "level7": "levels/medium.json",
         "level8": "levels/lv8.json",
-        "level9": "levels/funkylevel.json",
+        "level9": "levels/oliverlvl1.json"
     },
     "sounds" : {
         "theme" : "sound/theme.mp3",
@@ -103,6 +103,6 @@
         "shared:gothicsmall": {
              "file": "shared/league-gothic-semiexpanded.ttf",
              "size": 24
-        }, 
+        }
     }
 }
