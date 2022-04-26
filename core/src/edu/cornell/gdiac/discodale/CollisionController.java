@@ -53,7 +53,7 @@ public class CollisionController implements ContactListener {
 
             // See if tongue sticky part has hit something
             if (dale.getGrappleState() == DaleModel.GrappleState.EXTENDING &&
-                    ((bd1 == dale.getStickyPart() && bd2 != dale) || (bd2 == dale.getStickyPart() && bd1 != dale))) {
+                    (bd1 == dale.getStickyPart() || bd2 == dale.getStickyPart())) {
                 if (bd1.getName().startsWith("reflective") || bd2.getName().startsWith("reflective")) {
                     dale.setHitReflectiveFlag(true);
                 } else {
@@ -68,20 +68,19 @@ public class CollisionController implements ContactListener {
             }
 
             // See if we have landed on the ground.
-            if ((dale.getSensorName().equals(fd2) && dale != bd1) ||
-                    (dale.getSensorName().equals(fd1) && dale != bd2)) {
+            if (dale.getSensorName().equals(fd2) || dale.getSensorName().equals(fd1)) {
                 dale.setGrounded(true);
-                sensorFixtures.add(dale == bd1 ? fix2 : fix1); // Could have more than one ground
+                sensorFixtures.add(dale == bd1 || dale.getBodyPart() == bd1 ? fix2 : fix1); // Could have more than one ground
             }
 
             // Check for win condition
-            if ((bd1 == dale && bd2 == sceneModel.goalDoor) ||
-                    (bd1 == sceneModel.goalDoor && bd2 == dale)) {
+            if (((bd1 == dale || bd1 == dale.getBodyPart()) && bd2 == sceneModel.goalDoor) ||
+                    (bd1 == sceneModel.goalDoor && (bd2 == dale && bd2 == dale.getBodyPart()))) {
                 dale.setWinLose(true);
             }
 
-            if ((bd1 == dale   && isFly(bd2)) ||
-                    (isFly(bd2) && bd2 == dale)) {
+            if (((bd1 == dale || bd1 == dale.getBodyPart()) && isFly(bd2)) ||
+                    (isFly(bd2) && (bd1 == dale || bd1 == dale.getBodyPart()))) {
                 dale.setWinLose(false);
             }
         } catch (Exception e) {
@@ -119,9 +118,8 @@ public class CollisionController implements ContactListener {
         Object bd1 = body1.getUserData();
         Object bd2 = body2.getUserData();
 
-        if ((dale.getSensorName().equals(fd2) && dale != bd1) ||
-                (dale.getSensorName().equals(fd1) && dale != bd2)) {
-            sensorFixtures.remove(dale == bd1 ? fix2 : fix1);
+        if (dale.getSensorName().equals(fd2) || dale.getSensorName().equals(fd1)) {
+            sensorFixtures.remove(dale == bd1 || dale.getBodyPart() == bd1 ? fix2 : fix1);
             if (sensorFixtures.size == 0) {
                 dale.setGrounded(false);
             }
