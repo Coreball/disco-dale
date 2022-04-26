@@ -83,6 +83,7 @@ public class GameMode implements Screen {
 	private ScreenListener listener;
 
 	private int levelIndex;
+
 	private float zoomFactor;
 	private float zoomValue;
 	private int ticks;
@@ -282,9 +283,9 @@ public class GameMode implements Screen {
 	public void updateScale() {
 //		this.scale.x = canvas.getWidth() / bounds.getWidth();
 //		this.scale.y = canvas.getHeight() / bounds.getHeight();
-		this.scale.x = 32f;
-		this.scale.y = 32f;
-		System.out.println("gamemode scale " + this.scale);
+		this.scale.x = (float) this.scene.getTileSize();
+		this.scale.y = (float) this.scene.getTileSize();
+//		System.out.println("gamemode scale " + this.scale);
 	}
 
 	public void setLevel(int index){
@@ -427,6 +428,7 @@ public class GameMode implements Screen {
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
 		loadLevel(levelIndex);
+		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f, this.bounds, this.scene.getTileSize());
 		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
 		populateLevel();
@@ -555,7 +557,7 @@ public class GameMode implements Screen {
 		} else if (input.didMenu()){
 			pause();
 			listener.exitScreen(this, Constants.EXIT_MENU);
-			canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f, this.bounds);
+			canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f, this.bounds, this.scene.getTileSize());
 			return false;
 		} else if (input.didAdvance()) {
 			pause();
@@ -616,12 +618,16 @@ public class GameMode implements Screen {
 
 		switch (getCameraState()) {
 			case START:
-				zoomValue = Math.max(this.bounds.getWidth() * 32 / this.canvas.getWidth(), this.bounds.getHeight() * 32 / this.canvas.getHeight());
+				zoomValue = Math.max(
+						this.bounds.getWidth() * this.scene.getTileSize() / this.canvas.getWidth(),
+						this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
+				);
 				canvas.updateCam(
 						(float) canvas.getWidth() / 2,
 						(float) canvas.getHeight() / 2,
 						zoomValue,
-						this.bounds
+						this.bounds,
+						this.scene.getTileSize()
 				);
 				if (ticks >= 55) {
 					zoomFactor = (zoomValue - ZOOM_AMOUNT) / 60;
@@ -635,12 +641,24 @@ public class GameMode implements Screen {
 					setCameraState(CameraState.PLAY);
 				} else {
 					float zoom = canvas.getCameraZoom();
-					canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - zoomFactor, this.bounds);
+					canvas.updateCam(
+							dale.getX() * scale.x,
+							dale.getY() * scale.y,
+							zoom - zoomFactor,
+							this.bounds,
+							this.scene.getTileSize()
+					);
 					scene.updateGrid();
 				}
 				break;
 			case PLAY:
-				canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y,  ZOOM_AMOUNT, this.bounds);
+				canvas.updateCam(
+						dale.getX() * scale.x,
+						dale.getY() * scale.y,
+						ZOOM_AMOUNT,
+						this.bounds,
+						this.scene.getTileSize()
+				);
 
 				daleController.processMovement();
 				daleController.processColorRotation();
@@ -653,7 +671,7 @@ public class GameMode implements Screen {
 					flyController.setVelocity();
 				}
 
-				if(colorChangeCountdown>0){
+				if (colorChangeCountdown > 0) {
 					colorChangeCountdown--;
 				} else {
 					colorChangeCountdown = CHANGE_COLOR_TIME;
@@ -935,16 +953,14 @@ public class GameMode implements Screen {
 
 		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
 		// loadLevel(levelIndex);
-		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT));
+		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
 	}
 
 	private void loadLevel(int index) {
 		if (levels[index] != null) {
-			this.scene = levelLoader.load(levels[index], constants.get("defaults"), new Rectangle(0, 0,
-					canvas.width, canvas.height));
+			this.scene = levelLoader.load(levels[index], constants.get("defaults"));
 		} else {
-			this.scene = levelLoader.load(testlevel, constants.get("defaults"), new Rectangle(0, 0,
-					canvas.width, canvas.height));
+			this.scene = levelLoader.load(testlevel, constants.get("defaults"));
 		}
 		this.bounds = new Rectangle(scene.getBounds());
 		updateScale();
