@@ -623,8 +623,8 @@ public class GameMode implements Screen {
 						zoomValue,
 						this.bounds
 				);
-				if (ticks >= 30) {
-					zoomFactor = (zoomValue - ZOOM_AMOUNT) / 75;
+				if (ticks >= 55) {
+					zoomFactor = (zoomValue - ZOOM_AMOUNT) / 60;
 					setCameraState(CameraState.ZOOM);
 				} else {
 					ticks++;
@@ -635,7 +635,6 @@ public class GameMode implements Screen {
 					setCameraState(CameraState.PLAY);
 				} else {
 					float zoom = canvas.getCameraZoom();
-					System.out.println("Zoom Factor: " + zoomFactor);
 					canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - zoomFactor, this.bounds);
 					scene.updateGrid();
 				}
