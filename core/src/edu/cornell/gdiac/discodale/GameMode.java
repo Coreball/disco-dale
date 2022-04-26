@@ -83,6 +83,7 @@ public class GameMode implements Screen {
 	private ScreenListener listener;
 
 	private int levelIndex;
+	private boolean isNewLevel;
 
 	private float zoomFactor;
 	private float zoomValue;
@@ -300,11 +301,11 @@ public class GameMode implements Screen {
 
 	public void setLevel(int index){
 		levelIndex = index;
-
+		isNewLevel = true;
 	}
 
 	public void nextLevel(){
-		levelIndex = (levelIndex + 1) % NUM_LEVELS;
+		setLevel((levelIndex + 1) % NUM_LEVELS);
 	}
 
 	/**
@@ -416,6 +417,7 @@ public class GameMode implements Screen {
 		return horiz && vert;
 	}
 
+
 	/**
 	 * Resets the status of the game so that we can play again.
 	 *
@@ -438,7 +440,7 @@ public class GameMode implements Screen {
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
 		loadLevel(levelIndex);
-		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f, this.bounds, this.scene.getTileSize());
+		isNewLevel = false;
 		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
 		populateLevel();
@@ -945,7 +947,10 @@ public class GameMode implements Screen {
 		this.bounds = new Rectangle(scene.getBounds());
 		updateScale();
 		ticks = 0;
-		setCameraState(CameraState.START);
+		if (isNewLevel)
+			setCameraState(CameraState.START);
+		else
+			setCameraState(CameraState.PLAY);
 	}
 
 }
