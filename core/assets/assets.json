@@ -62,12 +62,12 @@
         "level1": "levels/tutorial1.json",
         "level2": "levels/tutorial2.json",
         "level3": "levels/tutorial3.json",
-        "level4": "levels/tutorial4.json",
+        "level4": "levels/4.json",
         "level5": "levels/tutorial5.json",
         "level6": "levels/oliverlvl1.json",
         "level7": "levels/medium.json",
         "level8": "levels/lv8.json",
-        "level9": "levels/funkylevel.json"
+        "level9": "levels/funkylevel.json",
     },
     "sounds" : {
         "theme" : "sound/theme.mp3",
