@@ -68,9 +68,9 @@ public class InputController {
 	/** Whether the debug toggle was pressed. */
 	private boolean debugPressed;
 	private boolean debugPrevious;
-	/** Whether the exit button was pressed. */
-	private boolean exitPressed;
-	private boolean exitPrevious;
+	/** Whether the pause button was pressed. */
+	private boolean pausePressed;
+	private boolean pausePrevious;
 	/** Whether the click action button is being held. */
 	private boolean clickHeld;
 	/** Whether the switch adjustment button was pressed. */
@@ -194,12 +194,12 @@ public class InputController {
 	}
 	
 	/**
-	 * Returns true if the exit button was pressed.
+	 * Returns true if the pause button was pressed.
 	 *
-	 * @return true if the exit button was pressed.
+	 * @return true if the pause button was pressed.
 	 */
-	public boolean didExit() {
-		return exitPressed && !exitPrevious;
+	public boolean didPause() {
+		return pausePressed && !pausePrevious;
 	}
 
 	/**
@@ -284,7 +284,7 @@ public class InputController {
 		clickPrevious = clickPressed;
 		resetPrevious  = resetPressed;
 		debugPrevious  = debugPressed;
-		exitPrevious = exitPressed;
+		pausePrevious = pausePressed;
 		nextPrevious = nextPressed;
 		prevPrevious = prevPressed;
 		switchAdjustmentPrevious = switchAdjustmentPressed;
@@ -314,7 +314,7 @@ public class InputController {
 	 */
 	private void readGamepad(Rectangle bounds, Vector2 scale) {
 		resetPressed = xbox.getStart();
-		exitPressed  = xbox.getBack();
+		pausePressed  = xbox.getBack();
 		nextPressed  = xbox.getRBumper();
 		prevPressed  = xbox.getLBumper();
 		rotateColorPressed = xbox.getA();
@@ -355,7 +355,7 @@ public class InputController {
 		rotateColorPressed = (secondary && rotateColorPressed) || (Gdx.input.isKeyPressed(Input.Keys.SPACE));
 		prevPressed = (secondary && prevPressed) || (Gdx.input.isKeyPressed(Input.Keys.P));
 		nextPressed = (secondary && nextPressed) || (Gdx.input.isKeyPressed(Input.Keys.N));
-		exitPressed  = (secondary && exitPressed) || (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
+		pausePressed  = (secondary && pausePressed) || (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
 		
 		// Directional controls
 		horizontal = (secondary ? horizontal : 0.0f);
