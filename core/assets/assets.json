@@ -28,11 +28,33 @@
         "platform:greencolor": "platform/color_green.png",
         "platform:purplecolor": "platform/color_purple.png",
         "platform:orangecolor": "platform/color_orange.png",
+        "platform:light": "platform/light.png",
+        "platform:darkness": "platform/darkness.png",
         "menu:play": "menu/play_button.png",
+        "menu:options": "menu/options_button.png",
+        "menu:exit": "menu/exit.png",
         "menu:bg": "menu/background.png",
+        "menu:windowbg": "menu/window_bg.png",
+        "menu:optionsbg": "menu/options_bg.png",
+        "menu:completebg": "menu/complete_bg.png",
+        "menu:complete": "menu/complete.png",
         "menu:title": "menu/title.png",
         "menu:level": "menu/level.png",
-        "menu:levelbutton": "menu/level_button.png"
+        "menu:levelbutton": "menu/level_button.png",
+        "menu:toggleon": "menu/toggle_on.png",
+        "menu:toggleoff": "menu/toggle_off.png",
+        "menu:slideon": "menu/slide_on.png",
+        "menu:slideonleft": "menu/slide_on_left.png",
+        "menu:slideoff": "menu/slide_off.png",
+        "menu:slideoffright": "menu/slide_off_right.png",
+        "menu:slidethumb": "menu/slide_thumb.png",
+        "menu:exittomenu": "menu/exit_to_menu.png",
+        "menu:nextlevel": "menu/next_level.png",
+        "menu:restart": "menu/restart.png",
+        "menu:resume": "menu/resume.png",
+        "menu:restartpause": "menu/restart_long.png",
+        "menu:optionspause": "menu/options.png",
+        "menu:menu": "menu/main_menu.png"
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json",
@@ -40,22 +62,42 @@
         "level1": "levels/1.json",
         "level2": "levels/2.json",
         "level3": "levels/3.json",
-        "level4": "levels/4.json"
+        "level4": "levels/4.json",
+        "level5":  "platform/testbig.json",
     },
     "sounds" : {
-        "theme" : "shared/theme.mp3",
+        "theme" : "sound/theme.mp3",
+        "died": "sound/died.mp3",
+        "stick": "sound/stick.mp3",
+        "extend": "sound/extend.mp3",
         "platform:jump" : "platform/jump.mp3",
         "platform:pew"  : "platform/pew.mp3",
-        "platform:plop" : "platform/plop.mp3"
+        "platform:plop" : "platform/plop.mp3",
     },
     "fonts": {
         "shared:retro": {
             "file": "shared/RetroGame.ttf",
             "size": 64
         },
-        "shared:alien": {
+        "shared:alienitalic": {
             "file": "shared/AlienRemixItalic-EaoL4.ttf",
             "size": 48
-        }
+        },
+        "shared:alien": {
+             "file": "shared/AlienRemix-ZVL7J.ttf",
+             "size": 48
+        },
+        "shared:aliensmall": {
+             "file": "shared/AlienRemix-ZVL7J.ttf",
+             "size": 24
+        },
+       "shared:gothic": {
+             "file": "shared/league-gothic-semiexpanded.ttf",
+             "size": 32
+        }, 
+        "shared:gothicsmall": {
+             "file": "shared/league-gothic-semiexpanded.ttf",
+             "size": 24
+        }, 
     }
 }

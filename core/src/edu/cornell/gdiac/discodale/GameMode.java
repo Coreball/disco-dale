@@ -16,7 +16,10 @@
  */
 package edu.cornell.gdiac.discodale;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.*;
@@ -62,6 +65,8 @@ public class GameMode implements Screen {
 
 	private static int NUM_LEVELS = 10;
 
+	private static float ZOOM_AMOUNT = 0.75f;
+
 	/** The texture for neutral walls */
 	protected TextureRegion brickTile;
 	/** The texture for non-grappleable walls */
@@ -81,7 +86,10 @@ public class GameMode implements Screen {
 	private ScreenListener listener;
 
 	private int levelIndex;
+
 	private float zoomFactor;
+	private float zoomValue;
+	private int ticks;
 
 	/** The Box2D world */
 	protected World world;
@@ -113,9 +121,18 @@ public class GameMode implements Screen {
 
 	private Texture[] colors = new Texture[5];
 
-	/** Background music */
-	private Sound theme;
-	private long themeId = -1;
+	private TextureRegion light;
+	private TextureRegion darkness;
+
+	/** Sound effects */
+	private Sound died;
+	private Sound extend;
+	private Sound stick;
+
+	private long diedId = -1;
+	private long extendId = -1;
+	private long stickId = -1;
+
 
 	// TODO support colors with the split-body model
 	/** Dale body texture */
@@ -123,7 +140,8 @@ public class GameMode implements Screen {
 	private TextureRegion pinkIdleBody1Texture;
 
 	/** The default sound volume */
-	private float volume;
+	private float volumeBgm;
+	private float volumeSfx;
 
 	// Physics objects for the game
 	/** Physics constants for initialization */
@@ -141,6 +159,8 @@ public class GameMode implements Screen {
 	private DaleController daleController;
 	private CollisionController collisionController;
 
+	private CameraState camState;
+
 	/** Which value to change with the increase/decrease buttons */
 	private AdjustTarget adjustTarget = AdjustTarget.GRAPPLE_SPEED;
 	/** Enum for which value to change with the increase/decrease buttons */
@@ -149,7 +169,7 @@ public class GameMode implements Screen {
 		GRAPPLE_FORCE,
 	}
 
-	private PooledList<FlyController> flyControllers;
+	private LinkedList<FlyController> flyControllers;
 
 	private int colorChangeCountdown;
 
@@ -160,6 +180,9 @@ public class GameMode implements Screen {
 		setFailure(false);
 //		this.scene = new SceneModel(bounds);
 	}
+
+	public void setVolumeBgm(int volumeBgm) { this.volumeBgm = volumeBgm / 100f; }
+	public void setVolumeSfx(int volumeSfx) { this.volumeSfx = volumeSfx / 100f; }
 
 	/**
 	 * Returns true if debug mode is active.
@@ -269,9 +292,16 @@ public class GameMode implements Screen {
 	 */
 	public void setCanvas(GameCanvas canvas) {
 		this.canvas = canvas;
-		this.scale.x = canvas.getWidth() / bounds.getWidth();
-		this.scale.y = canvas.getHeight() / bounds.getHeight();
 		this.scene.setCanvas(canvas);
+		updateScale();
+	}
+
+	public void updateScale() {
+//		this.scale.x = canvas.getWidth() / bounds.getWidth();
+//		this.scale.y = canvas.getHeight() / bounds.getHeight();
+		this.scale.x = (float) this.scene.getTileSize();
+		this.scale.y = (float) this.scene.getTileSize();
+//		System.out.println("gamemode scale " + this.scale);
 	}
 
 	public void setLevel(int index){
@@ -413,8 +443,8 @@ public class GameMode implements Screen {
 		setFailure(false);
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
-		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f);
 		loadLevel(levelIndex);
+		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f, this.bounds, this.scene.getTileSize());
 		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
 		populateLevel();
@@ -463,7 +493,7 @@ public class GameMode implements Screen {
 		dwidth = FLY_SIZE / scale.x;
 		dheight = FLY_SIZE / scale.y;
 		flies = new PooledList<>();
-		flyControllers = new PooledList<>();
+		flyControllers = new LinkedList<>();
 		for (Vector2 flyLocation : scene.getFlyLocations()) {
 			FlyModel fly = new FlyModel(constants.get("fly"), flyLocation.x, flyLocation.y, dwidth, dheight, FlyModel.IdleType.STATIONARY);
 			fly.setDrawScale(scale);
@@ -484,7 +514,6 @@ public class GameMode implements Screen {
 		// This world is heavier
 		world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
 
-		volume = constants.getFloat("volume", 1.0f);
 	}
 
 	/**
@@ -543,14 +572,13 @@ public class GameMode implements Screen {
 		}
 
 		// Now it is time to maybe switch screens.
-		if (input.didExit()) {
+		if (input.didPause()) {
 			pause();
-			listener.exitScreen(this, Constants.EXIT_QUIT);
+			listener.exitScreen(this, Constants.EXIT_PAUSE);
 			return false;
 		} else if (input.didMenu()){
 			pause();
 			listener.exitScreen(this, Constants.EXIT_MENU);
-			canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f);
 			return false;
 		} else if (input.didAdvance()) {
 			pause();
@@ -568,7 +596,7 @@ public class GameMode implements Screen {
 				reset();
 			} else if (complete) {
 				pause();
-				listener.exitScreen(this, Constants.EXIT_NEXT);
+				listener.exitScreen(this, Constants.EXIT_COMPLETE);
 				return false;
 			}
 		}
@@ -587,6 +615,10 @@ public class GameMode implements Screen {
 	private boolean daleMatches() {
 		return dale.getColor() == daleBackground();
 	}
+
+	public CameraState getCameraState() {return camState;}
+
+	public void setCameraState(CameraState state) {camState = state;}
 
 	/**
 	 * The core gameplay loop of this world.
@@ -608,48 +640,173 @@ public class GameMode implements Screen {
 		dale.applyForce();
 		dale.applyStickyPartMovement(dt);
 
-		themeId = playBGM(theme, themeId, volume);
 		dale.setMatch(daleMatches());
-
-		// zoom at the start of the level
-		if (canvas.getCameraZoom() > 0.75f) {
-			float zoom = canvas.getCameraZoom();
-			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom - 0.005f);
-			scene.updateGrid();
-		// consistent zoom for the rest of the level
-		} else {
-			canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f);
-			daleController.processMovement();
-			daleController.processColorRotation();
-			daleController.processGrappleAction(world);
-			for (FlyController flyController : flyControllers) {
-				flyController.changeDirection();
-				flyController.setVelocity();
-			}
-
-			if(colorChangeCountdown>0){
-				colorChangeCountdown--;
-			} else {
-				colorChangeCountdown = CHANGE_COLOR_TIME;
-				scene.updateColorRegions();
-			}
-
-			scene.updateGrid();
-			scene.updateColorRegionMovement();
+		switch (daleController.sfx){
+			case TONGUE_EXTEND:
+				extendId = SoundPlayer.playSound(extend, extendId, volumeSfx);
+				break;
+			case TONGUE_STICK:
+				stickId = SoundPlayer.playSound(stick, stickId, volumeSfx);
+				break;
 		}
 
+		switch (getCameraState()) {
+			case START:
+				zoomValue = Math.max(
+						this.bounds.getWidth() * this.scene.getTileSize() / this.canvas.getWidth(),
+						this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
+				);
+				canvas.updateCam(
+						(float) canvas.getWidth() / 2,
+						(float) canvas.getHeight() / 2,
+						zoomValue,
+						this.bounds,
+						this.scene.getTileSize()
+				);
+				if (ticks >= 55) {
+					zoomFactor = (zoomValue - ZOOM_AMOUNT) / 60;
+					setCameraState(CameraState.ZOOM);
+				} else {
+					ticks++;
+				}
+				break;
+			case ZOOM:
+				if (canvas.getCameraZoom() <= ZOOM_AMOUNT) {
+					setCameraState(CameraState.PLAY);
+				} else {
+					float zoom = canvas.getCameraZoom();
+					canvas.updateCam(
+							dale.getX() * scale.x,
+							dale.getY() * scale.y,
+							zoom - zoomFactor,
+							this.bounds,
+							this.scene.getTileSize()
+					);
+					scene.updateGrid();
+				}
+				break;
+			case PLAY:
+				canvas.updateCam(
+						dale.getX() * scale.x,
+						dale.getY() * scale.y,
+						ZOOM_AMOUNT,
+						this.bounds,
+						this.scene.getTileSize()
+				);
+
+				daleController.processMovement();
+				daleController.processColorRotation();
+				daleController.processGrappleAction(world);
+				dale.applyForce();
+				dale.applyStickyPartMovement(dt);
+
+				for (FlyController flyController : flyControllers) {
+					flyController.changeDirection();
+					flyController.setVelocity();
+				}
+
+				if (colorChangeCountdown > 0) {
+					colorChangeCountdown--;
+				} else {
+					colorChangeCountdown = CHANGE_COLOR_TIME;
+					scene.updateColorRegions();
+				}
+
+				scene.updateGrid();
+				scene.updateColorRegionMovement();
+				break;
+		}
 
 		int winLose = dale.getWinLose();
+
 		if(winLose == WIN_CODE){
 			setComplete(true);
-//			//debugging message
-//			System.out.println("win");
 		}
+
 		if(winLose == LOSE_CODE){
 			setFailure(true);
-//			//debugging message
-//			System.out.println("lose");
 		}
+
+		class FixtureAndDistance{
+			public Fixture fixture;
+			public float distance;
+			public FixtureAndDistance(Fixture fixture,float distance){
+				this.fixture = fixture;
+				this.distance = distance;
+			}
+		}
+
+		class CustomizedRayCastCallBack implements RayCastCallback{
+			public LinkedList<FixtureAndDistance> fixtureAndDistances = new LinkedList<>();
+			public void reset(){
+				fixtureAndDistances = new LinkedList<>();
+			}
+			@Override
+			public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+				float diffX = Math.abs(point.x - dale.getX());
+				float diffY = Math.abs(point.y - dale.getY());
+				float distance = (float) Math.sqrt((double)(diffX*diffX) + (double)(diffY*diffY));
+				fixtureAndDistances.add(new FixtureAndDistance(fixture,distance));
+
+				return 1;
+			}
+		}
+
+		CustomizedRayCastCallBack callback = new CustomizedRayCastCallBack();
+
+		if(scene.isRealSightMode()){
+			for(FlyController f:flyControllers){
+				f.setSeeDaleInRealWorld(false);
+			}
+			for(FlyController f:flyControllers){
+				FlyModel fly = f.getFly();
+//				System.out.println("startRay");
+//				System.out.println(dale.getX() +"  "+ dale.getY() +"  "+fly.getX() +"  "+fly.getY());
+				callback.reset();
+				world.rayCast(callback,dale.getX(),dale.getY(),fly.getX(),fly.getY());
+				LinkedList<FixtureAndDistance> fixtureAndDistances = callback.fixtureAndDistances;
+				Collections.sort(fixtureAndDistances,new Comparator<FixtureAndDistance>(){
+					public int compare(FixtureAndDistance f1,FixtureAndDistance f2){
+						if(f1.distance>f2.distance){
+							return 1;
+						}
+						else if(f1.distance==f2.distance){
+							return 0;
+						}else{
+							return -1;
+						}
+					}
+				});
+				for(FixtureAndDistance fd: fixtureAndDistances){
+					Fixture fixture = fd.fixture;
+					boolean isFly = false;
+					for(FlyController ff:flyControllers){
+						FlyModel flyModel = ff.getFly();
+						for(Fixture flyModelFixture: flyModel.getBody().getFixtureList()){
+							if (fixture==flyModelFixture){
+//								System.out.println(flyModel.getX() +"  "+flyModel.getY() + fd.distance);
+								isFly = true;
+								ff.setSeeDaleInRealWorld(true);
+							}
+						}
+					}
+					if(!isFly){
+						if(!dale.checkFixtureInDale(fixture)){
+//							System.out.println("Distance to obstacle: "+fd.distance);
+							break;
+						}
+					}
+				}
+//				System.out.println("endRay");
+			}
+//			for(FlyController f:flyControllers){
+//				if(f.getSeeDaleInRealWorld()){
+//					System.out.println("Can see");
+//				}
+//			}
+
+		}
+
 	}
 
 	/**
@@ -703,10 +860,29 @@ public class GameMode implements Screen {
 
 		canvas.begin();
 		scene.draw(canvas);
+
 		for (Obstacle obj : objects) {
 			obj.draw(canvas);
 		}
 		canvas.end();
+
+		if(scene.isDarkMode()){
+			// Draw light
+			canvas.beginLight();
+			float ch = canvas.getHeight();
+			float cw = canvas.getWidth();
+			float h = light.getRegionHeight();
+			float w = light.getRegionWidth();
+			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
+			float lightScale = 2f;
+			canvas.draw(light,new Color(256,256,256,0f),w*lightScale/2f,h*lightScale/2f,dale.getX()*scale.x,dale.getY()*scale.y,w*lightScale,h*lightScale);
+			canvas.endLight();
+
+			// Draw darkness around light
+			canvas.beginLight2();
+			canvas.draw(darkness,new Color(256,256,256,0.5f),cw/2f,ch/2f,canvas.getCameraX(),canvas.getCameraY(),cw,ch);
+			canvas.endLight();
+		}
 
 		if (debug) {
 			canvas.beginDebug();
@@ -726,58 +902,12 @@ public class GameMode implements Screen {
 			canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
 			canvas.end();
 		} else if (failed) {
+			diedId = SoundPlayer.playSound(died, diedId, volumeSfx);
 			displayFont.setColor(Color.BLACK);
 			canvas.begin(); // DO NOT SCALE
 			canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
 			canvas.end();
 		}
-	}
-
-	/**
-	 * Method to ensure that a sound asset is only played once.
-	 *
-	 * Every time you play a sound asset, it makes a new instance of that sound.
-	 * If you play the sounds to close together, you will have overlapping copies.
-	 * To prevent that, you must stop the sound before you play it again. That
-	 * is the purpose of this method. It stops the current instance playing (if
-	 * any) and then returns the id of the new instance for tracking.
-	 *
-	 * @param sound   The sound asset to play
-	 * @param soundId The previously playing sound instance
-	 *
-	 * @return the new sound instance for this asset.
-	 */
-	public long playSound(Sound sound, long soundId) {
-		return playSound(sound, soundId, 1.0f);
-	}
-
-	/**
-	 * Method to ensure that a sound asset is only played once.
-	 *
-	 * Every time you play a sound asset, it makes a new instance of that sound.
-	 * If you play the sounds to close together, you will have overlapping copies.
-	 * To prevent that, you must stop the sound before you play it again. That
-	 * is the purpose of this method. It stops the current instance playing (if
-	 * any) and then returns the id of the new instance for tracking.
-	 *
-	 * @param sound   The sound asset to play
-	 * @param soundId The previously playing sound instance
-	 * @param volume  The sound volume
-	 *
-	 * @return the new sound instance for this asset.
-	 */
-	public long playSound(Sound sound, long soundId, float volume) {
-		if (soundId != -1) {
-			sound.stop(soundId);
-		}
-		return sound.play(volume);
-	}
-
-	public long playBGM(Sound sound, long soundId, float volume) {
-		if (soundId != -1) {
-			return soundId;
-		}
-		return sound.loop(volume);
 	}
 
 	/**
@@ -820,6 +950,7 @@ public class GameMode implements Screen {
 	 */
 	public void pause() {
 		// TODO Auto-generated method stub
+		canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f, this.bounds, this.scene.getTileSize());
 	}
 
 	/**
@@ -829,6 +960,7 @@ public class GameMode implements Screen {
 	 */
 	public void resume() {
 		// TODO Auto-generated method stub
+		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f, this.bounds, this.scene.getTileSize());
 	}
 
 	/**
@@ -886,14 +1018,19 @@ public class GameMode implements Screen {
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
 		flyChaseTexture = directory.getEntry("platform:flychasing", Texture.class);
 
-		theme = directory.getEntry("theme", Sound.class);
+		light = new TextureRegion(directory.getEntry("platform:light",Texture.class));
+		darkness = new TextureRegion(directory.getEntry("platform:darkness",Texture.class));
 
 		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles
 		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
-		displayFont = directory.getEntry("shared:alien", BitmapFont.class);
+		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
+
+		died = directory.getEntry("died", Sound.class);
+		extend = directory.getEntry("extend", Sound.class);
+		stick = directory.getEntry("stick", Sound.class);
 
 		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
 		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);
@@ -901,6 +1038,8 @@ public class GameMode implements Screen {
 		colors[3] = directory.getEntry("platform:purplecolor", Texture.class);
 		colors[4] = directory.getEntry("platform:orangecolor", Texture.class);
 		ColorRegionModel.setColorTexture(colors);
+
+
 
 		this.testlevel = directory.getEntry("testlevel", JsonValue.class);
 
@@ -910,17 +1049,19 @@ public class GameMode implements Screen {
 
 		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
 		// loadLevel(levelIndex);
-		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT));
+		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
 	}
 
-	private void loadLevel(int index){
+	private void loadLevel(int index) {
 		if (levels[index] != null) {
-			this.scene = levelLoader.load(levels[index], constants.get("defaults"), new Rectangle(0, 0,
-					canvas.width, canvas.height));
+			this.scene = levelLoader.load(levels[index], constants.get("defaults"));
 		} else {
-			this.scene = levelLoader.load(testlevel, constants.get("defaults"), new Rectangle(0, 0,
-					canvas.width, canvas.height));
+			this.scene = levelLoader.load(testlevel, constants.get("defaults"));
 		}
+		this.bounds = new Rectangle(scene.getBounds());
+		updateScale();
+		ticks = 0;
+		setCameraState(CameraState.START);
 	}
 
 }

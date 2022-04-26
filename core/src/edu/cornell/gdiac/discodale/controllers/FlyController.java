@@ -1,5 +1,6 @@
 package edu.cornell.gdiac.discodale.controllers;
 
+import com.badlogic.gdx.physics.box2d.Fixture;
 import edu.cornell.gdiac.discodale.models.DaleModel;
 import edu.cornell.gdiac.discodale.models.FlyModel;
 import edu.cornell.gdiac.discodale.models.SceneModel;
@@ -34,6 +35,8 @@ public class FlyController {
     private float dx;
     private float dy;
 
+    private boolean seeDaleInRealWorld;
+
     public class Node {
         int x;
         int y;
@@ -66,6 +69,20 @@ public class FlyController {
         dx = 0;
         dy = 0;
         ticks = 0;
+        seeDaleInRealWorld = false;
+    }
+
+    public void setSeeDaleInRealWorld(boolean seeDaleInRealWorld){
+        this.seeDaleInRealWorld = seeDaleInRealWorld;
+    }
+
+    /** Gets if Dale is in fly's real world sight. Note that it does not know scene's mode. */
+    public boolean getSeeDaleInRealWorld(){
+        return seeDaleInRealWorld;
+    }
+
+    public FlyModel getFly(){
+        return fly;
     }
 
     public void setVelocity() {
@@ -93,6 +110,29 @@ public class FlyController {
                 break;
         }
     }
+    /** Checks if Dale is in fly's area sight. Note that it does not know scene's mode. */
+    private boolean daleInAreaSight(){
+        boolean ans = true;
+        float diffX = Math.abs(fly.getX() - dale.getX());
+        float diffY = Math.abs(fly.getY() - dale.getY());
+        if(Math.sqrt((double)(diffX*diffX) + (double)(diffY*diffY))>scene.getAreaSightRadius()){
+            ans = false;
+        }
+        return ans;
+    }
+
+    /** Determine if fly should chase Dale */
+    public boolean shouldChaseDale(){
+        boolean seeInArea = true;
+        boolean seeDaleInWorld = true;
+        if(scene.isAreaSightMode()){
+            seeInArea = daleInAreaSight();
+        }
+        if(scene.isRealSightMode()){
+            seeDaleInWorld = getSeeDaleInRealWorld();
+        }
+        return seeInArea && seeDaleInWorld && !dale.getMatch();
+    }
 
     /**
      * Change the state of the fly.
@@ -102,7 +142,7 @@ public class FlyController {
         // Next state depends on current state.
         switch (state) {
             case IDLE:
-                if (!dale.getMatch()) {
+                if(shouldChaseDale()){
                     fly.setAngry(true);
                     state = FSMState.CHASE;
                 }
