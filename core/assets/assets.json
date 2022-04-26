@@ -28,6 +28,8 @@
         "platform:greencolor": "platform/color_green.png",
         "platform:purplecolor": "platform/color_purple.png",
         "platform:orangecolor": "platform/color_orange.png",
+        "platform:light": "platform/light.png",
+        "platform:darkness": "platform/darkness.png",
         "menu:play": "menu/play_button.png",
         "menu:options": "menu/options_button.png",
         "menu:exit": "menu/exit.png",

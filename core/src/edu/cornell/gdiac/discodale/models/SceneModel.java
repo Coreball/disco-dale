@@ -42,6 +42,17 @@ public class SceneModel {
 
     private Vector2 centerOfRotation = null;
 
+    /** Whether flies can start to chase Dale only if Dale is within an area of a radius or not */
+    private boolean areaSightMode = true;
+
+    /** Whether flies can start to chase Dale only if there is no obstacle between them or not */
+    private boolean realSightMode = true;
+
+    /** The radius of area of fly's sight */
+    private float areaSightRadius = 10f;
+
+    /** Whether Dale can only see an area around him or not. */
+    private boolean darkMode = true;
 
     /** The texture for walls and platforms */
     protected TextureRegion brickTile;
@@ -123,6 +134,25 @@ public class SceneModel {
 
     public void addFly(float x, float y) {
         this.flyLocations.add(new Vector2(x, y));
+    }
+
+    public boolean isAreaSightMode() {
+        return areaSightMode;
+    }
+
+    public boolean isRealSightMode() {
+        return realSightMode;
+    }
+
+    public float getAreaSightRadius() {
+        return areaSightRadius;
+    }
+    public boolean isDarkMode() {
+        return darkMode;
+    }
+
+    public void setDarkMode(boolean darkMode) {
+        this.darkMode = darkMode;
     }
 
     public void setCanvas(GameCanvas canvas) {

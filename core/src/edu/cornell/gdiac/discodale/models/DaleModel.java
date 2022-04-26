@@ -584,6 +584,27 @@ public class DaleModel extends WheelObstacle {
 	}
 
 	/**
+	 * Checks if a fixture is Dale's.
+	 *
+	 * @param fixture the fixture to check
+	 *
+	 * @return true if the fixture is either in Dale's own body or its bodyPart
+	 */
+	public boolean checkFixtureInDale(Fixture fixture){
+		for(Fixture f:getBody().getFixtureList()){
+			if(f==fixture){
+				return true;
+			}
+		}
+		for(Fixture f:bodyPart.getBody().getFixtureList()){
+			if(f==fixture){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Applies the force to the body of this dude
 	 *
 	 * This method should be called after the force attribute is set.
