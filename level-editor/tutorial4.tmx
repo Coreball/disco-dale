@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.4" orientation="orthogonal" renderorder="right-down" width="32" height="18" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="3">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="32" height="18" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="3">
+ <editorsettings>
+  <export target="../core/assets/levels/tutorial4.json" format="json"/>
+ </editorsettings>
+ <properties>
+  <property name="colorMode" type="int" value="0"/>
+ </properties>
  <tileset firstgid="1" source="disco.tsx"/>
  <layer id="1" name="platform" width="32" height="18">
   <data encoding="csv">
