@@ -93,13 +93,14 @@ public class DaleModel extends WheelObstacle {
 
 	private int colorIndex;
 	private DaleColor[] availableColors;
-	private TextureRegion[] headIdleTextures;
+	private FilmStrip[] headTextures;
 	private TextureRegion[] bodyIdleTextures;
 	private FilmStrip[] bodyWalkTextures;
 
 	/** Seconds per frame */
 	private static final float ANIMATION_SPEED = 0.10f;
 	private float bodyWalkAnimationClock;
+	private float headGrappleAnimationClock;
 
 	/** Cache for internal force calculations */
 	private final Vector2 forceCache = new Vector2();
@@ -456,12 +457,12 @@ public class DaleModel extends WheelObstacle {
 	 * @param bodyHeight        The body width in physics units
 	 * @param bodyOffset        Distance between Dale head and body centers
 	 * @param availableColors   Available colors for Dale, should be same length as headTextures and bodyTextures
-	 * @param headIdleTextures  Head idle textures in order of colors
+	 * @param headTextures      Head textures in order of colors
 	 * @param bodyIdleTextures  Body idle textures in order of colors
 	 * @param bodyWalkTextures  Body walk textures in order of colors
 	 */
 	public DaleModel(float x, float y, JsonValue data, float headRadius, float bodyWidth, float bodyHeight,
-					 float bodyOffset, DaleColor[] availableColors, TextureRegion[] headIdleTextures,
+					 float bodyOffset, DaleColor[] availableColors, FilmStrip[] headTextures,
 					 TextureRegion[] bodyIdleTextures, FilmStrip[] bodyWalkTextures) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(x, y, headRadius);
@@ -516,7 +517,7 @@ public class DaleModel extends WheelObstacle {
 
 		colorIndex = 0;
 		this.availableColors = availableColors;
-		this.headIdleTextures = headIdleTextures;
+		this.headTextures = headTextures;
 		this.bodyIdleTextures = bodyIdleTextures;
 		this.bodyWalkTextures = bodyWalkTextures;
 	}
@@ -650,6 +651,8 @@ public class DaleModel extends WheelObstacle {
 		grappleStickyPart.update(dt);
 
 		bodyWalkAnimationClock = (bodyWalkAnimationClock + dt) % (ANIMATION_SPEED * bodyWalkTextures[0].getSize());
+		headGrappleAnimationClock = grappleState == GrappleState.RETRACTED ? 0
+				: Math.min(headGrappleAnimationClock + dt, ANIMATION_SPEED * (headTextures[0].getSize() - 1));
 	}
 
 	@Override
@@ -681,7 +684,8 @@ public class DaleModel extends WheelObstacle {
 	}
 
 	public void setDaleTexture() {
-		this.setTexture(headIdleTextures[colorIndex]);
+		headTextures[colorIndex].setFrame((int) (headGrappleAnimationClock / ANIMATION_SPEED));
+		this.setTexture(headTextures[colorIndex]);
 		if (isGrounded && Math.abs(getVX()) > 2) {
 			bodyWalkTextures[colorIndex].setFrame((int) (bodyWalkAnimationClock / ANIMATION_SPEED));
 			bodyPart.setTexture(bodyWalkTextures[colorIndex]);

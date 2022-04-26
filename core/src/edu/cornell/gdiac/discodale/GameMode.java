@@ -101,8 +101,8 @@ public class GameMode implements Screen {
 	/** Countdown active for winning or losing */
 	protected int countdown;
 
-	/** All head idle textures for Dale, in order of colors */
-	private TextureRegion[] headIdleTextures;
+	/** All head textures for Dale, in order of colors */
+	private FilmStrip[] headTextures;
 	/** All body idle textures for Dale, in order of colors */
 	private TextureRegion[] bodyIdleTextures;
 	/** All body walk textures for Dale, in order of colors */
@@ -424,25 +424,25 @@ public class GameMode implements Screen {
 	 * Lays out the game geography.
 	 */
 	private void populateLevel() {
-		float dradius = headIdleTextures[0].getRegionWidth() / scale.x / 2f;
+		float dradius = headTextures[0].getRegionHeight() / scale.x / 2f;
 		float dwidth = bodyIdleTextures[0].getRegionWidth() / scale.x;
 		float dheight = bodyIdleTextures[0].getRegionHeight() / scale.y;
 		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
 
 		DaleColor[] availableColors = scene.getPossibleColors();
 
-		TextureRegion[] availableHeadIdleTextures = new TextureRegion[availableColors.length];
+		FilmStrip[] availableHeadTextures = new FilmStrip[availableColors.length];
 		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
 		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
 		for (int i = 0; i < availableColors.length; i++) {
 			int colorIndex = availableColors[i].ordinal();
-			availableHeadIdleTextures[i] = headIdleTextures[colorIndex];
+			availableHeadTextures[i] = headTextures[colorIndex];
 			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
 			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
 		}
 
 		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
-				dradius, dwidth, dheight, bodyOffset, availableColors, availableHeadIdleTextures,
+				dradius, dwidth, dheight, bodyOffset, availableColors, availableHeadTextures,
 				availableBodyIdleTextures, availableBodyWalkTextures);
 		dale.setDrawScale(scale);
 
@@ -871,10 +871,10 @@ public class GameMode implements Screen {
 				new TextureRegion(directory.getEntry("platform:body:idle:green", Texture.class))
 		};
 
-		headIdleTextures = new TextureRegion[]{
-				new TextureRegion(directory.getEntry("platform:head:idle:pink", Texture.class)),
-				new TextureRegion(directory.getEntry("platform:head:idle:blue", Texture.class)),
-				new TextureRegion(directory.getEntry("platform:head:idle:green", Texture.class))
+		headTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:head:pink", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:head:blue", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:head:green", Texture.class), 1, 3)
 		};
 
 		bodyWalkTextures = new FilmStrip[]{
