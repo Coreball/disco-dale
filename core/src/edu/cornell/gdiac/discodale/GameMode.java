@@ -75,6 +75,7 @@ public class GameMode implements Screen {
 	protected TextureRegion goalTile;
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
+	protected Texture background;
 
 	/** Reference to the game canvas */
 	protected GameCanvas canvas;
@@ -861,6 +862,8 @@ public class GameMode implements Screen {
 		canvas.clear();
 
 		canvas.begin();
+		canvas.draw(background, Color.WHITE,0, 0, scene.getBounds().getWidth() * scene.getTileSize(),
+				scene.getBounds().getHeight() * scene.getTileSize());
 		scene.draw(canvas);
 
 		for (Obstacle obj : objects) {
@@ -1029,6 +1032,7 @@ public class GameMode implements Screen {
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
+		background = directory.getEntry("menu:bg", Texture.class);
 
 		died = directory.getEntry("died", Sound.class);
 		extend = directory.getEntry("extend", Sound.class);
