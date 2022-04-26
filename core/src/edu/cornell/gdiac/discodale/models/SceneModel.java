@@ -254,13 +254,13 @@ public class SceneModel {
             case SCROLL_HORIZONTAL:
                 for(ColorRegionModel cr:colorRegions){
                     cr.move(colorMovementAmount,0);
-                    cr.move(cr.testBound(window_width,0)*window_width*2,0);
+                    cr.move(cr.testBound(window_width,0)*window_width*3,0);
                 }
                 break;
             case SCROLL_VERTICAL:
                 for(ColorRegionModel cr:colorRegions){
                     cr.move(0,colorMovementAmount);
-                    cr.move(0,cr.testBound(window_height,1)*window_height*2);
+                    cr.move(0,cr.testBound(window_height,1)*window_height*3);
                 }
                 break;
             case ROTATE:
