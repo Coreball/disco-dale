@@ -23,7 +23,6 @@ public class LevelLoader {
     private int tileWidth;
     private int tileHeight;
 
-    private Rectangle canvasBounds; // = new Rectangle(0, 0, Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT);
     private Rectangle levelBounds;
     private Rectangle bounds;
     private Vector2 scale;
@@ -36,7 +35,7 @@ public class LevelLoader {
         this.bounds = new Rectangle(0, 0, width, height);
     }
 
-    public SceneModel load(JsonValue json, JsonValue defaults, Rectangle canvasBounds) {
+    public SceneModel load(JsonValue json, JsonValue defaults) {
         this.tileWidth = json.getInt("tilewidth");
         this.tileHeight = json.getInt("tileheight");
         this.bounds = new Rectangle(
@@ -44,7 +43,6 @@ public class LevelLoader {
                 json.getInt("width"),
                 json.getInt("height")
         );
-        this.canvasBounds = new Rectangle(canvasBounds);
         this.levelBounds = new Rectangle(
                 0, 0,
                 json.getInt("width") * this.tileWidth,
@@ -77,7 +75,7 @@ public class LevelLoader {
                 }
             }
         }
-        SceneModel model = new SceneModel(this.bounds, m);
+        SceneModel model = new SceneModel(this.bounds, m, this.tileWidth);
         model.setBrickTexture(this.brickTile);
         model.setReflectiveTexture(this.reflectiveTile);
         model.setGoalTexture(this.goalTile);

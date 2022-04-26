@@ -70,7 +70,7 @@ public class MenuMode implements Screen, InputProcessor {
         this.canvas = canvas;
         active = false;
         type = Type.START;
-        canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f, new Rectangle(0, 0, 32, 18));
+        canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f, new Rectangle(0, 0, 32, 18), 32);
     }
 
     public int getLevel(){

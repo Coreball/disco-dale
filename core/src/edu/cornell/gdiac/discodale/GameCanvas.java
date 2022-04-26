@@ -368,9 +368,9 @@ public class GameCanvas {
 	 * @param x the screen x-coordinate of the player
 	 * @param y the screen y-coordinate of the player
 	 */
-	public void updateCam(float x, float y, float zoom, Rectangle bounds) {
-		float xBound = bounds.getWidth() * 32;
-		float yBound = bounds.getHeight() * 32;
+	public void updateCam(float x, float y, float zoom, Rectangle bounds, int tileSize) {
+		float xBound = bounds.getWidth() * tileSize;
+		float yBound = bounds.getHeight() * tileSize;
 		float scaledViewportHalfX = camera.viewportWidth * zoom * 0.5f;
 		float scaledViewportHalfY = camera.viewportHeight * zoom * 0.5f;
 
