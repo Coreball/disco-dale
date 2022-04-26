@@ -25,11 +25,6 @@ public class SceneModel {
         ROTATE;
     }
 
-    private static int GRID_WIDTH = 32;
-    private static int GRID_HEIGHT = 18;
-
-    private static int SQUARE_SIZE = 32;
-
     /** Window size */
     private float window_width = 1088;
     private float window_height = 640;
@@ -75,19 +70,34 @@ public class SceneModel {
     private Vector2 daleStart = new Vector2();
     private PooledList<Vector2> flyLocations = new PooledList<>();
 
+    private int tileSize;
+
     /** */
     private Vector2 pointCache;
 
     /** The grid: whether a tile has obstacle */
-    private boolean[][] grid = new boolean[GRID_WIDTH][GRID_HEIGHT];
+    private boolean[][] grid; // = new boolean[GRID_WIDTH][GRID_HEIGHT];
 
-    public SceneModel(Rectangle bounds, ColorMovement movement) {
+    public SceneModel(Rectangle bounds, ColorMovement movement, int tileSize) {
+        this.tileSize = tileSize;
         this.bounds = new Rectangle(bounds);
-        this.scale = new Vector2(1024 / bounds.getWidth(), 576 / bounds.getHeight());
+        this.grid = new boolean[(int) bounds.getWidth()][(int) bounds.getHeight()];
+        System.out.println(bounds);
+//        this.scale = new Vector2(1024 / bounds.getWidth(), 576 / bounds.getHeight()); //todo
+        this.scale = new Vector2(32f, 32f);
+        System.out.println("scene scale: " + this.scale);
         this.colorMovement = movement;
         this.colorRegions = new PooledList<>();
-        this.window_width = bounds.getWidth()*SQUARE_SIZE;
-        this.window_height = bounds.getHeight()*SQUARE_SIZE;
+        this.window_width = bounds.getWidth()* tileSize;
+        this.window_height = bounds.getHeight()* tileSize;
+    }
+
+    public int getTileSize() {
+        return tileSize;
+    }
+
+    public Rectangle getBounds() {
+        return bounds;
     }
 
     public Vector2 getCenterOfRotation() {
@@ -146,8 +156,10 @@ public class SceneModel {
     }
 
     public void setCanvas(GameCanvas canvas) {
-        this.scale.x = canvas.getWidth() / bounds.getWidth();
-        this.scale.y = canvas.getHeight() / bounds.getHeight();
+//        this.scale.x = canvas.getWidth() / bounds.getWidth();
+//        this.scale.y = canvas.getHeight() / bounds.getHeight();
+//        canvas.setWidth((int) (this.bounds.getWidth() * 32));
+//        canvas.setHeight((int) (this.bounds.getHeight() * 32));
         for (Obstacle object : this.objects) {
             object.setDrawScale(this.scale);
         }
@@ -183,8 +195,8 @@ public class SceneModel {
 
     public void updateGrid() {
         // Test if center point of a grid is in any fixture
-        for (int i = 0; i < GRID_WIDTH; i++) {
-            for (int j = 0; j < GRID_HEIGHT; j++) {
+        for (int i = 0; i < bounds.getWidth(); i++) {
+            for (int j = 0; j < bounds.getHeight(); j++) {
                 boolean temp = false;
                 for (Obstacle object : objects) {
                     if(object == goalDoor){
