@@ -52,7 +52,10 @@ public class SceneModel {
     private float areaSightRadius = 10f;
 
     /** Whether Dale can only see an area around him or not. */
-    private boolean darkMode = true;
+    private boolean darkMode = false;
+
+    /** Whether there are moving spotlights in the level or not. */
+    private boolean spotlightMode = true;
 
     /** The texture for walls and platforms */
     protected TextureRegion brickTile;
@@ -153,6 +156,14 @@ public class SceneModel {
 
     public void setDarkMode(boolean darkMode) {
         this.darkMode = darkMode;
+    }
+
+    public boolean isSpotlightMode() {
+        return spotlightMode;
+    }
+
+    public void setSpotlightMode(boolean spotlightMode) {
+        this.spotlightMode = spotlightMode;
     }
 
     public void setCanvas(GameCanvas canvas) {
