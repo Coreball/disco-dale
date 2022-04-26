@@ -16,7 +16,10 @@
  */
 package edu.cornell.gdiac.discodale;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.*;
@@ -107,8 +110,8 @@ public class GameMode implements Screen {
 	/** Countdown active for winning or losing */
 	protected int countdown;
 
-	/** All head idle textures for Dale, in order of colors */
-	private TextureRegion[] headIdleTextures;
+	/** All head textures for Dale, in order of colors */
+	private FilmStrip[] headTextures;
 	/** All body idle textures for Dale, in order of colors */
 	private TextureRegion[] bodyIdleTextures;
 	/** All body walk textures for Dale, in order of colors */
@@ -118,6 +121,9 @@ public class GameMode implements Screen {
 	private Texture flyChaseTexture;
 
 	private Texture[] colors = new Texture[5];
+
+	private TextureRegion light;
+	private TextureRegion darkness;
 
 	/** Sound effects */
 	private Sound died;
@@ -164,7 +170,7 @@ public class GameMode implements Screen {
 		GRAPPLE_FORCE,
 	}
 
-	private PooledList<FlyController> flyControllers;
+	private LinkedList<FlyController> flyControllers;
 
 	private int colorChangeCountdown;
 
@@ -450,18 +456,25 @@ public class GameMode implements Screen {
 	 * Lays out the game geography.
 	 */
 	private void populateLevel() {
-		float dradius = headIdleTextures[0].getRegionWidth() / scale.x / 2f;
+		float dradius = headTextures[0].getRegionHeight() / scale.x / 2f;
 		float dwidth = bodyIdleTextures[0].getRegionWidth() / scale.x;
 		float dheight = bodyIdleTextures[0].getRegionHeight() / scale.y;
 		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
 
-		DaleColor[] availableColors = {DaleColor.PINK, DaleColor.BLUE, DaleColor.GREEN};
-		TextureRegion[] availableHeadIdleTextures = {headIdleTextures[0], headIdleTextures[1], headIdleTextures[2]};
-		TextureRegion[] availableBodyIdleTextures = {bodyIdleTextures[0], bodyIdleTextures[1], bodyIdleTextures[2]};
-		FilmStrip[] availableBodyWalkTextures = {bodyWalkTextures[0], bodyWalkTextures[1], bodyWalkTextures[2]};
+		DaleColor[] availableColors = scene.getPossibleColors();
+
+		FilmStrip[] availableHeadTextures = new FilmStrip[availableColors.length];
+		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
+		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
+		for (int i = 0; i < availableColors.length; i++) {
+			int colorIndex = availableColors[i].ordinal();
+			availableHeadTextures[i] = headTextures[colorIndex];
+			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
+			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
+		}
 
 		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
-				dradius, dwidth, dheight, bodyOffset, availableColors, availableHeadIdleTextures,
+				dradius, dwidth, dheight, bodyOffset, availableColors, availableHeadTextures,
 				availableBodyIdleTextures, availableBodyWalkTextures);
 		dale.setDrawScale(scale);
 
@@ -482,7 +495,7 @@ public class GameMode implements Screen {
 		dwidth = FLY_SIZE / scale.x;
 		dheight = FLY_SIZE / scale.y;
 		flies = new PooledList<>();
-		flyControllers = new PooledList<>();
+		flyControllers = new LinkedList<>();
 		for (Vector2 flyLocation : scene.getFlyLocations()) {
 			FlyModel fly = new FlyModel(constants.get("fly"), flyLocation.x, flyLocation.y, dwidth, dheight, FlyModel.IdleType.STATIONARY);
 			fly.setDrawScale(scale);
@@ -715,6 +728,87 @@ public class GameMode implements Screen {
 		if(winLose == LOSE_CODE){
 			setFailure(true);
 		}
+
+		class FixtureAndDistance{
+			public Fixture fixture;
+			public float distance;
+			public FixtureAndDistance(Fixture fixture,float distance){
+				this.fixture = fixture;
+				this.distance = distance;
+			}
+		}
+
+		class CustomizedRayCastCallBack implements RayCastCallback{
+			public LinkedList<FixtureAndDistance> fixtureAndDistances = new LinkedList<>();
+			public void reset(){
+				fixtureAndDistances = new LinkedList<>();
+			}
+			@Override
+			public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+				float diffX = Math.abs(point.x - dale.getX());
+				float diffY = Math.abs(point.y - dale.getY());
+				float distance = (float) Math.sqrt((double)(diffX*diffX) + (double)(diffY*diffY));
+				fixtureAndDistances.add(new FixtureAndDistance(fixture,distance));
+
+				return 1;
+			}
+		}
+
+		CustomizedRayCastCallBack callback = new CustomizedRayCastCallBack();
+
+		if(scene.isRealSightMode()){
+			for(FlyController f:flyControllers){
+				f.setSeeDaleInRealWorld(false);
+			}
+			for(FlyController f:flyControllers){
+				FlyModel fly = f.getFly();
+//				System.out.println("startRay");
+//				System.out.println(dale.getX() +"  "+ dale.getY() +"  "+fly.getX() +"  "+fly.getY());
+				callback.reset();
+				world.rayCast(callback,dale.getX(),dale.getY(),fly.getX(),fly.getY());
+				LinkedList<FixtureAndDistance> fixtureAndDistances = callback.fixtureAndDistances;
+				Collections.sort(fixtureAndDistances,new Comparator<FixtureAndDistance>(){
+					public int compare(FixtureAndDistance f1,FixtureAndDistance f2){
+						if(f1.distance>f2.distance){
+							return 1;
+						}
+						else if(f1.distance==f2.distance){
+							return 0;
+						}else{
+							return -1;
+						}
+					}
+				});
+				for(FixtureAndDistance fd: fixtureAndDistances){
+					Fixture fixture = fd.fixture;
+					boolean isFly = false;
+					for(FlyController ff:flyControllers){
+						FlyModel flyModel = ff.getFly();
+						for(Fixture flyModelFixture: flyModel.getBody().getFixtureList()){
+							if (fixture==flyModelFixture){
+//								System.out.println(flyModel.getX() +"  "+flyModel.getY() + fd.distance);
+								isFly = true;
+								ff.setSeeDaleInRealWorld(true);
+							}
+						}
+					}
+					if(!isFly){
+						if(!dale.checkFixtureInDale(fixture)){
+//							System.out.println("Distance to obstacle: "+fd.distance);
+							break;
+						}
+					}
+				}
+//				System.out.println("endRay");
+			}
+//			for(FlyController f:flyControllers){
+//				if(f.getSeeDaleInRealWorld()){
+//					System.out.println("Can see");
+//				}
+//			}
+
+		}
+
 	}
 
 	/**
@@ -773,6 +867,24 @@ public class GameMode implements Screen {
 			obj.draw(canvas);
 		}
 		canvas.end();
+
+		if(scene.isDarkMode()){
+			// Draw light
+			canvas.beginLight();
+			float ch = canvas.getHeight();
+			float cw = canvas.getWidth();
+			float h = light.getRegionHeight();
+			float w = light.getRegionWidth();
+			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
+			float lightScale = 2f;
+			canvas.draw(light,new Color(256,256,256,0f),w*lightScale/2f,h*lightScale/2f,dale.getX()*scale.x,dale.getY()*scale.y,w*lightScale,h*lightScale);
+			canvas.endLight();
+
+			// Draw darkness around light
+			canvas.beginLight2();
+			canvas.draw(darkness,new Color(256,256,256,0.5f),cw/2f,ch/2f,canvas.getCameraX(),canvas.getCameraY(),cw,ch);
+			canvas.endLight();
+		}
 
 		if (debug) {
 			canvas.beginDebug();
@@ -893,10 +1005,10 @@ public class GameMode implements Screen {
 				new TextureRegion(directory.getEntry("platform:body:idle:green", Texture.class))
 		};
 
-		headIdleTextures = new TextureRegion[]{
-				new TextureRegion(directory.getEntry("platform:head:idle:pink", Texture.class)),
-				new TextureRegion(directory.getEntry("platform:head:idle:blue", Texture.class)),
-				new TextureRegion(directory.getEntry("platform:head:idle:green", Texture.class))
+		headTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:head:pink", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:head:blue", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:head:green", Texture.class), 1, 3)
 		};
 
 		bodyWalkTextures = new FilmStrip[]{
@@ -908,6 +1020,8 @@ public class GameMode implements Screen {
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
 		flyChaseTexture = directory.getEntry("platform:flychasing", Texture.class);
 
+		light = new TextureRegion(directory.getEntry("platform:light",Texture.class));
+		darkness = new TextureRegion(directory.getEntry("platform:darkness",Texture.class));
 
 		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles
@@ -926,6 +1040,8 @@ public class GameMode implements Screen {
 		colors[3] = directory.getEntry("platform:purplecolor", Texture.class);
 		colors[4] = directory.getEntry("platform:orangecolor", Texture.class);
 		ColorRegionModel.setColorTexture(colors);
+
+
 
 		this.testlevel = directory.getEntry("testlevel", JsonValue.class);
 

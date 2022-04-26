@@ -325,6 +325,31 @@ public class GameCanvas {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);		
 	}
 
+	public void beginLight(){
+		spriteBatch.setProjectionMatrix(camera.combined);
+//		spriteBatch.setBlendFunction(GL20.GL_DST_COLOR, GL20.GL_SRC_ALPHA);
+		spriteBatch.setBlendFunction(GL20.GL_DST_COLOR,GL20.GL_SRC_ALPHA);
+
+		spriteBatch.begin();
+		active = DrawPass.STANDARD;
+	}
+
+	public void beginLight2(){
+		spriteBatch.setProjectionMatrix(camera.combined);
+//		spriteBatch.setBlendFunction(GL20.GL_DST_COLOR, GL20.GL_SRC_ALPHA);
+		spriteBatch.setBlendFunction(GL20.GL_SRC_COLOR,GL20.GL_ONE_MINUS_DST_ALPHA);
+
+		spriteBatch.begin();
+		active = DrawPass.STANDARD;
+	}
+
+	public void endLight(){
+		spriteBatch.end();
+		spriteBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		active = DrawPass.INACTIVE;
+	}
+
+
 	/**
 	 * Start a standard drawing sequence.
 	 *
@@ -392,6 +417,14 @@ public class GameCanvas {
 
 		camera.zoom = zoom;
 		camera.update();
+	}
+
+	public float getCameraX(){
+		return camera.position.x;
+	}
+
+	public float getCameraY(){
+		return camera.position.y;
 	}
 
 	/**
@@ -1141,7 +1174,6 @@ public class GameCanvas {
 			Gdx.app.error("GameCanvas", "Cannot draw without active beginDebug()", new IllegalStateException());
 			return;
 		}
-		
 		local.setToScaling(sx,sy);
 		local.translate(x,y);
 		local.rotateRad(angle);
