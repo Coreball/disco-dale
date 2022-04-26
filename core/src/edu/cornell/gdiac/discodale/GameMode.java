@@ -59,7 +59,8 @@ public class GameMode implements Screen {
 	private static int LOSE_CODE = -1;
 	private static int PLAY_CODE = 0;
 
-	private static int CHANGE_COLOR_TIME = 440;
+	private static float CHANGE_COLOR_TIME = 7.333f;
+	private static float CHANGE_COLOR_ALERT_TIME = 3.686f;
 
 	private static int FLY_SIZE = 32;
 
@@ -130,10 +131,12 @@ public class GameMode implements Screen {
 	private Sound died;
 	private Sound extend;
 	private Sound stick;
+	private Sound colorChange;
 
 	private long diedId = -1;
 	private long extendId = -1;
 	private long stickId = -1;
+	private long colorChangeId = -1;
 
 
 	// TODO support colors with the split-body model
@@ -173,7 +176,7 @@ public class GameMode implements Screen {
 
 	private LinkedList<FlyController> flyControllers;
 
-	private int colorChangeCountdown;
+	private float colorChangeCountdown;
 
 	public GameMode() {
 		this(Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT, Constants.DEFAULT_GRAVITY);
@@ -708,8 +711,11 @@ public class GameMode implements Screen {
 					flyController.setVelocity();
 				}
 
+				if (colorChangeCountdown > CHANGE_COLOR_ALERT_TIME)
+					colorChangeId = SoundPlayer.playSound(colorChange, colorChangeId, volumeSfx);
+
 				if (colorChangeCountdown > 0) {
-					colorChangeCountdown--;
+					colorChangeCountdown -= dt;
 				} else {
 					colorChangeCountdown = CHANGE_COLOR_TIME;
 					scene.updateColorRegions();
@@ -956,6 +962,7 @@ public class GameMode implements Screen {
 	public void pause() {
 		// TODO Auto-generated method stub
 		canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f, this.bounds, this.scene.getTileSize());
+		colorChange.pause(colorChangeId);
 	}
 
 	/**
@@ -966,6 +973,7 @@ public class GameMode implements Screen {
 	public void resume() {
 		// TODO Auto-generated method stub
 		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f, this.bounds, this.scene.getTileSize());
+		colorChange.resume(colorChangeId);
 	}
 
 	/**
@@ -1037,6 +1045,7 @@ public class GameMode implements Screen {
 		died = directory.getEntry("died", Sound.class);
 		extend = directory.getEntry("extend", Sound.class);
 		stick = directory.getEntry("stick", Sound.class);
+		colorChange = directory.getEntry("colorchange", Sound.class);
 
 		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
 		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);
