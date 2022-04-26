@@ -1,12 +1,12 @@
 {
     "textures": {
         "shared:brick" : {
-            "file":  "platform/wall.png",
+            "file":  "platform/scaffoldstickhorizontalsmall.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
         "shared:reflective" : {
-            "file":  "platform/reflective.png",
+            "file":  "platform/scaffoldnonstickhorizontalsmall.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
