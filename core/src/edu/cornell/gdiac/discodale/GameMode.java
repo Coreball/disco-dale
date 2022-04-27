@@ -640,12 +640,6 @@ public class GameMode implements Screen {
 	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
-//		daleController.processMovement();
-//		daleController.processColorRotation();
-//		daleController.processGrappleAction(world);
-		dale.applyForce();
-		dale.applyStickyPartMovement(dt);
-
 		dale.setMatch(daleMatches());
 		switch (daleController.sfx){
 			case TONGUE_EXTEND:
