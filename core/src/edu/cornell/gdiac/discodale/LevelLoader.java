@@ -57,6 +57,7 @@ public class LevelLoader {
         );
 
         SceneModel.ColorMovement m = SceneModel.ColorMovement.NO_MOVEMENT;
+        boolean darkMode = false;
         for (JsonValue prop : json.get("properties")) {
             if (prop.getString("name").equals("colorMode")) {
                 switch (prop.getInt("value")) {
@@ -73,12 +74,15 @@ public class LevelLoader {
                         m = SceneModel.ColorMovement.ROTATE;
                         break;
                 }
+            } else if (prop.getString("name").equalsIgnoreCase("darkMode")) {
+                darkMode = prop.getBoolean("value");
             }
         }
         SceneModel model = new SceneModel(this.bounds, m, this.tileWidth);
         model.setBrickTexture(this.brickTile);
         model.setReflectiveTexture(this.reflectiveTile);
         model.setGoalTexture(this.goalTile);
+        model.setDarkMode(darkMode);
 
         for (JsonValue layer : json.get("layers")) {
             if (layer.getString("name").equals("colors")) {

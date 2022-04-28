@@ -84,8 +84,17 @@ var vAction = tiled.registerAction("ColorVertical", function(action) {
 vAction.text = "Set Color Scroll Vertical";
 vAction.checkable = false;
 
+var darkModeOn = tiled.registerAction("DarkMode", function(action) {
+    if (tiled.activeAsset.isTileMap) {
+        tiled.activeAsset.setProperty("darkMode", action.checked);
+    }
+});
+darkModeOn.text = "Dark Mode";
+darkModeOn.checkable = true;
+
 tiled.extendMenu("Map", [
     { action: "ColorStill" },
     { action: "ColorHorizontal" },
-    { action: "ColorVertical" }
+    { action: "ColorVertical" },
+    { action: "DarkMode" }
 ]);
