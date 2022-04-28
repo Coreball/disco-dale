@@ -48,7 +48,7 @@ public class ColorRegionModel implements Cloneable{
 		this.seq = seq;
 		this.seqIndex = 0;
 		Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-		pixmap.setColor(Color.WHITE);
+		pixmap.setColor(new Color(1, 1, 1, 0.5f));
 		pixmap.fill();
 		texture = new Texture(pixmap);
 		this.polygonRegion = new PolygonRegion(new TextureRegion(texture), vertices,

@@ -59,7 +59,8 @@ public class GameMode implements Screen {
 	private static int LOSE_CODE = -1;
 	private static int PLAY_CODE = 0;
 
-	private static int CHANGE_COLOR_TIME = 440;
+	private static float CHANGE_COLOR_TIME = 7.333f;
+	private static float CHANGE_COLOR_ALERT_TIME = 3.686f;
 
 	private static int FLY_SIZE = 32;
 
@@ -75,6 +76,7 @@ public class GameMode implements Screen {
 	protected TextureRegion goalTile;
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
+	protected Texture background;
 
 	/** Reference to the game canvas */
 	protected GameCanvas canvas;
@@ -86,6 +88,7 @@ public class GameMode implements Screen {
 	private ScreenListener listener;
 
 	private int levelIndex;
+	private boolean isNewLevel;
 
 	private float zoomFactor;
 	private float zoomValue;
@@ -109,8 +112,8 @@ public class GameMode implements Screen {
 	/** Countdown active for winning or losing */
 	protected int countdown;
 
-	/** All head idle textures for Dale, in order of colors */
-	private TextureRegion[] headIdleTextures;
+	/** All head textures for Dale, in order of colors */
+	private FilmStrip[] headTextures;
 	/** All body idle textures for Dale, in order of colors */
 	private TextureRegion[] bodyIdleTextures;
 	/** All body walk textures for Dale, in order of colors */
@@ -128,10 +131,12 @@ public class GameMode implements Screen {
 	private Sound died;
 	private Sound extend;
 	private Sound stick;
+	private Sound colorChange;
 
 	private long diedId = -1;
 	private long extendId = -1;
 	private long stickId = -1;
+	private long colorChangeId = -1;
 
 
 	// TODO support colors with the split-body model
@@ -171,7 +176,7 @@ public class GameMode implements Screen {
 
 	private LinkedList<FlyController> flyControllers;
 
-	private int colorChangeCountdown;
+	private float colorChangeCountdown;
 
 	public GameMode() {
 		this(Constants.DEFAULT_WIDTH, Constants.DEFAULT_HEIGHT, Constants.DEFAULT_GRAVITY);
@@ -306,11 +311,11 @@ public class GameMode implements Screen {
 
 	public void setLevel(int index){
 		levelIndex = index;
-
+		isNewLevel = true;
 	}
 
 	public void nextLevel(){
-		levelIndex = (levelIndex + 1) % NUM_LEVELS;
+		setLevel((levelIndex + 1) % NUM_LEVELS);
 	}
 
 	/**
@@ -422,6 +427,7 @@ public class GameMode implements Screen {
 		return horiz && vert;
 	}
 
+
 	/**
 	 * Resets the status of the game so that we can play again.
 	 *
@@ -444,7 +450,7 @@ public class GameMode implements Screen {
 		countdown = -1;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
 		loadLevel(levelIndex);
-		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f, this.bounds, this.scene.getTileSize());
+		isNewLevel = false;
 		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
 		populateLevel();
@@ -454,18 +460,25 @@ public class GameMode implements Screen {
 	 * Lays out the game geography.
 	 */
 	private void populateLevel() {
-		float dradius = headIdleTextures[0].getRegionWidth() / scale.x / 2f;
+		float dradius = headTextures[0].getRegionHeight() / scale.x / 2f;
 		float dwidth = bodyIdleTextures[0].getRegionWidth() / scale.x;
 		float dheight = bodyIdleTextures[0].getRegionHeight() / scale.y;
 		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
 
-		DaleColor[] availableColors = {DaleColor.PINK, DaleColor.BLUE, DaleColor.GREEN};
-		TextureRegion[] availableHeadIdleTextures = {headIdleTextures[0], headIdleTextures[1], headIdleTextures[2]};
-		TextureRegion[] availableBodyIdleTextures = {bodyIdleTextures[0], bodyIdleTextures[1], bodyIdleTextures[2]};
-		FilmStrip[] availableBodyWalkTextures = {bodyWalkTextures[0], bodyWalkTextures[1], bodyWalkTextures[2]};
+		DaleColor[] availableColors = scene.getPossibleColors();
+
+		FilmStrip[] availableHeadTextures = new FilmStrip[availableColors.length];
+		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
+		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
+		for (int i = 0; i < availableColors.length; i++) {
+			int colorIndex = availableColors[i].ordinal();
+			availableHeadTextures[i] = headTextures[colorIndex];
+			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
+			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
+		}
 
 		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
-				dradius, dwidth, dheight, bodyOffset, availableColors, availableHeadIdleTextures,
+				dradius, dwidth, dheight, bodyOffset, availableColors, availableHeadTextures,
 				availableBodyIdleTextures, availableBodyWalkTextures);
 		dale.setDrawScale(scale);
 
@@ -627,12 +640,6 @@ public class GameMode implements Screen {
 	 * @param dt Number of seconds since last animation frame
 	 */
 	public void update(float dt) {
-//		daleController.processMovement();
-//		daleController.processColorRotation();
-//		daleController.processGrappleAction(world);
-		dale.applyForce();
-		dale.applyStickyPartMovement(dt);
-
 		dale.setMatch(daleMatches());
 		switch (daleController.sfx){
 			case TONGUE_EXTEND:
@@ -698,11 +705,18 @@ public class GameMode implements Screen {
 					flyController.setVelocity();
 				}
 
+				if (colorChangeCountdown > CHANGE_COLOR_ALERT_TIME)
+					colorChangeId = SoundPlayer.playSound(colorChange, colorChangeId, volumeSfx);
+
 				if (colorChangeCountdown > 0) {
-					colorChangeCountdown--;
+					colorChangeCountdown -= dt;
 				} else {
 					colorChangeCountdown = CHANGE_COLOR_TIME;
 					scene.updateColorRegions();
+				}
+
+				if (dale.getY() * scale.y < -150) {
+					reset();
 				}
 
 				scene.updateGrid();
@@ -852,6 +866,8 @@ public class GameMode implements Screen {
 		canvas.clear();
 
 		canvas.begin();
+		canvas.draw(background, Color.WHITE,0, 0, scene.getBounds().getWidth() * scene.getTileSize(),
+				scene.getBounds().getHeight() * scene.getTileSize());
 		scene.draw(canvas);
 
 		for (Obstacle obj : objects) {
@@ -944,6 +960,7 @@ public class GameMode implements Screen {
 	public void pause() {
 		// TODO Auto-generated method stub
 		canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f, this.bounds, this.scene.getTileSize());
+		colorChange.pause(colorChangeId);
 	}
 
 	/**
@@ -954,6 +971,7 @@ public class GameMode implements Screen {
 	public void resume() {
 		// TODO Auto-generated method stub
 		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f, this.bounds, this.scene.getTileSize());
+		colorChange.resume(colorChangeId);
 	}
 
 	/**
@@ -996,10 +1014,10 @@ public class GameMode implements Screen {
 				new TextureRegion(directory.getEntry("platform:body:idle:green", Texture.class))
 		};
 
-		headIdleTextures = new TextureRegion[]{
-				new TextureRegion(directory.getEntry("platform:head:idle:pink", Texture.class)),
-				new TextureRegion(directory.getEntry("platform:head:idle:blue", Texture.class)),
-				new TextureRegion(directory.getEntry("platform:head:idle:green", Texture.class))
+		headTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:head:pink", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:head:blue", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:head:green", Texture.class), 1, 3)
 		};
 
 		bodyWalkTextures = new FilmStrip[]{
@@ -1020,10 +1038,12 @@ public class GameMode implements Screen {
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
+		background = directory.getEntry("menu:bg", Texture.class);
 
 		died = directory.getEntry("died", Sound.class);
 		extend = directory.getEntry("extend", Sound.class);
 		stick = directory.getEntry("stick", Sound.class);
+		colorChange = directory.getEntry("colorchange", Sound.class);
 
 		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
 		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);
@@ -1054,7 +1074,10 @@ public class GameMode implements Screen {
 		this.bounds = new Rectangle(scene.getBounds());
 		updateScale();
 		ticks = 0;
-		setCameraState(CameraState.START);
+		if (isNewLevel)
+			setCameraState(CameraState.START);
+		else
+			setCameraState(CameraState.PLAY);
 	}
 
 }

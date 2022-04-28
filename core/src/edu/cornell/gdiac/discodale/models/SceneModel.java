@@ -15,6 +15,7 @@ import edu.cornell.gdiac.discodale.obstacle.PolygonObstacle;
 import edu.cornell.gdiac.util.PooledList;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public class SceneModel {
 
@@ -204,6 +205,23 @@ public class SceneModel {
 
     }
 
+    /**
+     * Get all the colors present in a level.
+     * Includes colors that are part of color sequences and not visible at the start.
+     *
+     * @return ordered array of Dale colors present in the level
+     */
+    public DaleColor[] getPossibleColors() {
+        return getColorRegions()
+                .stream()
+                .flatMap(colorRegion -> colorRegion.getSeq() == null
+                        ? Stream.of(colorRegion.getColor())
+                        : Stream.of(colorRegion.getSeq()))
+                .distinct()
+                .sorted()
+                .toArray(DaleColor[]::new);
+    }
+
     public void updateGrid() {
         // Test if center point of a grid is in any fixture
         for (int i = 0; i < bounds.getWidth(); i++) {
@@ -247,13 +265,13 @@ public class SceneModel {
             case SCROLL_HORIZONTAL:
                 for(ColorRegionModel cr:colorRegions){
                     cr.move(colorMovementAmount,0);
-                    cr.move(cr.testBound(window_width,0)*window_width*2,0);
+                    cr.move(cr.testBound(window_width,0)*window_width*3,0);
                 }
                 break;
             case SCROLL_VERTICAL:
                 for(ColorRegionModel cr:colorRegions){
                     cr.move(0,colorMovementAmount);
-                    cr.move(0,cr.testBound(window_height,1)*window_height*2);
+                    cr.move(0,cr.testBound(window_height,1)*window_height*3);
                 }
                 break;
             case ROTATE:
