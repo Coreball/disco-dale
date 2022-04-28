@@ -865,17 +865,22 @@ public class GameMode implements Screen {
 	public void draw(float dt) {
 		canvas.clear();
 
-		canvas.begin();
-		canvas.draw(background, Color.WHITE,0, 0, scene.getBounds().getWidth() * scene.getTileSize(),
-				scene.getBounds().getHeight() * scene.getTileSize());
-		scene.draw(canvas);
-
-		for (Obstacle obj : objects) {
-			obj.draw(canvas);
-		}
-		canvas.end();
-
 		if(scene.isDarkMode()){
+			canvas.begin();
+			scene.draw(canvas);
+			canvas.end();
+
+			canvas.begin2();
+			canvas.draw(background, Color.WHITE,0, 0, scene.getBounds().getWidth() * scene.getTileSize(),
+					scene.getBounds().getHeight() * scene.getTileSize());
+			canvas.endLight();
+
+			canvas.begin();
+			for (Obstacle obj : objects) {
+				obj.draw(canvas);
+			}
+			canvas.endLight();
+
 			// Draw light
 			canvas.beginLight();
 			float ch = canvas.getHeight();
@@ -892,6 +897,17 @@ public class GameMode implements Screen {
 			canvas.draw(darkness,new Color(256,256,256,0.5f),cw/2f,ch/2f,canvas.getCameraX(),canvas.getCameraY(),cw,ch);
 			canvas.endLight();
 		}
+		else{
+			canvas.begin();
+			canvas.draw(background, Color.WHITE,0, 0, scene.getBounds().getWidth() * scene.getTileSize(),
+					scene.getBounds().getHeight() * scene.getTileSize());
+			scene.draw(canvas);
+			for (Obstacle obj : objects) {
+				obj.draw(canvas);
+			}
+			canvas.end();
+		}
+
 
 		if (debug) {
 			canvas.beginDebug();

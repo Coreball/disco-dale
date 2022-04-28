@@ -325,6 +325,14 @@ public class GameCanvas {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);		
 	}
 
+	public void begin2(){
+		spriteBatch.setProjectionMatrix(camera.combined);
+		spriteBatch.setBlendFunction(GL20.GL_SRC_ALPHA,GL20.GL_SRC_ALPHA);
+
+		spriteBatch.begin();
+		active = DrawPass.STANDARD;
+	}
+
 	public void beginLight(){
 		spriteBatch.setProjectionMatrix(camera.combined);
 //		spriteBatch.setBlendFunction(GL20.GL_DST_COLOR, GL20.GL_SRC_ALPHA);
