@@ -72,8 +72,10 @@
     "sounds" : {
         "theme" : "sound/theme.mp3",
         "died": "sound/died.mp3",
-        "stick": "sound/stick.mp3",
+        "attach": "sound/stick.mp3",
+        "attach_fail": "sound/stick_mirror.mp3",
         "extend": "sound/extend.mp3",
+        "alert": "sound/fly_alert_in.mp3",
         "colorchange": "sound/colorchange.mp3",
         "platform:jump" : "platform/jump.mp3",
         "platform:pew"  : "platform/pew.mp3",

@@ -12,7 +12,6 @@ package edu.cornell.gdiac.discodale.models;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
@@ -52,6 +51,9 @@ public class FlyModel extends CapsuleObstacle {
 
 	/** Flag angry, whether the fly is chasing Dale or not */
 	private boolean angry;
+
+	/** Record the direction last frame */
+	boolean faceRight;
 
 	/** CURRENT image for this object. May change over time. */
 	protected FilmStrip animator;
@@ -212,8 +214,8 @@ public class FlyModel extends CapsuleObstacle {
 		} else {
 			animator.setTexture(idleTexture);
 		}
-
 		body.setLinearVelocity(this.velocity);
+		updateFacing();
 		super.update(dt);
 
 	}
@@ -225,12 +227,17 @@ public class FlyModel extends CapsuleObstacle {
 	 */
 	public void draw(GameCanvas canvas) {
 		animator.setFrame((int)animeFrame);
-		float sx = 1f;
-		if (velocity.x > 0){
-			sx = -1f;
-		}
+		float sx = faceRight ? -1f : 1f;
 		canvas.draw(animator, Color.WHITE, origin.x, origin.y, getX() * drawScale.x,
 				getY() * drawScale.y, getAngle(),sx / TEXTURE_SCALE, 1.0f / TEXTURE_SCALE);
+	}
+
+	private void updateFacing(){
+		if (velocity.x > 0){
+			faceRight = true;
+		} else if (velocity.x < 0) {
+			faceRight = false;
+		}
 	}
 
 	/**

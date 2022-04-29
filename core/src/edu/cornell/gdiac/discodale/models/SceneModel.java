@@ -155,6 +155,14 @@ public class SceneModel {
         return darkMode;
     }
 
+    public boolean hasColorChange() {
+        for (ColorRegionModel cr: colorRegions){
+            if (cr.getSeq() != null)
+                return true;
+        }
+        return false;
+    }
+
     public void setDarkMode(boolean darkMode) {
         this.darkMode = darkMode;
     }

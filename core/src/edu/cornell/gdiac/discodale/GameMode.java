@@ -29,6 +29,7 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 
+import com.badlogic.gdx.utils.Timer;
 import edu.cornell.gdiac.discodale.controllers.DaleController;
 import edu.cornell.gdiac.discodale.controllers.FlyController;
 
@@ -130,12 +131,17 @@ public class GameMode implements Screen {
 	/** Sound effects */
 	private Sound died;
 	private Sound extend;
-	private Sound stick;
+	private Sound attach;
+	private Sound attachFail;
+	private Sound flyAlert;
 	private Sound colorChange;
+
+	private boolean isAlert;
 
 	private long diedId = -1;
 	private long extendId = -1;
-	private long stickId = -1;
+	private long attachId = -1;
+	private long alertId = -1;
 	private long colorChangeId = -1;
 
 
@@ -641,12 +647,17 @@ public class GameMode implements Screen {
 	 */
 	public void update(float dt) {
 		dale.setMatch(daleMatches());
-		switch (daleController.sfx){
+		switch (daleController.daleSfx){
 			case TONGUE_EXTEND:
 				extendId = SoundPlayer.playSound(extend, extendId, volumeSfx);
 				break;
-			case TONGUE_STICK:
-				stickId = SoundPlayer.playSound(stick, stickId, volumeSfx);
+			case TONGUE_ATTACH:
+				extend.stop();
+				attachId = SoundPlayer.playSound(attach, attachId, volumeSfx);
+				break;
+			case TONGUE_ATTACH_FAIL:
+				extend.stop();
+				attachId = SoundPlayer.playSound(attachFail, attachId, volumeSfx);
 				break;
 		}
 
@@ -700,12 +711,22 @@ public class GameMode implements Screen {
 				dale.applyForce();
 				dale.applyStickyPartMovement(dt);
 
+				isAlert = false;
+
 				for (FlyController flyController : flyControllers) {
+					if (flyController.shouldChaseDale())
+						isAlert = true;
 					flyController.changeDirection();
 					flyController.setVelocity();
 				}
+				if (isAlert) {
+					alertId = SoundPlayer.loopSound(flyAlert, alertId, volumeSfx);
+				} else {
+					flyAlert.stop(alertId);
+					alertId = -1;
+				}
 
-				if (colorChangeCountdown > CHANGE_COLOR_ALERT_TIME)
+				if (scene.hasColorChange() && colorChangeCountdown > CHANGE_COLOR_ALERT_TIME)
 					colorChangeId = SoundPlayer.playSound(colorChange, colorChangeId, volumeSfx);
 
 				if (colorChangeCountdown > 0) {
@@ -977,6 +998,7 @@ public class GameMode implements Screen {
 		// TODO Auto-generated method stub
 		canvas.updateCam(canvas.getWidth() /2,canvas.getHeight()/2, 1.0f, this.bounds, this.scene.getTileSize());
 		colorChange.pause(colorChangeId);
+		flyAlert.pause(alertId);
 	}
 
 	/**
@@ -988,6 +1010,7 @@ public class GameMode implements Screen {
 		// TODO Auto-generated method stub
 		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f, this.bounds, this.scene.getTileSize());
 		colorChange.resume(colorChangeId);
+		flyAlert.resume(alertId);
 	}
 
 	/**
@@ -1058,7 +1081,9 @@ public class GameMode implements Screen {
 
 		died = directory.getEntry("died", Sound.class);
 		extend = directory.getEntry("extend", Sound.class);
-		stick = directory.getEntry("stick", Sound.class);
+		attach = directory.getEntry("attach", Sound.class);
+		attachFail = directory.getEntry("attach_fail", Sound.class);
+		flyAlert = directory.getEntry("alert", Sound.class);
 		colorChange = directory.getEntry("colorchange", Sound.class);
 
 		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);

@@ -1,6 +1,5 @@
 package edu.cornell.gdiac.discodale.controllers;
 
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import edu.cornell.gdiac.discodale.InputController;
@@ -13,12 +12,13 @@ public class DaleController {
 	/** Vector math cache */
 	private final Vector2 vectorCache;
 
-	public enum SFX {
+	public enum DaleSFX {
 		TONGUE_EXTEND,
-		TONGUE_STICK,
+		TONGUE_ATTACH,
+		TONGUE_ATTACH_FAIL,
 		NONE
 	}
-	public SFX sfx = SFX.NONE;
+	public DaleSFX daleSfx = DaleSFX.NONE;
 
 	public DaleController(DaleModel dale) {
 		this.dale = dale;
@@ -38,7 +38,7 @@ public class DaleController {
 	}
 
 	public void processGrappleAction(World world) {
-		sfx = SFX.NONE;
+		daleSfx = DaleSFX.NONE;
 		switch (dale.getGrappleState()) {
 			case RETRACTED:
 				dale.lookPosition(InputController.getInstance().getCrossHair());
@@ -48,19 +48,23 @@ public class DaleController {
 					dale.setGrappleAngle(vectorCache.angleRad());
 					dale.destroyGrappleJoint(world);
 					System.out.println("Grapple angle: " + dale.getGrappleAngle());
-					sfx = SFX.TONGUE_EXTEND;
+					daleSfx = DaleSFX.TONGUE_EXTEND;
 				}
 				break;
 			case EXTENDING:
 				dale.lookPosition(dale.getStickyPart().getPosition());
-				if (!InputController.getInstance().didClickHeld() || dale.getTongueLength() > dale.getMaxTongueLength() || dale.isHitReflectiveFlag()) {
+				if (!InputController.getInstance().didClickHeld() || dale.getTongueLength() > dale.getMaxTongueLength()) {
+					dale.setGrappleState(GrappleState.RETURNING);
+					dale.setStickyPartActive(false);
+				} else if (dale.isHitReflectiveFlag()){
 					dale.setGrappleState(GrappleState.RETURNING);
 					dale.setStickyPartActive(false);
 					dale.setHitReflectiveFlag(false);
+					daleSfx = DaleSFX.TONGUE_ATTACH_FAIL;
 				} else if (dale.getGrappleAttachedBody() != null) {
 					dale.setGrappleState(GrappleState.ATTACHED);
 					dale.createGrappleJoint(dale.getGrappleAttachedBody(), dale.getGrappleAttachedBodyLocalAnchor(), world);
-					sfx = SFX.TONGUE_STICK;
+					daleSfx = DaleSFX.TONGUE_ATTACH;
 				}
 				break;
 			case ATTACHED:

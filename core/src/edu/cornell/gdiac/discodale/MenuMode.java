@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Rectangle;
 import edu.cornell.gdiac.assets.AssetDirectory;
-import edu.cornell.gdiac.assets.TextureRegionLoader;
 import edu.cornell.gdiac.discodale.models.ColorRegionModel;
 import edu.cornell.gdiac.util.ScreenListener;
 
@@ -276,7 +275,7 @@ public class MenuMode implements Screen, InputProcessor {
     }
 
     public void update(float dt) {
-        themeId = SoundPlayer.playBGM(theme, themeId, volumeBgm / 100f);
+        themeId = SoundPlayer.loopSound(theme, themeId, volumeBgm / 100f);
     }
 
     public void draw(){
