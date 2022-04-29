@@ -6,7 +6,7 @@ import com.badlogic.gdx.audio.Sound;
 public class SoundPlayer {
 
 
-    public static long playBGM(Sound sound, long soundId, float volume) {
+    public static long loopSound(Sound sound, long soundId, float volume) {
         if (soundId != -1) {
             sound.setVolume(soundId, volume);
             return soundId;
