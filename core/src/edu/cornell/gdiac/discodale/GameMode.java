@@ -705,7 +705,7 @@ public class GameMode implements Screen {
 					flyController.setVelocity();
 				}
 
-				if (colorChangeCountdown > CHANGE_COLOR_ALERT_TIME)
+				if (scene.hasColorChange() && colorChangeCountdown > CHANGE_COLOR_ALERT_TIME)
 					colorChangeId = SoundPlayer.playSound(colorChange, colorChangeId, volumeSfx);
 
 				if (colorChangeCountdown > 0) {
