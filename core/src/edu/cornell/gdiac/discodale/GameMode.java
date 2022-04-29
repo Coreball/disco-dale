@@ -661,6 +661,8 @@ public class GameMode implements Screen {
 				break;
 		}
 
+		int winLose = dale.getWinLose();
+
 		switch (getCameraState()) {
 			case START:
 				zoomValue = Math.max(
@@ -736,7 +738,7 @@ public class GameMode implements Screen {
 					scene.updateColorRegions();
 				}
 
-				if (dale.getY() * scale.y < -150) {
+				if (dale.getY() * scale.y < -150 && winLose != WIN_CODE) {
 					reset();
 				}
 
@@ -744,8 +746,6 @@ public class GameMode implements Screen {
 				scene.updateColorRegionMovement();
 				break;
 		}
-
-		int winLose = dale.getWinLose();
 
 		if(winLose == WIN_CODE){
 			setComplete(true);
