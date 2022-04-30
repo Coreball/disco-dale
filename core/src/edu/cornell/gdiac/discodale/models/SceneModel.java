@@ -56,7 +56,9 @@ public class SceneModel {
     private boolean darkMode = false;
 
     /** Whether there are moving spotlights in the level or not. */
-    private boolean spotlightMode = true;
+    private boolean spotlightMode = false;
+    private float spotlightRadius = 100f;
+    private float[] spotlightPath = new float[]{1.0f,1.0f,200.0f,200.0f};
 
     private boolean hasColorChange;
 
@@ -179,6 +181,22 @@ public class SceneModel {
 
     public void setSpotlightMode(boolean spotlightMode) {
         this.spotlightMode = spotlightMode;
+    }
+
+    public float[] getSpotlightPath() {
+        return spotlightPath;
+    }
+
+    public void setSpotlightPath(float[] spotlightPath) {
+        this.spotlightPath = spotlightPath;
+    }
+
+    public float getSpotlightRadius() {
+        return spotlightRadius;
+    }
+
+    public void setSpotlightRadius(float spotlightRadius) {
+        this.spotlightRadius = spotlightRadius;
     }
 
     public void setCanvas(GameCanvas canvas) {
