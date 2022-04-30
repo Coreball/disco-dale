@@ -130,63 +130,46 @@ public class LevelLoader {
         int width = platforms.getInt("width");
         int height = platforms.getInt("height");
         for (int i = 0; i < height; i++) {
-            int last = 0;
             int count = 1;
             for (int j = 0; j < width; j++) {
                 int current = data[j + i * width];
-                if (current != last || j == width - 1) {
-                    float[] v;
-                    if (j == width - 1) {
-                        v = new float[] {
-                                width * this.tileWidth, (height - i) * this.tileHeight,
-                                width * this.tileWidth, (height - (i + 1)) * this.tileHeight,
-                                (width - count - 1) * this.tileWidth, (height - (i + 1)) * this.tileHeight,
-                                (width - count - 1) * this.tileWidth, (height - i) * this.tileHeight,
-                        };
-                    } else {
-                        v = new float[] {
-                                j * this.tileWidth, (height - i) * this.tileHeight,
-                                j * this.tileWidth, (height - (i + 1)) * this.tileHeight,
-                                (j - count) * this.tileWidth, (height - (i + 1)) * this.tileHeight,
-                                (j - count) * this.tileWidth, (height - i) * this.tileHeight,
-                        };
-                    }
+                float[] v;
+                v = new float[] {
+                        (j + 1) * this.tileWidth, (height - i) * this.tileHeight,
+                        (j + 1) * this.tileWidth, (height - (i + 1)) * this.tileHeight,
+                        (j + 1 - count) * this.tileWidth, (height - (i + 1)) * this.tileHeight,
+                        (j + 1 - count) * this.tileWidth, (height - i) * this.tileHeight,
+                };
 
-                    v = scaleRect(v);
+                v = scaleRect(v);
 
-                    switch (last) {
-                        case 0:
-                            break;
-                        case 1:
-                            model.addBrick(v, "brick" + (j + i * width), defaults);
-                            break;
-                        case 2:
-                            model.addReflective(v, "reflective" + (j + i * width), defaults);
-                            break;
-                        case 8:
-                            model.setDaleStart(
-                                    (j * this.tileWidth - (float) this.tileWidth / 2) / scale.x,
-                                    ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
-                            );
-                            break;
-                        case 9:
-                            model.addFly(
-                                    (j * this.tileWidth - (float) this.tileWidth / 2) / scale.x,
-                                    ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
-                            );
-                            break;
-                        case 11:
-                            model.setGoal(
-                                    (j * this.tileWidth - (float) this.tileWidth / 2) / scale.x,
-                                    ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
-                            );
-                            break;
-                    }
-                    count = 1;
-                    if (j == width - 1) last = 0;
-                    else last = current;
-                } else {
-                    count++;
+                switch (current) {
+                    case 0:
+                        break;
+                    case 1:
+                        model.addBrick(v, "brick" + (j + i * width), defaults);
+                        break;
+                    case 2:
+                        model.addReflective(v, "reflective" + (j + i * width), defaults);
+                        break;
+                    case 8:
+                        model.setDaleStart(
+                                ((j + 1) * this.tileWidth - (float) this.tileWidth / 2) / scale.x,
+                                ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
+                        );
+                        break;
+                    case 9:
+                        model.addFly(
+                                ((j + 1) * this.tileWidth - (float) this.tileWidth / 2) / scale.x,
+                                ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
+                        );
+                        break;
+                    case 11:
+                        model.setGoal(
+                                ((j + 1) * this.tileWidth - (float) this.tileWidth / 2) / scale.x,
+                                ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
+                        );
+                        break;
                 }
             }
         }
