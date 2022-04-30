@@ -24,6 +24,14 @@ public class MenuMode implements Screen, InputProcessor {
     private Type type;
     private Type typePrevious;
 
+    /** Standard window size (for scaling) */
+    private static int STANDARD_WIDTH  = 1024;
+    /** Standard window height (for scaling) */
+    private static int STANDARD_HEIGHT = 576;
+    /** Scaling factors for changing the resolution. */
+    private float sx = 1f;
+    private float sy = 1f;
+
     /** UX element scales and offsets */
     private static final float START_BUTTON_SCALE  = 0.25f;
     private static final int PLAY_OFFSET_Y = 300;
@@ -129,7 +137,7 @@ public class MenuMode implements Screen, InputProcessor {
     private boolean bgmPressed, sfxPressed;
     private boolean toMenuPressed, nextLevelPressed, restartPressed;
     private boolean resumePressed;
-    private int volumeBgm = 100, volumeSfx = 100;
+    private int volumeBgm = 0, volumeSfx = 100;
 
 //    private TextureRegionDrawable test;
 //    private Button testButton;
@@ -159,7 +167,8 @@ public class MenuMode implements Screen, InputProcessor {
         this.canvas = canvas;
         active = false;
         type = Type.START;
-        canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f, new Rectangle(0, 0, 32, 18), 32);
+        canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1.0f,
+                new Rectangle(0, 0, 32, 18), 32);
     }
 
 
@@ -174,7 +183,6 @@ public class MenuMode implements Screen, InputProcessor {
      */
     public void render(float delta) {
         if (active) {
-            Gdx.input.setInputProcessor( this );
             update(delta);
             draw();
         }
@@ -187,87 +195,90 @@ public class MenuMode implements Screen, InputProcessor {
     }
 
     private boolean inPlayBounds(int x, int y){
-        return inBounds(x, y, canvas.getWidth()/2f-playButton.getWidth()/2f*START_BUTTON_SCALE,
-                canvas.getWidth()/2f+playButton.getWidth()/2f*START_BUTTON_SCALE,
-                PLAY_OFFSET_Y+playButton.getHeight()/2f*START_BUTTON_SCALE,
-                PLAY_OFFSET_Y-playButton.getHeight()/2f*START_BUTTON_SCALE);
+        return inBounds(x, y, canvas.getWidth()/2f-playButton.getWidth()/2f*START_BUTTON_SCALE*sx,
+                canvas.getWidth()/2f+playButton.getWidth()/2f*START_BUTTON_SCALE*sx,
+                (PLAY_OFFSET_Y+playButton.getHeight()/2f*START_BUTTON_SCALE)*sy,
+                (PLAY_OFFSET_Y-playButton.getHeight()/2f*START_BUTTON_SCALE)*sy);
     }
 
     private boolean inOptionsBounds(int x, int y){
-        return inBounds(x, y, canvas.getWidth()/2f-optionsButton.getWidth()/2f*START_BUTTON_SCALE,
-                canvas.getWidth()/2f+optionsButton.getWidth()/2f*START_BUTTON_SCALE,
-                OPTIONS_OFFSET_Y+optionsButton.getHeight()/2f*START_BUTTON_SCALE,
-                OPTIONS_OFFSET_Y-optionsButton.getHeight()/2f*START_BUTTON_SCALE);
+        return inBounds(x, y, canvas.getWidth()/2f-optionsButton.getWidth()/2f*START_BUTTON_SCALE*sx,
+                canvas.getWidth()/2f+optionsButton.getWidth()/2f*START_BUTTON_SCALE*sx,
+                (OPTIONS_OFFSET_Y+optionsButton.getHeight()/2f*START_BUTTON_SCALE)*sy,
+                (OPTIONS_OFFSET_Y-optionsButton.getHeight()/2f*START_BUTTON_SCALE)*sy);
     }
 
     private boolean inExitBounds(int x, int y){
-        return inBounds(x, y, canvas.getWidth()/2f-exitButton.getWidth()/2f*START_BUTTON_SCALE,
-                canvas.getWidth()/2f+exitButton.getWidth()/2f*START_BUTTON_SCALE,
-                EXIT_OFFSET_Y+exitButton.getHeight()/2f*START_BUTTON_SCALE,
-                EXIT_OFFSET_Y-exitButton.getHeight()/2f*START_BUTTON_SCALE);
+        return inBounds(x, y, canvas.getWidth()/2f-exitButton.getWidth()/2f*START_BUTTON_SCALE*sx,
+                canvas.getWidth()/2f+exitButton.getWidth()/2f*START_BUTTON_SCALE*sx,
+                (EXIT_OFFSET_Y+exitButton.getHeight()/2f*START_BUTTON_SCALE)*sy,
+                (EXIT_OFFSET_Y-exitButton.getHeight()/2f*START_BUTTON_SCALE)*sy);
     }
 
     private boolean inOptionsReturnBounds(int x, int y){
-        return inBounds(x, y, OPTIONS_RETURN_OFFSET_X, OPTIONS_RETURN_OFFSET_X + 120f,
-                OPTIONS_RETURN_OFFSET_Y, OPTIONS_RETURN_OFFSET_Y - 20f);
+        return inBounds(x, y, OPTIONS_RETURN_OFFSET_X * sx, (OPTIONS_RETURN_OFFSET_X + 120f) * sx,
+                OPTIONS_RETURN_OFFSET_Y * sy, (OPTIONS_RETURN_OFFSET_Y - 20f) * sy);
     }
 
     private boolean inToggleBounds(int x, int y){
-        return inBounds(x, y, OPTIONS_ACCESS_OFFSET_X , OPTIONS_ACCESS_OFFSET_X + toggleOff.getWidth(),
-                OPTIONS_ACCESS_OFFSET_Y + toggleOff.getHeight(), OPTIONS_ACCESS_OFFSET_Y);
+        return inBounds(x, y, OPTIONS_ACCESS_OFFSET_X*sx, (OPTIONS_ACCESS_OFFSET_X + toggleOff.getWidth())*sx,
+                (OPTIONS_ACCESS_OFFSET_Y + toggleOff.getHeight()) * sy, OPTIONS_ACCESS_OFFSET_Y * sy);
     }
 
     private boolean inBgmBounds(int x, int y){
-        return inBounds(x, y, OPTIONS_SLIDE_OFFSET_X - slideThumb.getWidth(),
-                OPTIONS_SLIDE_OFFSET_X + slideOn.getWidth() + slideThumb.getWidth(),
-                OPTIONS_SLIDE_BGM_OFFSET_Y + slideThumb.getHeight() / 2f,
-                OPTIONS_SLIDE_BGM_OFFSET_Y - slideThumb.getHeight() / 2f);
+        return inBounds(x, y, (OPTIONS_SLIDE_OFFSET_X - slideThumb.getWidth()) * sx,
+                (OPTIONS_SLIDE_OFFSET_X + slideOn.getWidth() + slideThumb.getWidth()) * sx,
+                (OPTIONS_SLIDE_BGM_OFFSET_Y + slideThumb.getHeight() / 2f) * sy,
+                (OPTIONS_SLIDE_BGM_OFFSET_Y - slideThumb.getHeight() / 2f) * sy);
     }
 
     private boolean inSfxBounds(int x, int y){
-        return inBounds(x, y, OPTIONS_SLIDE_OFFSET_X - slideThumb.getWidth()
-                , OPTIONS_SLIDE_OFFSET_X + slideOn.getWidth() + slideThumb.getWidth(),
-                OPTIONS_SLIDE_SFX_OFFSET_Y + slideThumb.getHeight() / 2f,
-                OPTIONS_SLIDE_SFX_OFFSET_Y - slideThumb.getHeight() / 2f);
+        return inBounds(x, y, (OPTIONS_SLIDE_OFFSET_X - slideThumb.getWidth()) * sx,
+                (OPTIONS_SLIDE_OFFSET_X + slideOn.getWidth() + slideThumb.getWidth()) * sx,
+                (OPTIONS_SLIDE_SFX_OFFSET_Y + slideThumb.getHeight() / 2f) * sy,
+                (OPTIONS_SLIDE_SFX_OFFSET_Y - slideThumb.getHeight() / 2f) * sy);
     }
 
     private boolean inToMenuBounds(int x, int y){
-        return inBounds(x, y, COMPLETE_MENU_OFFSET_X, COMPLETE_MENU_OFFSET_X + exitToMenu.getWidth(),
-                COMPLETE_BUTTONS_OFFSET_Y +  exitToMenu.getHeight(), COMPLETE_BUTTONS_OFFSET_Y);
+        return inBounds(x, y, COMPLETE_MENU_OFFSET_X * sx,
+                (COMPLETE_MENU_OFFSET_X + exitToMenu.getWidth()) * sx,
+                (COMPLETE_BUTTONS_OFFSET_Y + exitToMenu.getHeight()) * sy, COMPLETE_BUTTONS_OFFSET_Y * sy);
     }
 
     private boolean inRestartBounds(int x, int y){
-        return inBounds(x, y, COMPLETE_RESTART_OFFSET_X, COMPLETE_RESTART_OFFSET_X + restart.getWidth(),
-                COMPLETE_BUTTONS_OFFSET_Y +  restart.getHeight(), COMPLETE_BUTTONS_OFFSET_Y);
+        return inBounds(x, y, COMPLETE_RESTART_OFFSET_X * sx,
+                (COMPLETE_RESTART_OFFSET_X + restart.getWidth()) * sx,
+                (COMPLETE_BUTTONS_OFFSET_Y +  restart.getHeight()) * sy, COMPLETE_BUTTONS_OFFSET_Y * sy);
     }
 
     private boolean inNextLevelBounds(int x, int y){
-        return inBounds(x, y, COMPLETE_NEXT_OFFSET_X, COMPLETE_NEXT_OFFSET_X + nextLevel.getWidth(),
-                COMPLETE_BUTTONS_OFFSET_Y +  nextLevel.getHeight(), COMPLETE_BUTTONS_OFFSET_Y);
+        return inBounds(x, y, COMPLETE_NEXT_OFFSET_X * sx,
+                (COMPLETE_NEXT_OFFSET_X + nextLevel.getWidth()) * sx,
+                (COMPLETE_BUTTONS_OFFSET_Y + nextLevel.getHeight()) * sy , COMPLETE_BUTTONS_OFFSET_Y * sy);
     }
 
     private boolean inResumeBounds(int x, int y){
-        return inBounds(x, y, canvas.getWidth()/2f-resume.getWidth()/2f,
-                canvas.getWidth()/2f+resume.getWidth()/2f,
-                PAUSE_RESUME_OFFSET_Y +  resume.getHeight(), PAUSE_RESUME_OFFSET_Y);
+        return inBounds(x, y, canvas.getWidth() / 2f - resume.getWidth() / 2f * sx,
+                canvas.getWidth() / 2f + resume.getWidth() / 2f * sx,
+                (PAUSE_RESUME_OFFSET_Y + resume.getHeight()) * sy, PAUSE_RESUME_OFFSET_Y * sy);
     }
 
     private boolean inRestartPauseBounds(int x, int y){
-        return inBounds(x, y, canvas.getWidth()/2f-restartPause.getWidth()/2f,
-                canvas.getWidth()/2f+restartPause.getWidth()/2f,
-                PAUSE_RESTART_OFFSET_Y +  restartPause.getHeight(), PAUSE_RESTART_OFFSET_Y);
+        return inBounds(x, y, canvas.getWidth() / 2f - restartPause.getWidth() / 2f * sx,
+                canvas.getWidth() / 2f + restartPause.getWidth() / 2f * sx,
+                (PAUSE_RESTART_OFFSET_Y + restartPause.getHeight()) * sy, PAUSE_RESTART_OFFSET_Y * sy);
     }
 
     private boolean inOptionsPauseBounds(int x, int y){
-        return inBounds(x, y, canvas.getWidth()/2f-optionsPause.getWidth()/2f,
-                canvas.getWidth()/2f+optionsPause.getWidth()/2f,
-                PAUSE_OPTIONS_OFFSET_Y +  optionsPause.getHeight(), PAUSE_OPTIONS_OFFSET_Y);
+        return inBounds(x, y, canvas.getWidth() / 2f - optionsPause.getWidth() / 2f * sx,
+                canvas.getWidth() / 2f + optionsPause.getWidth() / 2f * sx,
+                (PAUSE_OPTIONS_OFFSET_Y + optionsPause.getHeight()) * sy, PAUSE_OPTIONS_OFFSET_Y * sy);
     }
 
     private boolean inMenuPauseBounds(int x, int y){
-        return inBounds(x, y, canvas.getWidth()/2f-menuPause.getWidth()/2f,
-                canvas.getWidth()/2f+menuPause.getWidth()/2f,
-                PAUSE_MENU_OFFSET_Y +  menuPause.getHeight(), PAUSE_MENU_OFFSET_Y);
+        return inBounds(x, y, canvas.getWidth() / 2f - menuPause.getWidth() / 2f * sx,
+                canvas.getWidth() / 2f + menuPause.getWidth() / 2f * sx,
+                (PAUSE_MENU_OFFSET_Y + menuPause.getHeight()) * sy, PAUSE_MENU_OFFSET_Y * sy);
     }
 
     public boolean inBounds(int x, int y, float left, float right, float up, float down){
@@ -280,7 +291,7 @@ public class MenuMode implements Screen, InputProcessor {
 
     public void draw(){
         canvas.begin();
-        canvas.draw(background, Color.WHITE,0, 0, canvas.getWidth(), canvas.getHeight());
+        canvas.draw(background, Color.WHITE,0, 0, STANDARD_WIDTH, STANDARD_HEIGHT);
         if (type == Type.START)
             drawStart();
         else if (type == Type.LEVEL_SELECT)
@@ -295,22 +306,23 @@ public class MenuMode implements Screen, InputProcessor {
     }
 
     public void drawStart(){
+        canvas.draw(title, Color.WHITE, title.getWidth()/2f, title.getHeight()/2f,
+                STANDARD_WIDTH/2f, TITLE_OFFSET_Y, 0, 1f, 1f);
+
         canvas.draw(playButton, playPressed?Color.GRAY:Color.WHITE, playButton.getWidth()/2f,
-                playButton.getHeight()/2f,canvas.getWidth()/2f, PLAY_OFFSET_Y, 0,
+                playButton.getHeight()/2f,STANDARD_WIDTH/2f, PLAY_OFFSET_Y, 0,
                 START_BUTTON_SCALE, START_BUTTON_SCALE);
         canvas.draw(optionsButton, optionsPressed?Color.GRAY:Color.WHITE, optionsButton.getWidth()/2f,
-                optionsButton.getHeight()/2f, canvas.getWidth()/2f, OPTIONS_OFFSET_Y, 0,
+                optionsButton.getHeight()/2f, STANDARD_WIDTH/2f, OPTIONS_OFFSET_Y, 0,
                 START_BUTTON_SCALE, START_BUTTON_SCALE);
         canvas.draw(exitButton, exitPressed?Color.GRAY:Color.WHITE, exitButton.getWidth()/2f,
-                exitButton.getHeight()/2f, canvas.getWidth()/2f, EXIT_OFFSET_Y, 0,
+                exitButton.getHeight()/2f, STANDARD_WIDTH/2f, EXIT_OFFSET_Y, 0,
                 START_BUTTON_SCALE, START_BUTTON_SCALE);
-        canvas.draw(title, Color.WHITE, title.getWidth()/2f, title.getHeight()/2f,
-                canvas.getWidth()/2f, TITLE_OFFSET_Y, 0, 1f, 1f);
     }
 
     public void drawLevelSelect(){
         canvas.draw(levelSelect, Color.WHITE, levelSelect.getWidth()/2f, levelSelect.getHeight()/2f,
-                canvas.getWidth()/2f, TITLE_OFFSET_Y, 0, 1f, 1f);
+                STANDARD_WIDTH/2f, TITLE_OFFSET_Y, 0, 1f, 1f);
         int x, y, num;
         Color tint;
         for (int i = 0; i < LEVEL_BUTTON_ROWS; i++){
@@ -328,7 +340,7 @@ public class MenuMode implements Screen, InputProcessor {
     }
 
     public void drawOptions(){
-        canvas.draw(windowBg, canvas.getWidth()/2f - windowBg.getWidth()/2f, WINDOW_BG_OFFSET_Y);
+        canvas.draw(windowBg, STANDARD_WIDTH/2f - windowBg.getWidth()/2f, WINDOW_BG_OFFSET_Y);
         canvas.drawText("options", titleFont, WINDOW_TITLE_OFFSET_X, WINDOW_TITLE_OFFSET_Y);
         canvas.drawText("return", buttonFont, OPTIONS_RETURN_OFFSET_X, OPTIONS_RETURN_OFFSET_Y);
 
@@ -369,10 +381,10 @@ public class MenuMode implements Screen, InputProcessor {
     }
 
     public void drawComplete() {
-        canvas.draw(windowBg, canvas.getWidth()/2f - windowBg.getWidth()/2f, WINDOW_BG_OFFSET_Y);
+        canvas.draw(windowBg, STANDARD_WIDTH/2f - windowBg.getWidth()/2f, WINDOW_BG_OFFSET_Y);
         canvas.drawText("Level completed!", titleFont, WINDOW_TITLE_OFFSET_X, WINDOW_TITLE_OFFSET_Y);
-        canvas.draw(complete, canvas.getWidth()/2f - complete.getWidth()/2f,
-                canvas.getHeight()/2f - complete.getHeight()/2f);
+        canvas.draw(complete, STANDARD_WIDTH/2f - complete.getWidth()/2f,
+                STANDARD_HEIGHT/2f - complete.getHeight()/2f);
         canvas.draw(exitToMenu, toMenuPressed?Color.GRAY:Color.WHITE, COMPLETE_MENU_OFFSET_X,
                 COMPLETE_BUTTONS_OFFSET_Y, exitToMenu.getWidth(), exitToMenu.getHeight());
         canvas.draw(restart, restartPressed?Color.GRAY:Color.WHITE, COMPLETE_RESTART_OFFSET_X,
@@ -382,18 +394,18 @@ public class MenuMode implements Screen, InputProcessor {
     }
 
     public void drawPause() {
-        canvas.draw(windowBg, canvas.getWidth()/2f - windowBg.getWidth()/2f, WINDOW_BG_OFFSET_Y);
+        canvas.draw(windowBg, STANDARD_WIDTH/2f - windowBg.getWidth()/2f, WINDOW_BG_OFFSET_Y);
         canvas.drawText("paused", titleFont, WINDOW_TITLE_OFFSET_X, WINDOW_TITLE_OFFSET_Y);
-        canvas.draw(resume, resumePressed?Color.GRAY:Color.WHITE, canvas.getWidth()/2f - resume.getWidth()/2f,
+        canvas.draw(resume, resumePressed?Color.GRAY:Color.WHITE, STANDARD_WIDTH/2f - resume.getWidth()/2f,
                 PAUSE_RESUME_OFFSET_Y, resume.getWidth(), resume.getHeight());
         canvas.draw(restartPause, restartPressed?Color.GRAY:Color.WHITE,
-                canvas.getWidth()/2f - restartPause.getWidth()/2f, PAUSE_RESTART_OFFSET_Y,
+                STANDARD_WIDTH/2f - restartPause.getWidth()/2f, PAUSE_RESTART_OFFSET_Y,
                 restartPause.getWidth(), restartPause.getHeight());
         canvas.draw(optionsPause, optionsPressed?Color.GRAY:Color.WHITE,
-                canvas.getWidth()/2f - optionsPause.getWidth()/2f, PAUSE_OPTIONS_OFFSET_Y,
+                STANDARD_WIDTH/2f - optionsPause.getWidth()/2f, PAUSE_OPTIONS_OFFSET_Y,
                 optionsPause.getWidth(), optionsPause.getHeight());
         canvas.draw(menuPause, toMenuPressed?Color.GRAY:Color.WHITE,
-                canvas.getWidth()/2f - menuPause.getWidth()/2f, PAUSE_MENU_OFFSET_Y,
+                STANDARD_WIDTH/2f - menuPause.getWidth()/2f, PAUSE_MENU_OFFSET_Y,
                 menuPause.getWidth(), menuPause.getHeight());
     }
 
@@ -427,14 +439,12 @@ public class MenuMode implements Screen, InputProcessor {
         labelFont = directory.getEntry("shared:gothic", BitmapFont.class);
         labelFont2 = directory.getEntry("shared:gothicsmall", BitmapFont.class);
         theme = directory.getEntry("theme", Sound.class);
+
         displayFont.setColor(Color.BLACK);
         titleFont.setColor(labelColor);
         labelFont.setColor(labelColor);
         labelFont2.setColor(labelColor);
         buttonFont.setColor(labelColor);
-
-//        test = new TextureRegionDrawable(exitToMenu);
-//        testButton = new Button(test);
     }
 
 
@@ -450,12 +460,17 @@ public class MenuMode implements Screen, InputProcessor {
     @Override
     public void show() {
         active = true;
+        Gdx.input.setInputProcessor( this );
     }
 
 
     @Override
     public void resize(int width, int height) {
-
+        canvas.width = width;
+        canvas.height = height;
+        // Compute the drawing scale
+        sx = ((float)width)/STANDARD_WIDTH;
+        sy = ((float)height)/STANDARD_HEIGHT;
     }
 
     @Override
@@ -535,7 +550,7 @@ public class MenuMode implements Screen, InputProcessor {
                 right = x + levelButton.getWidth() / 2f;
                 up = y + levelButton.getHeight() / 2f;
                 down = y - levelButton.getHeight() / 2f;
-                if (inBounds(screenX, screenY, left, right, up, down)){
+                if (inBounds((int) (screenX / sx), (int) (screenY / sy), left, right, up, down)){
                     levelPressed = i * LEVEL_BUTTON_COLS + j;
                     return true;
                 }
@@ -639,7 +654,7 @@ public class MenuMode implements Screen, InputProcessor {
             int right = LEVEL_BUTTONS_OFFSET_X + j * LEVEL_BUTTONS_MARGIN + levelButton.getWidth() / 2;
             int up = LEVEL_BUTTONS_OFFSET_Y - i * LEVEL_BUTTONS_MARGIN + levelButton.getHeight() / 2;
             int down = LEVEL_BUTTONS_OFFSET_Y - i * LEVEL_BUTTONS_MARGIN - levelButton.getHeight() / 2;
-            if (inBounds(screenX, screenY, left, right, up, down)){
+            if (inBounds((int) (screenX / sx), (int) (screenY / sy), left, right, up, down)){
                 typePrevious = Type.LEVEL_SELECT;
                 listener.exitScreen(this, Constants.EXIT_LEVEL);
             }
@@ -712,10 +727,12 @@ public class MenuMode implements Screen, InputProcessor {
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         if (bgmPressed) {
-            volumeBgm = Math.max(0, Math.min(100, (screenX - OPTIONS_SLIDE_OFFSET_X) * 100 / slideOn.getWidth()));
+            volumeBgm = Math.max(0, Math.min(100,
+                    (int) ((screenX - OPTIONS_SLIDE_OFFSET_X * sx) * 100 / slideOn.getWidth() / sx)));
             return false;
         } else if (sfxPressed) {
-            volumeSfx = Math.max(0, Math.min(100, (screenX - OPTIONS_SLIDE_OFFSET_X) * 100 / slideOn.getWidth()));
+            volumeSfx = Math.max(0, Math.min(100,
+                    (int) ((screenX - OPTIONS_SLIDE_OFFSET_X * sx) * 100 / slideOn.getWidth() / sx)));
             return false;
         }
         return false;
