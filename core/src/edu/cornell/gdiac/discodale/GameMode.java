@@ -128,6 +128,11 @@ public class GameMode implements Screen {
 	private TextureRegion light;
 	private TextureRegion darkness;
 
+	private float spotlightX;
+	private float spotlightY;
+	private int spotlightTargetPointIndex;
+	private float spotlightSpeed = 7f;
+
 	/** Sound effects */
 	private Sound died;
 	private Sound extend;
@@ -526,6 +531,11 @@ public class GameMode implements Screen {
 		// This world is heavier
 		world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
 
+		float[] path = scene.getSpotlightPath();
+		spotlightX = path[0];
+		spotlightY = path[1];
+		spotlightTargetPointIndex = 1;
+
 	}
 
 	/**
@@ -632,6 +642,59 @@ public class GameMode implements Screen {
 
 	public void setCameraState(CameraState state) {camState = state;}
 
+	public void updateSpotlightPosition(){
+		float[] path = scene.getSpotlightPath();
+		if(spotlightTargetPointIndex*2>=path.length){
+			spotlightTargetPointIndex = 0;
+		}
+		float nextX = path[spotlightTargetPointIndex*2];
+		float nextY = path[spotlightTargetPointIndex*2+1];
+		float nowX = spotlightX;
+		float nowY = spotlightY;
+		float dy = nextY - nowY;
+		float dx = nextX - nowX;
+		float distance = (float)Math.sqrt(dy*dy+dx*dx);
+		if(distance<=spotlightSpeed){
+			System.out.println(distance);
+			System.out.println(spotlightSpeed);
+			spotlightX = nextX;
+			spotlightY = nextY;
+			spotlightTargetPointIndex++;
+		}else{
+			double theta = Math.atan2(dy,dx);
+			float moveX = spotlightSpeed*(float)Math.cos(theta);
+			float moveY = spotlightSpeed*(float)Math.sin(theta);
+			spotlightX = nowX + moveX;
+			spotlightY = nowY + moveY;
+		}
+		return;
+	}
+
+	class FixtureAndDistance{
+		public Fixture fixture;
+		public float distance;
+		public FixtureAndDistance(Fixture fixture,float distance){
+			this.fixture = fixture;
+			this.distance = distance;
+		}
+	}
+
+	class CustomizedRayCastCallBack implements RayCastCallback{
+		public LinkedList<FixtureAndDistance> fixtureAndDistances = new LinkedList<>();
+		public void reset(){
+			fixtureAndDistances = new LinkedList<>();
+		}
+		@Override
+		public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+			float diffX = Math.abs(point.x - dale.getX());
+			float diffY = Math.abs(point.y - dale.getY());
+			float distance = (float) Math.sqrt((double)(diffX*diffX) + (double)(diffY*diffY));
+			fixtureAndDistances.add(new FixtureAndDistance(fixture,distance));
+
+			return 1;
+		}
+	}
+
 	/**
 	 * The core gameplay loop of this world.
 	 *
@@ -662,7 +725,9 @@ public class GameMode implements Screen {
 		}
 
 		int winLose = dale.getWinLose();
-
+		if(scene.isSpotlightMode()){
+			updateSpotlightPosition();
+		}
 		switch (getCameraState()) {
 			case START:
 				zoomValue = Math.max(
@@ -753,31 +818,6 @@ public class GameMode implements Screen {
 
 		if(winLose == LOSE_CODE){
 			setFailure(true);
-		}
-
-		class FixtureAndDistance{
-			public Fixture fixture;
-			public float distance;
-			public FixtureAndDistance(Fixture fixture,float distance){
-				this.fixture = fixture;
-				this.distance = distance;
-			}
-		}
-
-		class CustomizedRayCastCallBack implements RayCastCallback{
-			public LinkedList<FixtureAndDistance> fixtureAndDistances = new LinkedList<>();
-			public void reset(){
-				fixtureAndDistances = new LinkedList<>();
-			}
-			@Override
-			public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
-				float diffX = Math.abs(point.x - dale.getX());
-				float diffY = Math.abs(point.y - dale.getY());
-				float distance = (float) Math.sqrt((double)(diffX*diffX) + (double)(diffY*diffY));
-				fixtureAndDistances.add(new FixtureAndDistance(fixture,distance));
-
-				return 1;
-			}
 		}
 
 		CustomizedRayCastCallBack callback = new CustomizedRayCastCallBack();
@@ -916,6 +956,44 @@ public class GameMode implements Screen {
 			// Draw darkness around light
 			canvas.beginLight2();
 			canvas.draw(darkness,new Color(256,256,256,0.5f),cw/2f,ch/2f,canvas.getCameraX(),canvas.getCameraY(),cw,ch);
+			canvas.endLight();
+		}
+		else if(scene.isSpotlightMode()){
+			canvas.begin();
+			scene.draw(canvas);
+			canvas.end();
+
+			canvas.begin2();
+			canvas.draw(background, Color.WHITE,0, 0, scene.getBounds().getWidth() * scene.getTileSize(),
+					scene.getBounds().getHeight() * scene.getTileSize());
+			canvas.endLight();
+
+			canvas.begin();
+			for (Obstacle obj : objects) {
+				obj.draw(canvas);
+			}
+			canvas.endLight();
+
+			// Draw light
+			canvas.beginLight();
+			float ch = canvas.getHeight();
+			float cw = canvas.getWidth();
+			float h = light.getRegionHeight();
+			float w = light.getRegionWidth();
+			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
+//			float lightScale = 2f;
+			float lightScaleX = scene.getSpotlightRadius()/w;
+			float lightScaleY = scene.getSpotlightRadius()/h;
+			canvas.draw(light,new Color(256,256,256,0f),w*lightScaleX/2f,h*lightScaleY/2f,spotlightX,spotlightY,w*lightScaleX,h*lightScaleY);
+			canvas.endLight();
+
+			// Draw darkness around light
+			canvas.beginLight2();
+			canvas.draw(darkness,new Color(256,256,256,0.5f),cw/2f,ch/2f,canvas.getCameraX(),canvas.getCameraY(),cw,ch);
+			canvas.endLight();
+
+			canvas.begin();
+			dale.draw(canvas);
 			canvas.endLight();
 		}
 		else{

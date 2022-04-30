@@ -57,6 +57,8 @@ public class SceneModel {
 
     /** Whether there are moving spotlights in the level or not. */
     private boolean spotlightMode = true;
+    private float spotlightRadius = 200f;
+    private float[] spotlightPath = new float[]{1.0f,1.0f,200.0f,200.0f};
 
     /** The texture for walls and platforms */
     protected TextureRegion brickTile;
@@ -173,6 +175,22 @@ public class SceneModel {
 
     public void setSpotlightMode(boolean spotlightMode) {
         this.spotlightMode = spotlightMode;
+    }
+
+    public float[] getSpotlightPath() {
+        return spotlightPath;
+    }
+
+    public void setSpotlightPath(float[] spotlightPath) {
+        this.spotlightPath = spotlightPath;
+    }
+
+    public float getSpotlightRadius() {
+        return spotlightRadius;
+    }
+
+    public void setSpotlightRadius(float spotlightRadius) {
+        this.spotlightRadius = spotlightRadius;
     }
 
     public void setCanvas(GameCanvas canvas) {
