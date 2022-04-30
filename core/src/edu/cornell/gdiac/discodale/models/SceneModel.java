@@ -56,7 +56,7 @@ public class SceneModel {
     private boolean darkMode = false;
 
     /** Whether there are moving spotlights in the level or not. */
-    private boolean spotlightMode = true;
+    private boolean spotlightMode = false;
     private float spotlightRadius = 100f;
     private float[] spotlightPath = new float[]{1.0f,1.0f,200.0f,200.0f};
 
