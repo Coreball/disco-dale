@@ -57,7 +57,7 @@ public class SceneModel {
 
     /** Whether there are moving spotlights in the level or not. */
     private boolean spotlightMode = true;
-    private float spotlightRadius = 200f;
+    private float spotlightRadius = 100f;
     private float[] spotlightPath = new float[]{1.0f,1.0f,200.0f,200.0f};
 
     /** The texture for walls and platforms */

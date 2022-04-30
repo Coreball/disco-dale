@@ -635,6 +635,15 @@ public class GameMode implements Screen {
 	}
 
 	private boolean daleMatches() {
+		if(scene.isSpotlightMode()){
+			float size = scene.getTileSize();
+			float dy = dale.getY()*size-spotlightY;
+			float dx = dale.getX()*size-spotlightX;
+			double distance = Math.sqrt(dy*dy+dx*dx);
+			if(distance>scene.getSpotlightRadius()){
+				return true;
+			}
+		}
 		return dale.getColor() == daleBackground();
 	}
 
@@ -655,8 +664,6 @@ public class GameMode implements Screen {
 		float dx = nextX - nowX;
 		float distance = (float)Math.sqrt(dy*dy+dx*dx);
 		if(distance<=spotlightSpeed){
-			System.out.println(distance);
-			System.out.println(spotlightSpeed);
 			spotlightX = nextX;
 			spotlightY = nextY;
 			spotlightTargetPointIndex++;
@@ -944,8 +951,6 @@ public class GameMode implements Screen {
 
 			// Draw light
 			canvas.beginLight();
-			float ch = canvas.getHeight();
-			float cw = canvas.getWidth();
 			float h = light.getRegionHeight();
 			float w = light.getRegionWidth();
 			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
@@ -955,6 +960,8 @@ public class GameMode implements Screen {
 
 			// Draw darkness around light
 			canvas.beginLight2();
+			float ch = scene.getBounds().getHeight()*scene.getTileSize();
+			float cw = scene.getBounds().getWidth()*scene.getTileSize();
 			canvas.draw(darkness,new Color(256,256,256,0.5f),cw/2f,ch/2f,canvas.getCameraX(),canvas.getCameraY(),cw,ch);
 			canvas.endLight();
 		}
@@ -976,19 +983,18 @@ public class GameMode implements Screen {
 
 			// Draw light
 			canvas.beginLight();
-			float ch = canvas.getHeight();
-			float cw = canvas.getWidth();
 			float h = light.getRegionHeight();
 			float w = light.getRegionWidth();
 			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
-//			float lightScale = 2f;
-			float lightScaleX = scene.getSpotlightRadius()/w;
-			float lightScaleY = scene.getSpotlightRadius()/h;
+			float lightScaleX = scene.getSpotlightRadius()*2/w;
+			float lightScaleY = scene.getSpotlightRadius()*2/h;
 			canvas.draw(light,new Color(256,256,256,0f),w*lightScaleX/2f,h*lightScaleY/2f,spotlightX,spotlightY,w*lightScaleX,h*lightScaleY);
 			canvas.endLight();
 
 			// Draw darkness around light
 			canvas.beginLight2();
+			float ch = scene.getBounds().getHeight()*scene.getTileSize();
+			float cw = scene.getBounds().getWidth()*scene.getTileSize();
 			canvas.draw(darkness,new Color(256,256,256,0.5f),cw/2f,ch/2f,canvas.getCameraX(),canvas.getCameraY(),cw,ch);
 			canvas.endLight();
 
