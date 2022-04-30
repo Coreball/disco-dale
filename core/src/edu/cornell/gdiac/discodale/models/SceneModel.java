@@ -60,6 +60,8 @@ public class SceneModel {
     private float spotlightRadius = 100f;
     private float[] spotlightPath = new float[]{1.0f,1.0f,200.0f,200.0f};
 
+    private boolean hasColorChange;
+
     /** The texture for walls and platforms */
     protected TextureRegion brickTile;
     protected TextureRegion reflectiveTile;
@@ -157,12 +159,16 @@ public class SceneModel {
         return darkMode;
     }
 
-    public boolean hasColorChange() {
+    public void setColorChange(){
+        hasColorChange = false;
         for (ColorRegionModel cr: colorRegions){
             if (cr.getSeq() != null)
-                return true;
+                hasColorChange = true;
         }
-        return false;
+    }
+
+    public boolean getColorChange() {
+        return hasColorChange;
     }
 
     public void setDarkMode(boolean darkMode) {
