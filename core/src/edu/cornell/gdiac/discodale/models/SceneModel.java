@@ -58,6 +58,8 @@ public class SceneModel {
     /** Whether there are moving spotlights in the level or not. */
     private boolean spotlightMode = true;
 
+    private boolean hasColorChange;
+
     /** The texture for walls and platforms */
     protected TextureRegion brickTile;
     protected TextureRegion reflectiveTile;
@@ -155,12 +157,16 @@ public class SceneModel {
         return darkMode;
     }
 
-    public boolean hasColorChange() {
+    public void setColorChange(){
+        hasColorChange = false;
         for (ColorRegionModel cr: colorRegions){
             if (cr.getSeq() != null)
-                return true;
+                hasColorChange = true;
         }
-        return false;
+    }
+
+    public boolean getColorChange() {
+        return hasColorChange;
     }
 
     public void setDarkMode(boolean darkMode) {

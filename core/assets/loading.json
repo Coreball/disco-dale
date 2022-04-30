@@ -1,7 +1,7 @@
 {
 	"textures": {
         "background": "shared/loading.png",
-		"play": "shared/play.png",
+        "dale": "shared/dale.png",
         "progress": {
             "file":      "shared/progressbar.png",
             "atlas":     {

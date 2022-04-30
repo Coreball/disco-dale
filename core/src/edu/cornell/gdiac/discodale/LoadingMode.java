@@ -26,9 +26,6 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.*;
-import com.badlogic.gdx.controllers.Controller;
-import com.badlogic.gdx.controllers.ControllerListener;
-import com.badlogic.gdx.controllers.ControllerMapping;
 
 import edu.cornell.gdiac.assets.*;
 import edu.cornell.gdiac.util.*;
@@ -61,36 +58,13 @@ public class LoadingMode implements Screen {
 	 * Background texture for start-up
 	 */
 	private Texture background;
-	/**
-	 * Texture atlas to support a progress bar
-	 */
-	private final Texture statusBar;
 
-	// statusBar is a "texture atlas." Break it up into parts.
 	/**
-	 * Left cap to the status background (grey region)
+	 * Dale's texture for start-up
 	 */
-	private TextureRegion statusBkgLeft;
-	/**
-	 * Middle portion of the status background (grey region)
-	 */
-	private TextureRegion statusBkgMiddle;
-	/**
-	 * Right cap to the status background (grey region)
-	 */
-	private TextureRegion statusBkgRight;
-	/**
-	 * Left cap to the status forground (colored region)
-	 */
-	private TextureRegion statusFrgLeft;
-	/**
-	 * Middle portion of the status forground (colored region)
-	 */
-	private TextureRegion statusFrgMiddle;
-	/**
-	 * Right cap to the status forground (colored region)
-	 */
-	private TextureRegion statusFrgRight;
+	private Texture dale;
+	private Texture tongue;
+	private Texture sticky;
 
 	/**
 	 * Default budget for asset loader (do nothing but load 60 fps)
@@ -99,11 +73,11 @@ public class LoadingMode implements Screen {
 	/**
 	 * Standard window size (for scaling)
 	 */
-	private static int STANDARD_WIDTH = 800;
+	private static int STANDARD_WIDTH = 1024;
 	/**
 	 * Standard window height (for scaling)
 	 */
-	private static int STANDARD_HEIGHT = 700;
+	private static int STANDARD_HEIGHT = 576;
 	/**
 	 * Ratio of the bar width to the screen
 	 */
@@ -112,10 +86,9 @@ public class LoadingMode implements Screen {
 	 * Ration of the bar height to the screen
 	 */
 	private static float BAR_HEIGHT_RATIO = 0.25f;
-	/**
-	 * Height of the progress bar
-	 */
-	private static float BUTTON_SCALE = 0.75f;
+
+	private static final int DALE_OFFSET_X = 0;
+	private static final int DALE_OFFSET_Y = 100;
 
 	/**
 	 * Reference to GameCanvas created by the root
@@ -127,34 +100,16 @@ public class LoadingMode implements Screen {
 	private ScreenListener listener;
 
 	/**
-	 * The width of the progress bar
-	 */
-	private int width;
-	/**
-	 * The y-coordinate of the center of the progress bar
-	 */
-	private int centerY;
-	/**
-	 * The x-coordinate of the center of the progress bar
-	 */
-	private int centerX;
-	/**
-	 * The height of the canvas window (necessary since sprite origin != screen origin)
-	 */
-	private int heightY;
-	/**
 	 * Scaling factor for when the student changes the resolution.
 	 */
 	private float scale;
+	private float sx = 1f, sy = 1f;
 
 	/**
 	 * Current progress (0 to 1) of the asset manager
 	 */
 	private float progress;
-	/**
-	 * The current state of the play button
-	 */
-	private int pressState;
+
 	/**
 	 * The amount of time to devote to loading assets (as opposed to on screen hints, etc.)
 	 */
@@ -252,20 +207,20 @@ public class LoadingMode implements Screen {
 		// Load the next two images immediately.
 		background = internal.getEntry("background", Texture.class);
 		background.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		statusBar = internal.getEntry("progress", Texture.class);
-
-		// Break up the status bar texture into regions
-		statusBkgLeft = internal.getEntry("progress.backleft", TextureRegion.class);
-		statusBkgRight = internal.getEntry("progress.backright", TextureRegion.class);
-		statusBkgMiddle = internal.getEntry("progress.background", TextureRegion.class);
-
-		statusFrgLeft = internal.getEntry("progress.foreleft", TextureRegion.class);
-		statusFrgRight = internal.getEntry("progress.foreright", TextureRegion.class);
-		statusFrgMiddle = internal.getEntry("progress.foreground", TextureRegion.class);
+		dale = internal.getEntry("dale", Texture.class);
 
 		// No progress so far.
 		progress = 0;
-		pressState = 0;
+
+		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
+		tonguePixmap.setColor(Color.PINK);
+		tonguePixmap.fill();
+		tongue = new Texture(tonguePixmap);
+
+		Pixmap stickyPartPixmap = new Pixmap(12, 12, Pixmap.Format.RGBA8888);
+		stickyPartPixmap.setColor(Color.PINK);
+		stickyPartPixmap.fillCircle(6, 6, 5);
+		sticky = new Texture(stickyPartPixmap);
 
 		// Start loading the real assets
 		assets = new AssetDirectory(file);
@@ -309,6 +264,7 @@ public class LoadingMode implements Screen {
 		canvas.begin();
 		canvas.draw(background, 0, 0);
 		drawProgress(canvas);
+		canvas.draw(dale, DALE_OFFSET_X, DALE_OFFSET_Y);
 		canvas.end();
 	}
 
@@ -322,26 +278,11 @@ public class LoadingMode implements Screen {
 	 * @param canvas The drawing context
 	 */
 	private void drawProgress(GameCanvas canvas) {
-		canvas.draw(statusBkgLeft, Color.WHITE, centerX - width / 2, centerY,
-				scale * statusBkgLeft.getRegionWidth(), scale * statusBkgLeft.getRegionHeight());
-		canvas.draw(statusBkgRight, Color.WHITE, centerX + width / 2 - scale * statusBkgRight.getRegionWidth(), centerY,
-				scale * statusBkgRight.getRegionWidth(), scale * statusBkgRight.getRegionHeight());
-		canvas.draw(statusBkgMiddle, Color.WHITE, centerX - width / 2 + scale * statusBkgLeft.getRegionWidth(), centerY,
-				width - scale * (statusBkgRight.getRegionWidth() + statusBkgLeft.getRegionWidth()),
-				scale * statusBkgMiddle.getRegionHeight());
+		canvas.draw(tongue, Color.WHITE, DALE_OFFSET_X + dale.getWidth() / 2, DALE_OFFSET_Y + dale.getHeight() / 2,
+				700 * progress, tongue.getHeight());
+		canvas.draw(sticky, DALE_OFFSET_X + dale.getWidth() / 2 + 700 * progress - sticky.getWidth()/2,
+				DALE_OFFSET_Y + dale.getHeight() / 2 + tongue.getHeight()/2 - sticky.getHeight()/2);
 
-		canvas.draw(statusFrgLeft, Color.WHITE, centerX - width / 2, centerY,
-				scale * statusFrgLeft.getRegionWidth(), scale * statusFrgLeft.getRegionHeight());
-		if (progress > 0) {
-			float span = progress * (width - scale * (statusFrgLeft.getRegionWidth() + statusFrgRight.getRegionWidth())) / 2.0f;
-			canvas.draw(statusFrgRight, Color.WHITE, centerX - width / 2 + scale * statusFrgLeft.getRegionWidth() + span, centerY,
-					scale * statusFrgRight.getRegionWidth(), scale * statusFrgRight.getRegionHeight());
-			canvas.draw(statusFrgMiddle, Color.WHITE, centerX - width / 2 + scale * statusFrgLeft.getRegionWidth(), centerY,
-					span, scale * statusFrgMiddle.getRegionHeight());
-		} else {
-			canvas.draw(statusFrgRight, Color.WHITE, centerX - width / 2 + scale * statusFrgLeft.getRegionWidth(), centerY,
-					scale * statusFrgRight.getRegionWidth(), scale * statusFrgRight.getRegionHeight());
-		}
 	}
 
 	// ADDITIONAL SCREEN METHODS
@@ -377,14 +318,10 @@ public class LoadingMode implements Screen {
 	 */
 	public void resize(int width, int height) {
 		// Compute the drawing scale
-		float sx = ((float) width) / STANDARD_WIDTH;
-		float sy = ((float) height) / STANDARD_HEIGHT;
+		sx = ((float) width) / STANDARD_WIDTH;
+		sy = ((float) height) / STANDARD_HEIGHT;
 		scale = (sx < sy ? sx : sy);
 
-		this.width = (int) (BAR_WIDTH_RATIO * width);
-		centerY = (int) (BAR_HEIGHT_RATIO * height);
-		centerX = width / 2;
-		heightY = height;
 	}
 
 	/**

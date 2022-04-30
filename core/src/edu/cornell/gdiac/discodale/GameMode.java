@@ -728,7 +728,7 @@ public class GameMode implements Screen {
 					alertId = -1;
 				}
 
-				if (scene.hasColorChange() && colorChangeCountdown > CHANGE_COLOR_ALERT_TIME)
+				if (scene.getColorChange() && colorChangeCountdown > CHANGE_COLOR_ALERT_TIME)
 					colorChangeId = SoundPlayer.playSound(colorChange, colorChangeId, volumeSfx);
 
 				if (colorChangeCountdown > 0) {
@@ -1112,6 +1112,7 @@ public class GameMode implements Screen {
 		} else {
 			this.scene = levelLoader.load(testlevel, constants.get("defaults"));
 		}
+		scene.setColorChange();
 		this.bounds = new Rectangle(scene.getBounds());
 		updateScale();
 		ticks = 0;
