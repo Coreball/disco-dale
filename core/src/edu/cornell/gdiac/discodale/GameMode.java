@@ -67,7 +67,7 @@ public class GameMode implements Screen {
 
 	private static int NUM_LEVELS = 10;
 
-	private static float ZOOM_AMOUNT = 0.75f;
+	private static float ZOOM_AMOUNT = 1.0f;
 
 	/** The texture for neutral walls */
 	protected TextureRegion brickTile;
@@ -661,6 +661,8 @@ public class GameMode implements Screen {
 				break;
 		}
 
+		int winLose = dale.getWinLose();
+
 		switch (getCameraState()) {
 			case START:
 				zoomValue = Math.max(
@@ -736,7 +738,7 @@ public class GameMode implements Screen {
 					scene.updateColorRegions();
 				}
 
-				if (dale.getY() * scale.y < -150) {
+				if (dale.getY() * scale.y < -150 && winLose != WIN_CODE) {
 					reset();
 				}
 
@@ -744,8 +746,6 @@ public class GameMode implements Screen {
 				scene.updateColorRegionMovement();
 				break;
 		}
-
-		int winLose = dale.getWinLose();
 
 		if(winLose == WIN_CODE){
 			setComplete(true);
