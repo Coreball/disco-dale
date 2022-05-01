@@ -22,6 +22,8 @@ import edu.cornell.gdiac.discodale.*;
 import edu.cornell.gdiac.discodale.obstacle.*;
 import edu.cornell.gdiac.util.FilmStrip;
 
+import java.util.Arrays;
+
 /**
  * Player avatar for the plaform game.
  *
@@ -109,6 +111,10 @@ public class DaleModel extends WheelObstacle {
 
 	public DaleColor getColor() {
 		return availableColors[colorIndex];
+	}
+
+	public void setColor(DaleColor color) {
+		colorIndex = Arrays.asList(availableColors).indexOf(color);
 	}
 
 	public void rotateColor() {

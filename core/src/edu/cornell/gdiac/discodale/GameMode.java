@@ -528,6 +528,7 @@ public class GameMode implements Screen {
 				radius, width, height, bodyOffset, availableColors, availableHeadTextures,
 				availableBodyIdleTextures, availableBodyWalkTextures);
 		dale.setDrawScale(scale);
+		dale.setColor(daleBackground());
 
 		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
 		tonguePixmap.setColor(Color.PINK);
