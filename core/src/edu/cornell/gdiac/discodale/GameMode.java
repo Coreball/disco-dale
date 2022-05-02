@@ -471,48 +471,14 @@ public class GameMode implements Screen {
 	 * Lays out the game geography.
 	 */
 	private void populateLevel() {
-		float dradius = headTextures[0].getRegionHeight() / scale.x / 2f;
-		float dwidth = bodyIdleTextures[0].getRegionWidth() / scale.x;
-		float dheight = bodyIdleTextures[0].getRegionHeight() / scale.y;
-		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
+		populateLevelDale();
 
-		DaleColor[] availableColors = scene.getPossibleColors();
-
-		FilmStrip[] availableHeadTextures = new FilmStrip[availableColors.length];
-		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
-		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
-		for (int i = 0; i < availableColors.length; i++) {
-			int colorIndex = availableColors[i].ordinal();
-			availableHeadTextures[i] = headTextures[colorIndex];
-			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
-			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
-		}
-
-		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
-				dradius, dwidth, dheight, bodyOffset, availableColors, availableHeadTextures,
-				availableBodyIdleTextures, availableBodyWalkTextures);
-		dale.setDrawScale(scale);
-
-		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
-		tonguePixmap.setColor(Color.PINK);
-		tonguePixmap.fill();
-		Texture tongueTexture = new Texture(tonguePixmap);
-		dale.setTongueTexture(tongueTexture);
-		Pixmap stickyPartPixmap = new Pixmap(11, 11, Pixmap.Format.RGBA8888);
-		stickyPartPixmap.setColor(Color.PINK);
-		stickyPartPixmap.fillCircle(5, 5, 5);
-		Texture stickyPartTexture = new Texture(stickyPartPixmap);
-		dale.setStickyPartTexture(stickyPartTexture);
-
-		addObject(dale);
-		daleController = new DaleController(this.dale);
-
-		dwidth = FLY_SIZE / scale.x;
-		dheight = FLY_SIZE / scale.y;
+		float width = FLY_SIZE / scale.x;
+		float height = FLY_SIZE / scale.y;
 		flies = new PooledList<>();
 		flyControllers = new LinkedList<>();
 		for (Vector2 flyLocation : scene.getFlyLocations()) {
-			FlyModel fly = new FlyModel(constants.get("fly"), flyLocation.x, flyLocation.y, dwidth, dheight, FlyModel.IdleType.STATIONARY);
+			FlyModel fly = new FlyModel(constants.get("fly"), flyLocation.x, flyLocation.y, width, height, FlyModel.IdleType.STATIONARY);
 			fly.setDrawScale(scale);
 			fly.initializeTexture(flyIdleTexture, flyChaseTexture);
 			flies.add(fly);
@@ -535,7 +501,48 @@ public class GameMode implements Screen {
 		spotlightX = path[0];
 		spotlightY = path[1];
 		spotlightTargetPointIndex = 1;
+	}
 
+	/**
+	 * Populate the level with Dale
+	 */
+	private void populateLevelDale() {
+		float radius = headTextures[0].getRegionHeight() / scale.x / 2f;
+		float width = bodyIdleTextures[0].getRegionWidth() / scale.x;
+		float height = bodyIdleTextures[0].getRegionHeight() / scale.y;
+		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
+
+		DaleColor[] availableColors = scene.getPossibleColors();
+
+		FilmStrip[] availableHeadTextures = new FilmStrip[availableColors.length];
+		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
+		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
+		for (int i = 0; i < availableColors.length; i++) {
+			int colorIndex = availableColors[i].ordinal();
+			availableHeadTextures[i] = headTextures[colorIndex];
+			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
+			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
+		}
+
+		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
+				radius, width, height, bodyOffset, availableColors, availableHeadTextures,
+				availableBodyIdleTextures, availableBodyWalkTextures);
+		dale.setDrawScale(scale);
+		dale.setColor(daleBackground());
+
+		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
+		tonguePixmap.setColor(Color.PINK);
+		tonguePixmap.fill();
+		Texture tongueTexture = new Texture(tonguePixmap);
+		dale.setTongueTexture(tongueTexture);
+		Pixmap stickyPartPixmap = new Pixmap(11, 11, Pixmap.Format.RGBA8888);
+		stickyPartPixmap.setColor(Color.PINK);
+		stickyPartPixmap.fillCircle(5, 5, 5);
+		Texture stickyPartTexture = new Texture(stickyPartPixmap);
+		dale.setStickyPartTexture(stickyPartTexture);
+
+		addObject(dale);
+		daleController = new DaleController(this.dale);
 	}
 
 	/**
