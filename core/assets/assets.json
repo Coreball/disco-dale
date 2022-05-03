@@ -54,7 +54,8 @@
         "menu:resume": "menu/resume.png",
         "menu:restartpause": "menu/restart_long.png",
         "menu:optionspause": "menu/options.png",
-        "menu:menu": "menu/main_menu.png"
+        "menu:menu": "menu/main_menu.png",
+        "menu:levelpage": "menu/level_page.png"
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json",
