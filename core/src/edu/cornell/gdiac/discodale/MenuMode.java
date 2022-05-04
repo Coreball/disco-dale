@@ -316,6 +316,7 @@ public class MenuMode implements Screen, InputProcessor {
     public void draw(){
         canvas.begin();
         canvas.draw(background, Color.WHITE,0, 0, STANDARD_WIDTH, STANDARD_HEIGHT);
+//        canvas.draw(background,Color.WHITE,0, 0, canvas.getWidth(), canvas.getHeight());
         if (type == Type.START)
             drawStart();
         else if (type == Type.LEVEL_SELECT)
