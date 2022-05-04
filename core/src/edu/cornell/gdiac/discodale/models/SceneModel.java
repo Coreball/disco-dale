@@ -27,8 +27,8 @@ public class SceneModel {
     }
 
     /** Window size */
-    private float window_width = 1088;
-    private float window_height = 640;
+    private float window_width;
+    private float window_height;
 
     /** Reference to the goalDoor (for collision detection) */
     public BoxObstacle goalDoor;
@@ -65,6 +65,8 @@ public class SceneModel {
     /** The texture for walls and platforms */
     protected TextureRegion brickTile;
     protected TextureRegion reflectiveTile;
+    protected TextureRegion brickScaffold;
+    protected TextureRegion reflectiveScaffold;
     /** The texture for the exit condition */
     protected TextureRegion goalTile;
 
@@ -92,7 +94,7 @@ public class SceneModel {
         this.grid = new boolean[(int) bounds.getWidth()][(int) bounds.getHeight()];
         System.out.println(bounds);
 //        this.scale = new Vector2(1024 / bounds.getWidth(), 576 / bounds.getHeight()); //todo
-        this.scale = new Vector2(32f, 32f);
+        this.scale = new Vector2(64f, 64f);
         System.out.println("scene scale: " + this.scale);
         this.colorMovement = movement;
         this.colorRegions = new PooledList<>();
@@ -126,6 +128,14 @@ public class SceneModel {
 
     public void setReflectiveTexture(TextureRegion texture) {
         this.reflectiveTile = texture;
+    }
+
+    public void setBrickScaffold(TextureRegion brickScaffold) {
+        this.brickScaffold = brickScaffold;
+    }
+
+    public void setReflectiveScaffold(TextureRegion reflectiveScaffold) {
+        this.reflectiveScaffold = reflectiveScaffold;
     }
 
     public Vector2 getDaleStart() {
@@ -379,7 +389,7 @@ public class SceneModel {
         updateGrid();
     }
 
-    public void addBrick(float[] vertices, String name, JsonValue defaults) {
+    public void addBrickWall(float[] vertices, String name, JsonValue defaults) {
         PolygonObstacle obj;
         obj = new PolygonObstacle(vertices, 0, 0);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
@@ -396,7 +406,7 @@ public class SceneModel {
         addObject(obj);
     }
 
-    public void addReflective(float[] vertices, String name, JsonValue defaults) {
+    public void addReflectiveWall(float[] vertices, String name, JsonValue defaults) {
         PolygonObstacle obj;
         obj = new PolygonObstacle(vertices, 0, 0);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
@@ -405,6 +415,40 @@ public class SceneModel {
         obj.setRestitution(defaults.getFloat("restitution", 0.0f));
         obj.setDrawScale(scale);
         obj.setTexture(reflectiveTile);
+        obj.setName(name);
+        Filter objFilter = new Filter();
+        objFilter.categoryBits = 0b00000001;
+        objFilter.maskBits     = 0b00011100;
+        obj.setFilterData(objFilter);
+        addObject(obj);
+    }
+
+    public void addBrickScaffold(float[] vertices, String name, JsonValue defaults) {
+        PolygonObstacle obj;
+        obj = new PolygonObstacle(vertices, 0, 0);
+        obj.setBodyType(BodyDef.BodyType.StaticBody);
+        obj.setDensity(defaults.getFloat("density", 0.0f));
+        obj.setFriction(defaults.getFloat("friction", 0.0f));
+        obj.setRestitution(defaults.getFloat("restitution", 0.0f));
+        obj.setDrawScale(scale);
+        obj.setTexture(brickScaffold);
+        obj.setName(name);
+        Filter objFilter = new Filter();
+        objFilter.categoryBits = 0b00000001;
+        objFilter.maskBits     = 0b00011100;
+        obj.setFilterData(objFilter);
+        addObject(obj);
+    }
+
+    public void addReflectiveScaffold(float[] vertices, String name, JsonValue defaults) {
+        PolygonObstacle obj;
+        obj = new PolygonObstacle(vertices, 0, 0);
+        obj.setBodyType(BodyDef.BodyType.StaticBody);
+        obj.setDensity(defaults.getFloat("density", 0.0f));
+        obj.setFriction(defaults.getFloat("friction", 0.0f));
+        obj.setRestitution(defaults.getFloat("restitution", 0.0f));
+        obj.setDrawScale(scale);
+        obj.setTexture(reflectiveScaffold);
         obj.setName(name);
         Filter objFilter = new Filter();
         objFilter.categoryBits = 0b00000001;

@@ -1,26 +1,40 @@
 {
     "textures": {
         "shared:brick" : {
-            "file":  "platform/scaffoldstickhorizontalsmall.png",
+            "file":  "platform/wall.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
         "shared:reflective" : {
+            "file":  "platform/reflective.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:brickScaffold" : {
+            "file":  "platform/scaffoldstickhorizontalsmall.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffold" : {
             "file":  "platform/scaffoldnonstickhorizontalsmall.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
         "shared:goal":   "platform/disco.png",
         "platform:fly": "platform/fly.png",
-        "platform:head:pink": "platform/head_32/headpink_32.png",
-        "platform:head:blue": "platform/head_32/headblue_32.png",
-        "platform:head:green": "platform/head_32/headgreen_32.png",
-        "platform:body:idle:pink": "platform/idle_32/idlepink_32.png",
-        "platform:body:idle:blue": "platform/idle_32/idleblue_32.png",
-        "platform:body:idle:green": "platform/idle_32/idlegreen_32.png",
-        "platform:body:walk:pink": "platform/walk_32/walkpink_32.png",
-        "platform:body:walk:blue": "platform/walk_32/walkblue_32.png",
-        "platform:body:walk:green": "platform/walk_32/walkgreen_32.png",
+        "platform:head:pink": "platform/head/headpink.png",
+        "platform:head:blue": "platform/head/headblue.png",
+        "platform:head:green": "platform/head/headgreen.png",
+        "platform:head:orange": "platform/head/headorange.png",
+        "platform:head:purple": "platform/head/headpurple.png",
+        "platform:body:idle:pink": "platform/idle/idlepink.png",
+        "platform:body:idle:blue": "platform/idle/idleblue.png",
+        "platform:body:idle:green": "platform/idle/idlegreen.png",
+        "platform:body:idle:orange": "platform/idle/idleorange.png",
+        "platform:body:idle:purple": "platform/idle/idlepurple.png",
+        "platform:body:walk:pink": "platform/walk/walkpink.png",
+        "platform:body:walk:blue": "platform/walk/walkblue.png",
+        "platform:body:walk:green": "platform/walk/walkgreen.png",
         "platform:flyidle": "platform/fly_idle_blue.png",
         "platform:flychasing": "platform/fly_chasing.png",
         "platform:pinkcolor": "platform/color_pink.png",
