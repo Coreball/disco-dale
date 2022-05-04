@@ -128,6 +128,11 @@ public class GameMode implements Screen {
 	private TextureRegion light;
 	private TextureRegion darkness;
 
+	private float spotlightX;
+	private float spotlightY;
+	private int spotlightTargetPointIndex;
+	private float spotlightSpeed = 7f;
+
 	/** Sound effects */
 	private Sound died;
 	private Sound extend;
@@ -174,6 +179,9 @@ public class GameMode implements Screen {
 
 	/** Which value to change with the increase/decrease buttons */
 	private AdjustTarget adjustTarget = AdjustTarget.GRAPPLE_SPEED;
+	private TextureRegion brickScaffold;
+	private TextureRegion reflectiveScaffold;
+
 	/** Enum for which value to change with the increase/decrease buttons */
 	private enum AdjustTarget {
 		GRAPPLE_SPEED,
@@ -466,48 +474,14 @@ public class GameMode implements Screen {
 	 * Lays out the game geography.
 	 */
 	private void populateLevel() {
-		float dradius = headTextures[0].getRegionHeight() / scale.x / 2f;
-		float dwidth = bodyIdleTextures[0].getRegionWidth() / scale.x;
-		float dheight = bodyIdleTextures[0].getRegionHeight() / scale.y;
-		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
+		populateLevelDale();
 
-		DaleColor[] availableColors = scene.getPossibleColors();
-
-		FilmStrip[] availableHeadTextures = new FilmStrip[availableColors.length];
-		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
-		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
-		for (int i = 0; i < availableColors.length; i++) {
-			int colorIndex = availableColors[i].ordinal();
-			availableHeadTextures[i] = headTextures[colorIndex];
-			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
-			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
-		}
-
-		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
-				dradius, dwidth, dheight, bodyOffset, availableColors, availableHeadTextures,
-				availableBodyIdleTextures, availableBodyWalkTextures);
-		dale.setDrawScale(scale);
-
-		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
-		tonguePixmap.setColor(Color.PINK);
-		tonguePixmap.fill();
-		Texture tongueTexture = new Texture(tonguePixmap);
-		dale.setTongueTexture(tongueTexture);
-		Pixmap stickyPartPixmap = new Pixmap(11, 11, Pixmap.Format.RGBA8888);
-		stickyPartPixmap.setColor(Color.PINK);
-		stickyPartPixmap.fillCircle(5, 5, 5);
-		Texture stickyPartTexture = new Texture(stickyPartPixmap);
-		dale.setStickyPartTexture(stickyPartTexture);
-
-		addObject(dale);
-		daleController = new DaleController(this.dale);
-
-		dwidth = FLY_SIZE / scale.x;
-		dheight = FLY_SIZE / scale.y;
+		float width = FLY_SIZE / scale.x;
+		float height = FLY_SIZE / scale.y;
 		flies = new PooledList<>();
 		flyControllers = new LinkedList<>();
 		for (Vector2 flyLocation : scene.getFlyLocations()) {
-			FlyModel fly = new FlyModel(constants.get("fly"), flyLocation.x, flyLocation.y, dwidth, dheight, FlyModel.IdleType.STATIONARY);
+			FlyModel fly = new FlyModel(constants.get("fly"), flyLocation.x, flyLocation.y, width, height, FlyModel.IdleType.STATIONARY);
 			fly.setDrawScale(scale);
 			fly.initializeTexture(flyIdleTexture, flyChaseTexture);
 			flies.add(fly);
@@ -526,6 +500,52 @@ public class GameMode implements Screen {
 		// This world is heavier
 		world.setGravity(new Vector2(0, defaults.getFloat("gravity", 0)));
 
+		float[] path = scene.getSpotlightPath();
+		spotlightX = path[0];
+		spotlightY = path[1];
+		spotlightTargetPointIndex = 1;
+	}
+
+	/**
+	 * Populate the level with Dale
+	 */
+	private void populateLevelDale() {
+		float radius = headTextures[0].getRegionHeight() / scale.x / 2f;
+		float width = bodyIdleTextures[0].getRegionWidth() / scale.x;
+		float height = bodyIdleTextures[0].getRegionHeight() / scale.y;
+		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
+
+		DaleColor[] availableColors = scene.getPossibleColors();
+
+		FilmStrip[] availableHeadTextures = new FilmStrip[availableColors.length];
+		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
+		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
+		for (int i = 0; i < availableColors.length; i++) {
+			int colorIndex = availableColors[i].ordinal();
+			availableHeadTextures[i] = headTextures[colorIndex];
+			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
+			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
+		}
+
+		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
+				radius, width, height, bodyOffset, availableColors, availableHeadTextures,
+				availableBodyIdleTextures, availableBodyWalkTextures);
+		dale.setDrawScale(scale);
+		dale.setColor(daleBackground());
+
+		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
+		tonguePixmap.setColor(Color.PINK);
+		tonguePixmap.fill();
+		Texture tongueTexture = new Texture(tonguePixmap);
+		dale.setTongueTexture(tongueTexture);
+		Pixmap stickyPartPixmap = new Pixmap(11, 11, Pixmap.Format.RGBA8888);
+		stickyPartPixmap.setColor(Color.PINK);
+		stickyPartPixmap.fillCircle(5, 5, 5);
+		Texture stickyPartTexture = new Texture(stickyPartPixmap);
+		dale.setStickyPartTexture(stickyPartTexture);
+
+		addObject(dale);
+		daleController = new DaleController(this.dale);
 	}
 
 	/**
@@ -625,12 +645,72 @@ public class GameMode implements Screen {
 	}
 
 	private boolean daleMatches() {
+		if(scene.isSpotlightMode()){
+			float size = scene.getTileSize();
+			float dy = dale.getY()*size-spotlightY;
+			float dx = dale.getX()*size-spotlightX;
+			double distance = Math.sqrt(dy*dy+dx*dx);
+			if(distance>scene.getSpotlightRadius()){
+				return true;
+			}
+		}
 		return dale.getColor() == daleBackground();
 	}
 
 	public CameraState getCameraState() {return camState;}
 
 	public void setCameraState(CameraState state) {camState = state;}
+
+	public void updateSpotlightPosition(){
+		float[] path = scene.getSpotlightPath();
+		if(spotlightTargetPointIndex*2>=path.length){
+			spotlightTargetPointIndex = 0;
+		}
+		float nextX = path[spotlightTargetPointIndex*2];
+		float nextY = path[spotlightTargetPointIndex*2+1];
+		float nowX = spotlightX;
+		float nowY = spotlightY;
+		float dy = nextY - nowY;
+		float dx = nextX - nowX;
+		float distance = (float)Math.sqrt(dy*dy+dx*dx);
+		if(distance<=spotlightSpeed){
+			spotlightX = nextX;
+			spotlightY = nextY;
+			spotlightTargetPointIndex++;
+		}else{
+			double theta = Math.atan2(dy,dx);
+			float moveX = spotlightSpeed*(float)Math.cos(theta);
+			float moveY = spotlightSpeed*(float)Math.sin(theta);
+			spotlightX = nowX + moveX;
+			spotlightY = nowY + moveY;
+		}
+		return;
+	}
+
+	class FixtureAndDistance{
+		public Fixture fixture;
+		public float distance;
+		public FixtureAndDistance(Fixture fixture,float distance){
+			this.fixture = fixture;
+			this.distance = distance;
+		}
+	}
+
+	class CustomizedRayCastCallBack implements RayCastCallback{
+		public LinkedList<FixtureAndDistance> fixtureAndDistances = new LinkedList<>();
+		public void reset(){
+			fixtureAndDistances = new LinkedList<>();
+		}
+		@Override
+		public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+			float diffX = Math.abs(point.x - dale.getX());
+			float diffY = Math.abs(point.y - dale.getY());
+			float distance = (float) Math.sqrt((double)(diffX*diffX) + (double)(diffY*diffY));
+			fixtureAndDistances.add(new FixtureAndDistance(fixture,distance));
+
+			return 1;
+		}
+	}
 
 	/**
 	 * The core gameplay loop of this world.
@@ -662,7 +742,9 @@ public class GameMode implements Screen {
 		}
 
 		int winLose = dale.getWinLose();
-
+		if(scene.isSpotlightMode()){
+			updateSpotlightPosition();
+		}
 		switch (getCameraState()) {
 			case START:
 				zoomValue = Math.max(
@@ -753,31 +835,6 @@ public class GameMode implements Screen {
 
 		if(winLose == LOSE_CODE){
 			setFailure(true);
-		}
-
-		class FixtureAndDistance{
-			public Fixture fixture;
-			public float distance;
-			public FixtureAndDistance(Fixture fixture,float distance){
-				this.fixture = fixture;
-				this.distance = distance;
-			}
-		}
-
-		class CustomizedRayCastCallBack implements RayCastCallback{
-			public LinkedList<FixtureAndDistance> fixtureAndDistances = new LinkedList<>();
-			public void reset(){
-				fixtureAndDistances = new LinkedList<>();
-			}
-			@Override
-			public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
-				float diffX = Math.abs(point.x - dale.getX());
-				float diffY = Math.abs(point.y - dale.getY());
-				float distance = (float) Math.sqrt((double)(diffX*diffX) + (double)(diffY*diffY));
-				fixtureAndDistances.add(new FixtureAndDistance(fixture,distance));
-
-				return 1;
-			}
 		}
 
 		CustomizedRayCastCallBack callback = new CustomizedRayCastCallBack();
@@ -904,8 +961,6 @@ public class GameMode implements Screen {
 
 			// Draw light
 			canvas.beginLight();
-			float ch = canvas.getHeight();
-			float cw = canvas.getWidth();
 			float h = light.getRegionHeight();
 			float w = light.getRegionWidth();
 			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
@@ -915,7 +970,46 @@ public class GameMode implements Screen {
 
 			// Draw darkness around light
 			canvas.beginLight2();
+			float ch = scene.getBounds().getHeight()*scene.getTileSize();
+			float cw = scene.getBounds().getWidth()*scene.getTileSize();
 			canvas.draw(darkness,new Color(256,256,256,0.5f),cw/2f,ch/2f,canvas.getCameraX(),canvas.getCameraY(),cw,ch);
+			canvas.endLight();
+		}
+		else if(scene.isSpotlightMode()){
+			canvas.begin();
+			scene.draw(canvas);
+			canvas.end();
+
+			canvas.begin2();
+			canvas.draw(background, Color.WHITE,0, 0, scene.getBounds().getWidth() * scene.getTileSize(),
+					scene.getBounds().getHeight() * scene.getTileSize());
+			canvas.endLight();
+
+			canvas.begin();
+			for (Obstacle obj : objects) {
+				obj.draw(canvas);
+			}
+			canvas.endLight();
+
+			// Draw light
+			canvas.beginLight();
+			float h = light.getRegionHeight();
+			float w = light.getRegionWidth();
+			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
+			float lightScaleX = scene.getSpotlightRadius()*2/w;
+			float lightScaleY = scene.getSpotlightRadius()*2/h;
+			canvas.draw(light,new Color(256,256,256,0f),w*lightScaleX/2f,h*lightScaleY/2f,spotlightX,spotlightY,w*lightScaleX,h*lightScaleY);
+			canvas.endLight();
+
+			// Draw darkness around light
+			canvas.beginLight2();
+			float ch = scene.getBounds().getHeight()*scene.getTileSize();
+			float cw = scene.getBounds().getWidth()*scene.getTileSize();
+			canvas.draw(darkness,new Color(256,256,256,0.5f),cw/2f,ch/2f,canvas.getCameraX(),canvas.getCameraY(),cw,ch);
+			canvas.endLight();
+
+			canvas.begin();
+			dale.draw(canvas);
 			canvas.endLight();
 		}
 		else{
@@ -1050,13 +1144,17 @@ public class GameMode implements Screen {
 		bodyIdleTextures = new TextureRegion[]{
 				new TextureRegion(directory.getEntry("platform:body:idle:pink", Texture.class)),
 				new TextureRegion(directory.getEntry("platform:body:idle:blue", Texture.class)),
-				new TextureRegion(directory.getEntry("platform:body:idle:green", Texture.class))
+				new TextureRegion(directory.getEntry("platform:body:idle:green", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:body:idle:orange", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:body:idle:purple", Texture.class))
 		};
 
 		headTextures = new FilmStrip[]{
 				new FilmStrip(directory.getEntry("platform:head:pink", Texture.class), 1, 3),
 				new FilmStrip(directory.getEntry("platform:head:blue", Texture.class), 1, 3),
-				new FilmStrip(directory.getEntry("platform:head:green", Texture.class), 1, 3)
+				new FilmStrip(directory.getEntry("platform:head:green", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:head:orange", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:head:purple", Texture.class), 1, 3)
 		};
 
 		bodyWalkTextures = new FilmStrip[]{
@@ -1075,6 +1173,8 @@ public class GameMode implements Screen {
 		// Allocate the tiles
 		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
+		brickScaffold = new TextureRegion(directory.getEntry("shared:brickScaffold", Texture.class));
+		reflectiveScaffold = new TextureRegion(directory.getEntry("shared:reflectiveScaffold", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
 		background = directory.getEntry("menu:bg", Texture.class);
@@ -1101,7 +1201,7 @@ public class GameMode implements Screen {
 			levels[i] = directory.getEntry("level" + Integer.toString(i + 1), JsonValue.class);
 		}
 
-		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, brickScaffold, reflectiveScaffold, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
 		// loadLevel(levelIndex);
 		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
 	}
