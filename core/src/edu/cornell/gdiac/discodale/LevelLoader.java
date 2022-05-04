@@ -17,27 +17,32 @@ public class LevelLoader {
     /** The texture for brick and reflective walls */
     protected TextureRegion brickTile;
     protected TextureRegion reflectiveTile;
+    protected TextureRegion brickScaffold;
+    protected TextureRegion reflectiveScaffold;
     /** The texture for the exit condition */
     protected TextureRegion goalTile;
 
     private int tileWidth;
     private int tileHeight;
+    private float tileScale;
 
     private Rectangle levelBounds;
     private Rectangle bounds;
     private Vector2 scale;
-//    private Vector2 scale = new Vector2(1024 / Constants.DEFAULT_WIDTH, 576 / Constants.DEFAULT_HEIGHT);
 
-    public LevelLoader(TextureRegion brickTile, TextureRegion reflectiveTile, TextureRegion goalTile, float width, float height) {
+    public LevelLoader(TextureRegion brickTile, TextureRegion reflectiveTile, TextureRegion brickScaffold, TextureRegion reflectiveScaffold, TextureRegion goalTile, float width, float height) {
         this.brickTile = brickTile;
         this.reflectiveTile = reflectiveTile;
+        this.brickScaffold = brickScaffold;
+        this.reflectiveScaffold = reflectiveScaffold;
         this.goalTile = goalTile;
         this.bounds = new Rectangle(0, 0, width, height);
     }
 
     public SceneModel load(JsonValue json, JsonValue defaults) {
-        this.tileWidth = json.getInt("tilewidth");
-        this.tileHeight = json.getInt("tileheight");
+        this.tileWidth = 64; // json.getInt("tilewidth");
+        this.tileHeight = 64; // json.getInt("tileheight");
+        this.tileScale = this.tileWidth / (float) json.getInt("tilewidth");
         this.bounds = new Rectangle(
                 0, 0,
                 json.getInt("width"),
@@ -48,8 +53,6 @@ public class LevelLoader {
                 json.getInt("width") * this.tileWidth,
                 json.getInt("height") * this.tileHeight
         );
-
-//        System.out.println(this.levelBounds.toString());
 
         this.scale = new Vector2(
                 this.levelBounds.getWidth() / this.bounds.getWidth(),
@@ -81,6 +84,8 @@ public class LevelLoader {
         SceneModel model = new SceneModel(this.bounds, m, this.tileWidth);
         model.setBrickTexture(this.brickTile);
         model.setReflectiveTexture(this.reflectiveTile);
+        model.setBrickScaffold(this.brickScaffold);
+        model.setReflectiveScaffold(this.reflectiveScaffold);
         model.setGoalTexture(this.goalTile);
         model.setDarkMode(darkMode);
 
@@ -97,16 +102,16 @@ public class LevelLoader {
 
     private void addColors(SceneModel model, JsonValue colors) {
         for (JsonValue o : colors.get("objects")) {
-            float cx = o.getFloat("x");
-            float cy = o.getFloat("y");
+            float cx = o.getFloat("x") * this.tileScale;
+            float cy = o.getFloat("y") * this.tileScale;
             if (o.getString("name").equalsIgnoreCase("colorwheel")) {
                 model.setCenterOfRotation(new Vector2(
-                        cx + o.getFloat("width")/2,
-                        this.levelBounds.getHeight() - o.getFloat("height")/2 - cy
+                        cx + o.getFloat("width") * this.tileScale /2,
+                        this.levelBounds.getHeight() - o.getFloat("height") * this.tileScale /2 - cy
                 ));
             } else {
                 float[] vertices = toPrimitive(StreamSupport.stream(o.get("polygon").spliterator(), false)
-                        .flatMap(p -> Stream.of(p.getFloat("x") + cx, this.levelBounds.getHeight() - p.getFloat("y") - cy))
+                        .flatMap(p -> Stream.of(p.getFloat("x") * this.tileScale + cx, this.levelBounds.getHeight() - p.getFloat("y") * this.tileScale - cy))
                         .toArray(Float[]::new));
                 DaleColor color = mapColor(o.getString("type"));
                 DaleColor[] seq = null;
@@ -147,10 +152,10 @@ public class LevelLoader {
                     case 0:
                         break;
                     case 1:
-                        model.addBrick(v, "brick" + (j + i * width), defaults);
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults);
                         break;
                     case 2:
-                        model.addReflective(v, "reflective" + (j + i * width), defaults);
+                        model.addReflectiveWall(v, "reflective" + (j + i * width), defaults);
                         break;
                     case 8:
                         model.setDaleStart(
@@ -170,6 +175,13 @@ public class LevelLoader {
                                 ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
                         );
                         break;
+                    case 12:
+                        model.addBrickScaffold(v, "brickscaffold" + (j + i * width), defaults);
+                        break;
+                    case 13:
+                        model.addReflectiveScaffold(v, "reflectivescaffold" + (j + i * width), defaults);
+                        break;
+
                 }
             }
         }
@@ -197,10 +209,10 @@ public class LevelLoader {
                 color = DaleColor.GREEN;
                 break;
             case "color4":
-                color = DaleColor.GREEN;
+                color = DaleColor.ORANGE;
                 break;
             case "color5":
-                color = DaleColor.GREEN;
+                color = DaleColor.PURPLE;
                 break;
         }
         return color;
@@ -219,10 +231,10 @@ public class LevelLoader {
                 color = DaleColor.GREEN;
                 break;
             case 4:
-                color = DaleColor.GREEN;
+                color = DaleColor.ORANGE;
                 break;
             case 5:
-                color = DaleColor.GREEN;
+                color = DaleColor.PURPLE;
                 break;
         }
         return color;
