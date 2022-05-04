@@ -661,6 +661,8 @@ public class GameMode implements Screen {
 
 	public void setCameraState(CameraState state) {camState = state;}
 
+	public int getTileSize() {return this.scene.getTileSize();}
+
 	public void updateSpotlightPosition(){
 		float[] path = scene.getSpotlightPath();
 		if(spotlightTargetPointIndex*2>=path.length){
@@ -745,6 +747,7 @@ public class GameMode implements Screen {
 		if(scene.isSpotlightMode()){
 			updateSpotlightPosition();
 		}
+
 		switch (getCameraState()) {
 			case START:
 				zoomValue = Math.max(
@@ -1102,7 +1105,7 @@ public class GameMode implements Screen {
 	 */
 	public void resume() {
 		// TODO Auto-generated method stub
-		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f, this.bounds, this.scene.getTileSize());
+		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, ZOOM_AMOUNT, this.bounds, this.scene.getTileSize());
 		colorChange.resume(colorChangeId);
 		flyAlert.resume(alertId);
 	}
