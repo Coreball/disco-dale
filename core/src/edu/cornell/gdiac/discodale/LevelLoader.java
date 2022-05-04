@@ -209,10 +209,10 @@ public class LevelLoader {
                 color = DaleColor.GREEN;
                 break;
             case "color4":
-                color = DaleColor.ORANGE;
+                color = DaleColor.GREEN;
                 break;
             case "color5":
-                color = DaleColor.PURPLE;
+                color = DaleColor.GREEN;
                 break;
         }
         return color;
@@ -231,10 +231,10 @@ public class LevelLoader {
                 color = DaleColor.GREEN;
                 break;
             case 4:
-                color = DaleColor.ORANGE;
+                color = DaleColor.GREEN;
                 break;
             case 5:
-                color = DaleColor.PURPLE;
+                color = DaleColor.GREEN;
                 break;
         }
         return color;
