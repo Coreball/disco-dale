@@ -1144,13 +1144,17 @@ public class GameMode implements Screen {
 		bodyIdleTextures = new TextureRegion[]{
 				new TextureRegion(directory.getEntry("platform:body:idle:pink", Texture.class)),
 				new TextureRegion(directory.getEntry("platform:body:idle:blue", Texture.class)),
-				new TextureRegion(directory.getEntry("platform:body:idle:green", Texture.class))
+				new TextureRegion(directory.getEntry("platform:body:idle:green", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:body:idle:orange", Texture.class)),
+				new TextureRegion(directory.getEntry("platform:body:idle:purple", Texture.class))
 		};
 
 		headTextures = new FilmStrip[]{
 				new FilmStrip(directory.getEntry("platform:head:pink", Texture.class), 1, 3),
 				new FilmStrip(directory.getEntry("platform:head:blue", Texture.class), 1, 3),
-				new FilmStrip(directory.getEntry("platform:head:green", Texture.class), 1, 3)
+				new FilmStrip(directory.getEntry("platform:head:green", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:head:orange", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:head:purple", Texture.class), 1, 3)
 		};
 
 		bodyWalkTextures = new FilmStrip[]{
@@ -1169,8 +1173,8 @@ public class GameMode implements Screen {
 		// Allocate the tiles
 		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
-		brickScaffold = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
-		reflectiveScaffold = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
+		brickScaffold = new TextureRegion(directory.getEntry("shared:brickScaffold", Texture.class));
+		reflectiveScaffold = new TextureRegion(directory.getEntry("shared:reflectiveScaffold", Texture.class));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
 		background = directory.getEntry("menu:bg", Texture.class);
