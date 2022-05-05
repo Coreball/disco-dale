@@ -82,17 +82,9 @@ public class LoadingMode implements Screen {
 	 * Standard window height (for scaling)
 	 */
 	private static int STANDARD_HEIGHT = 1080;
-	/**
-	 * Ratio of the bar width to the screen
-	 */
-	private static float BAR_WIDTH_RATIO = 0.66f;
-	/**
-	 * Ration of the bar height to the screen
-	 */
-	private static float BAR_HEIGHT_RATIO = 0.25f;
 
 	private static final int DALE_OFFSET_X = 0;
-	private static final int DALE_OFFSET_Y = 100;
+	private static final int DALE_OFFSET_Y = 175;
 
 	/**
 	 * Reference to GameCanvas created by the root
