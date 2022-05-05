@@ -24,11 +24,15 @@ package edu.cornell.gdiac.discodale;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.*;
 
+import com.badlogic.gdx.math.Rectangle;
 import edu.cornell.gdiac.assets.*;
 import edu.cornell.gdiac.util.*;
+
+import java.awt.*;
 
 /**
  * Class that provides a loading screen for the state of the game.
@@ -198,6 +202,8 @@ public class LoadingMode implements Screen {
 
 		// Compute the dimensions from the canvas
 		resize(canvas.getWidth(), canvas.getHeight());
+		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1/sx,
+				new Rectangle(0, 0, 32, 18), 32);
 
 		// We need these files loaded immediately
 		internal = new AssetDirectory("loading.json");
@@ -262,9 +268,9 @@ public class LoadingMode implements Screen {
 	 */
 	private void draw() {
 		canvas.begin();
-		canvas.draw(background, 0, 0);
+		canvas.draw(background, Color.WHITE,0, 0, canvas.getWidth(), canvas.getHeight());
 		drawProgress(canvas);
-		canvas.draw(dale, DALE_OFFSET_X, DALE_OFFSET_Y);
+		canvas.draw(dale, Color.WHITE, 0, 0, DALE_OFFSET_X * sx, DALE_OFFSET_Y * sy, 0, sx, sy);
 		canvas.end();
 	}
 
@@ -278,10 +284,13 @@ public class LoadingMode implements Screen {
 	 * @param canvas The drawing context
 	 */
 	private void drawProgress(GameCanvas canvas) {
-		canvas.draw(tongue, Color.WHITE, DALE_OFFSET_X + dale.getWidth() / 2, DALE_OFFSET_Y + dale.getHeight() / 2,
-				700 * progress, tongue.getHeight());
-		canvas.draw(sticky, DALE_OFFSET_X + dale.getWidth() / 2 + 700 * progress - sticky.getWidth()/2,
-				DALE_OFFSET_Y + dale.getHeight() / 2 + tongue.getHeight()/2 - sticky.getHeight()/2);
+		canvas.draw(tongue, Color.WHITE, (DALE_OFFSET_X + dale.getWidth() / 2f) * sx,
+				(DALE_OFFSET_Y + dale.getHeight() / 2f) * sy,
+				700 * progress * sx, tongue.getHeight() * sy);
+		canvas.draw(sticky, Color.WHITE, 0, 0,
+				(DALE_OFFSET_X + dale.getWidth() / 2f + 700 * progress - sticky.getWidth()/2f) * sx,
+				(DALE_OFFSET_Y + dale.getHeight() / 2f + tongue.getHeight()/2f - sticky.getHeight()/2f) * sy,
+				0, sx, sy);
 
 	}
 

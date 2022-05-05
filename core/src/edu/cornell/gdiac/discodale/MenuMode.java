@@ -172,8 +172,8 @@ public class MenuMode implements Screen, InputProcessor {
     public int getVolumeSfx() { return volumeSfx; }
 
     public MenuMode(GameCanvas canvas){
-        sx = ((float)canvas.getWidth())/STANDARD_WIDTH;
-        sy = ((float)canvas.getHeight())/STANDARD_HEIGHT;
+        sx = 1f;
+        sy = 1f;
         this.canvas = canvas;
         active = false;
         type = Type.START;
@@ -315,8 +315,8 @@ public class MenuMode implements Screen, InputProcessor {
 
     public void draw(){
         canvas.begin();
-        canvas.draw(background, Color.WHITE,0, 0, STANDARD_WIDTH, STANDARD_HEIGHT);
-//        canvas.draw(background,Color.WHITE,0, 0, canvas.getWidth(), canvas.getHeight());
+//        canvas.draw(background, Color.WHITE,0, 0, STANDARD_WIDTH, STANDARD_HEIGHT);
+        canvas.draw(background,Color.WHITE,0, 0, canvas.getWidth(), canvas.getHeight());
         if (type == Type.START)
             drawStart();
         else if (type == Type.LEVEL_SELECT)
@@ -332,17 +332,17 @@ public class MenuMode implements Screen, InputProcessor {
 
     public void drawStart(){
         canvas.draw(title, Color.WHITE, title.getWidth()/2f, title.getHeight()/2f,
-                STANDARD_WIDTH/2f, TITLE_OFFSET_Y, 0, 1f, 1f);
+                canvas.getWidth()/2f, TITLE_OFFSET_Y*sy, 0, sx, sy);
 
         canvas.draw(playButton, playPressed?Color.GRAY:Color.WHITE, playButton.getWidth()/2f,
-                playButton.getHeight()/2f,STANDARD_WIDTH/2f, PLAY_OFFSET_Y, 0,
-                START_BUTTON_SCALE, START_BUTTON_SCALE);
+                playButton.getHeight()/2f,canvas.getWidth()/2f, PLAY_OFFSET_Y*sy, 0,
+                START_BUTTON_SCALE * sx, START_BUTTON_SCALE * sy);
         canvas.draw(optionsButton, optionsPressed?Color.GRAY:Color.WHITE, optionsButton.getWidth()/2f,
-                optionsButton.getHeight()/2f, STANDARD_WIDTH/2f, OPTIONS_OFFSET_Y, 0,
-                START_BUTTON_SCALE, START_BUTTON_SCALE);
+                optionsButton.getHeight()/2f, canvas.getWidth()/2f, OPTIONS_OFFSET_Y*sy, 0,
+                START_BUTTON_SCALE * sx, START_BUTTON_SCALE * sy);
         canvas.draw(exitButton, exitPressed?Color.GRAY:Color.WHITE, exitButton.getWidth()/2f,
-                exitButton.getHeight()/2f, STANDARD_WIDTH/2f, EXIT_OFFSET_Y, 0,
-                START_BUTTON_SCALE, START_BUTTON_SCALE);
+                exitButton.getHeight()/2f, canvas.getWidth()/2f, EXIT_OFFSET_Y*sy, 0,
+                START_BUTTON_SCALE * sx, START_BUTTON_SCALE * sy);
     }
 
     private int getLevelNumOffset(int num){
@@ -363,7 +363,7 @@ public class MenuMode implements Screen, InputProcessor {
 
     public void drawLevelSelect(){
         canvas.draw(levelSelect, Color.WHITE, levelSelect.getWidth()/2f, levelSelect.getHeight()/2f,
-                STANDARD_WIDTH/2f, TITLE_OFFSET_Y, 0, 1f, 1f);
+                canvas.getWidth()/2f, TITLE_OFFSET_Y*sy, 0, sx, sy);
         int x, y, num, offset;
         Color tint;
         for (int i = 0; i < LEVEL_BUTTON_ROWS; i++){
@@ -374,91 +374,106 @@ public class MenuMode implements Screen, InputProcessor {
                 x = LEVEL_BUTTONS_OFFSET_X + j * LEVEL_BUTTONS_MARGIN;
                 y = LEVEL_BUTTONS_OFFSET_Y - i * LEVEL_BUTTONS_MARGIN;
                 canvas.draw(levelButton, tint, levelButton.getWidth()/2f, levelButton.getHeight()/2f,
-                        x, y, 0, 1f, 1f);
+                        x*sx, y*sy, 0, sx, sy);
                 canvas.drawText(Integer.toString(num + 1), displayFont,
-                        x - LEVEL_FONT_MARGIN_X - offset, y + LEVEL_FONT_MARGIN_Y);
+                        (x - LEVEL_FONT_MARGIN_X - offset) * sx, (y + LEVEL_FONT_MARGIN_Y) * sy);
             }
         }
         if (levelPage != 0) {
             tint = levelPageLeftPressed ? Color.GRAY : Color.WHITE;
             canvas.draw(levelPageSwitch, tint, levelPageSwitch.getWidth()/2f, levelPageSwitch.getHeight()/2f,
-                    LEVEL_PAGE_OFFSET_X_LEFT, LEVEL_PAGE_OFFSET_Y, 0, -1f, -1f);
+                    LEVEL_PAGE_OFFSET_X_LEFT * sx, LEVEL_PAGE_OFFSET_Y * sy, 0, -sx, -sy);
         }
         if (levelPage != LEVEL_PAGES - 1) {
             tint = levelPageRightPressed ? Color.GRAY : Color.WHITE;
             canvas.draw(levelPageSwitch, tint, levelPageSwitch.getWidth()/2f, levelPageSwitch.getHeight()/2f,
-                    LEVEL_PAGE_OFFSET_X_RIGHT, LEVEL_PAGE_OFFSET_Y, 0, 1f, 1f);
+                    LEVEL_PAGE_OFFSET_X_RIGHT * sx, LEVEL_PAGE_OFFSET_Y * sy, 0, sx, sy);
         }
     }
 
     public void drawOptions(){
-        canvas.draw(windowBg, STANDARD_WIDTH/2f - windowBg.getWidth()/2f, WINDOW_BG_OFFSET_Y);
-        canvas.drawText("options", titleFont, WINDOW_TITLE_OFFSET_X, WINDOW_TITLE_OFFSET_Y);
-        canvas.drawText("return", buttonFont, OPTIONS_RETURN_OFFSET_X, OPTIONS_RETURN_OFFSET_Y);
+        canvas.draw(windowBg, Color.WHITE, 0, 0,
+                canvas.getWidth()/2f - windowBg.getWidth()/2f * sx, WINDOW_BG_OFFSET_Y * sy,0, sx, sy);
+        canvas.drawText("options", titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
+        canvas.drawText("return", buttonFont, OPTIONS_RETURN_OFFSET_X * sx, OPTIONS_RETURN_OFFSET_Y * sy);
 
-        canvas.drawText("Volume", labelFont, OPTIONS_LABEL_OFFSET_X, OPTIONS_VOLUME_LABEL_OFFSET_Y);
-        canvas.drawText("BGM", labelFont2, OPTIONS_LABEL_2_OFFSET_X, OPTIONS_BGM_LABEL_OFFSET_Y);
-        canvas.drawText("SFX", labelFont2, OPTIONS_LABEL_2_OFFSET_X, OPTIONS_SFX_LABEL_OFFSET_Y);
+        canvas.drawText("Volume", labelFont, OPTIONS_LABEL_OFFSET_X * sx, OPTIONS_VOLUME_LABEL_OFFSET_Y * sy);
+        canvas.drawText("BGM", labelFont2, OPTIONS_LABEL_2_OFFSET_X * sx, OPTIONS_BGM_LABEL_OFFSET_Y * sy);
+        canvas.drawText("SFX", labelFont2, OPTIONS_LABEL_2_OFFSET_X * sx, OPTIONS_SFX_LABEL_OFFSET_Y * sy);
 
         drawSliders();
 
-        canvas.drawText("Accessibility Mode", labelFont, OPTIONS_LABEL_OFFSET_X, OPTIONS_ACCESS_LABEL_OFFSET_Y);
-        canvas.draw(accessibilitySelected?toggleOn:toggleOff, OPTIONS_ACCESS_OFFSET_X,OPTIONS_ACCESS_OFFSET_Y);
+        canvas.drawText("Accessibility Mode", labelFont,
+                OPTIONS_LABEL_OFFSET_X * sx, OPTIONS_ACCESS_LABEL_OFFSET_Y * sy);
+        canvas.draw(accessibilitySelected ? toggleOn : toggleOff, Color.WHITE,
+                0, 0, OPTIONS_ACCESS_OFFSET_X * sx,OPTIONS_ACCESS_OFFSET_Y * sy, 0, sx, sy);
     }
 
     private void drawSliders(){
-        canvas.draw(slideOn, Color.WHITE, OPTIONS_SLIDE_OFFSET_X, OPTIONS_SLIDE_BGM_OFFSET_Y,
-                volumeBgm * slideOn.getWidth() / 100f, slideOn.getHeight());
-        canvas.draw(slideOff, Color.WHITE, OPTIONS_SLIDE_OFFSET_X + volumeBgm * slideOn.getWidth() / 100f,
-                 OPTIONS_SLIDE_BGM_OFFSET_Y, (100 - volumeBgm) * slideOff.getWidth() / 100f, slideOff.getHeight());
-        canvas.draw(slideOnLeft, OPTIONS_SLIDE_OFFSET_X - slideOnLeft.getWidth(), OPTIONS_SLIDE_BGM_OFFSET_Y);
-        canvas.draw(slideOffRight, OPTIONS_SLIDE_OFFSET_X + slideOff.getWidth(), OPTIONS_SLIDE_BGM_OFFSET_Y);
+        canvas.draw(slideOn, Color.WHITE, OPTIONS_SLIDE_OFFSET_X * sx, OPTIONS_SLIDE_BGM_OFFSET_Y * sy,
+                volumeBgm * slideOn.getWidth() / 100f * sx, slideOn.getHeight() * sy);
+        canvas.draw(slideOff, Color.WHITE, (OPTIONS_SLIDE_OFFSET_X + volumeBgm * slideOn.getWidth() / 100f) * sx,
+                 OPTIONS_SLIDE_BGM_OFFSET_Y * sy, (100 - volumeBgm) * slideOff.getWidth() / 100f * sx,
+                slideOff.getHeight() * sy);
+        canvas.draw(slideOnLeft, Color.WHITE, 0, 0, (OPTIONS_SLIDE_OFFSET_X - slideOnLeft.getWidth()) * sx,
+                OPTIONS_SLIDE_BGM_OFFSET_Y * sy, 0, sx, sy);
+        canvas.draw(slideOffRight, Color.WHITE, 0, 0, (OPTIONS_SLIDE_OFFSET_X + slideOff.getWidth()) * sx,
+                OPTIONS_SLIDE_BGM_OFFSET_Y * sy, 0, sx, sy);
 
-        canvas.draw(slideOn, Color.WHITE, OPTIONS_SLIDE_OFFSET_X, OPTIONS_SLIDE_SFX_OFFSET_Y,
-                volumeSfx * slideOn.getWidth() / 100f, slideOn.getHeight());
-        canvas.draw(slideOff, Color.WHITE, OPTIONS_SLIDE_OFFSET_X + volumeSfx * slideOn.getWidth() / 100f,
-                OPTIONS_SLIDE_SFX_OFFSET_Y, (100 - volumeSfx) * slideOff.getWidth() / 100f, slideOff.getHeight());
-        canvas.draw(slideOnLeft, OPTIONS_SLIDE_OFFSET_X - slideOnLeft.getWidth(), OPTIONS_SLIDE_SFX_OFFSET_Y);
-        canvas.draw(slideOffRight, OPTIONS_SLIDE_OFFSET_X + slideOff.getWidth(), OPTIONS_SLIDE_SFX_OFFSET_Y);
+        canvas.draw(slideOn, Color.WHITE, OPTIONS_SLIDE_OFFSET_X * sx, OPTIONS_SLIDE_SFX_OFFSET_Y * sy,
+                volumeSfx * slideOn.getWidth() / 100f * sx, slideOn.getHeight() * sy);
+        canvas.draw(slideOff, Color.WHITE, (OPTIONS_SLIDE_OFFSET_X + volumeSfx * slideOn.getWidth() / 100f) * sx,
+                OPTIONS_SLIDE_SFX_OFFSET_Y * sy, (100 - volumeSfx) * slideOff.getWidth() / 100f * sx,
+                slideOff.getHeight() * sy);
+        canvas.draw(slideOnLeft, Color.WHITE, 0, 0, (OPTIONS_SLIDE_OFFSET_X - slideOnLeft.getWidth()) * sx,
+                OPTIONS_SLIDE_SFX_OFFSET_Y * sy, 0, sx, sy);
+        canvas.draw(slideOffRight, Color.WHITE, 0, 0, (OPTIONS_SLIDE_OFFSET_X + slideOff.getWidth()) * sx,
+                OPTIONS_SLIDE_SFX_OFFSET_Y * sy, 0, sx, sy);
 
-        canvas.draw(slideThumb,
-                OPTIONS_SLIDE_OFFSET_X + volumeBgm * slideOn.getWidth() / 100f - slideThumb.getWidth() / 2f,
-                OPTIONS_SLIDE_BGM_OFFSET_Y + slideOn.getHeight() / 2f - slideThumb.getHeight() / 2f);
-        canvas.draw(slideThumb,
-                OPTIONS_SLIDE_OFFSET_X + volumeSfx * slideOn.getWidth() / 100f - slideThumb.getWidth() / 2f,
-                OPTIONS_SLIDE_SFX_OFFSET_Y + slideOn.getHeight() / 2f - slideThumb.getHeight() / 2f);
+        canvas.draw(slideThumb, Color.WHITE, 0, 0,
+                (OPTIONS_SLIDE_OFFSET_X + volumeBgm * slideOn.getWidth() / 100f - slideThumb.getWidth() / 2f) * sx,
+                (OPTIONS_SLIDE_BGM_OFFSET_Y + slideOn.getHeight() / 2f - slideThumb.getHeight() / 2f) * sy,
+                0, sx, sy);
+        canvas.draw(slideThumb, Color.WHITE, 0, 0,
+                (OPTIONS_SLIDE_OFFSET_X + volumeSfx * slideOn.getWidth() / 100f - slideThumb.getWidth() / 2f) * sx,
+                (OPTIONS_SLIDE_SFX_OFFSET_Y + slideOn.getHeight() / 2f - slideThumb.getHeight() / 2f) * sy,
+                0, sx, sy);
 
-        canvas.drawText(Integer.toString(volumeBgm), labelFont2, OPTIONS_VOLUME_NUM_OFFSET_X, OPTIONS_BGM_LABEL_OFFSET_Y);
-        canvas.drawText(Integer.toString(volumeSfx), labelFont2, OPTIONS_VOLUME_NUM_OFFSET_X, OPTIONS_SFX_LABEL_OFFSET_Y);
+        canvas.drawText(Integer.toString(volumeBgm), labelFont2,
+                OPTIONS_VOLUME_NUM_OFFSET_X * sx, OPTIONS_BGM_LABEL_OFFSET_Y * sy);
+        canvas.drawText(Integer.toString(volumeSfx), labelFont2,
+                OPTIONS_VOLUME_NUM_OFFSET_X * sx, OPTIONS_SFX_LABEL_OFFSET_Y * sy);
     }
 
     public void drawComplete() {
-        canvas.draw(windowBg, STANDARD_WIDTH/2f - windowBg.getWidth()/2f, WINDOW_BG_OFFSET_Y);
-        canvas.drawText("Level completed!", titleFont, WINDOW_TITLE_OFFSET_X, WINDOW_TITLE_OFFSET_Y);
-        canvas.draw(complete, STANDARD_WIDTH/2f - complete.getWidth()/2f,
-                STANDARD_HEIGHT/2f - complete.getHeight()/2f);
-        canvas.draw(exitToMenu, toMenuPressed?Color.GRAY:Color.WHITE, COMPLETE_MENU_OFFSET_X,
-                COMPLETE_BUTTONS_OFFSET_Y, exitToMenu.getWidth(), exitToMenu.getHeight());
-        canvas.draw(restart, restartPressed?Color.GRAY:Color.WHITE, COMPLETE_RESTART_OFFSET_X,
-                COMPLETE_BUTTONS_OFFSET_Y, restart.getWidth(), restart.getHeight());
-        canvas.draw(nextLevel, nextLevelPressed?Color.GRAY:Color.WHITE, COMPLETE_NEXT_OFFSET_X,
-                COMPLETE_BUTTONS_OFFSET_Y, nextLevel.getWidth(), nextLevel.getHeight());
+        canvas.draw(windowBg, Color.WHITE, 0, 0,
+                canvas.getWidth()/2f - windowBg.getWidth()/2f * sx, WINDOW_BG_OFFSET_Y * sy,0, sx, sy);
+        canvas.drawText("Level completed!", titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
+        canvas.draw(complete, Color.WHITE, complete.getWidth()/2f, complete.getHeight()/2f,
+                canvas.getWidth()/2f, canvas.getHeight()/2f, 0, sx, sy);
+        canvas.draw(exitToMenu, toMenuPressed?Color.GRAY:Color.WHITE, COMPLETE_MENU_OFFSET_X * sx,
+                COMPLETE_BUTTONS_OFFSET_Y * sy, exitToMenu.getWidth() * sx, exitToMenu.getHeight() * sy);
+        canvas.draw(restart, restartPressed?Color.GRAY:Color.WHITE, COMPLETE_RESTART_OFFSET_X * sx,
+                COMPLETE_BUTTONS_OFFSET_Y * sy, restart.getWidth() * sx, restart.getHeight() * sy);
+        canvas.draw(nextLevel, nextLevelPressed?Color.GRAY:Color.WHITE, COMPLETE_NEXT_OFFSET_X * sx,
+                COMPLETE_BUTTONS_OFFSET_Y * sy, nextLevel.getWidth() * sx, nextLevel.getHeight() * sy);
     }
 
     public void drawPause() {
-        canvas.draw(windowBg, STANDARD_WIDTH/2f - windowBg.getWidth()/2f, WINDOW_BG_OFFSET_Y);
-        canvas.drawText("paused", titleFont, WINDOW_TITLE_OFFSET_X, WINDOW_TITLE_OFFSET_Y);
-        canvas.draw(resume, resumePressed?Color.GRAY:Color.WHITE, STANDARD_WIDTH/2f - resume.getWidth()/2f,
-                PAUSE_RESUME_OFFSET_Y, resume.getWidth(), resume.getHeight());
+        canvas.draw(windowBg, Color.WHITE, 0, 0,
+                canvas.getWidth()/2f - windowBg.getWidth()/2f * sx, WINDOW_BG_OFFSET_Y * sy,0, sx, sy);
+        canvas.drawText("paused", titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
+        canvas.draw(resume, resumePressed?Color.GRAY:Color.WHITE, canvas.getWidth()/2f - resume.getWidth()/2f * sx,
+                PAUSE_RESUME_OFFSET_Y * sy, resume.getWidth() * sx, resume.getHeight() * sy);
         canvas.draw(restartPause, restartPressed?Color.GRAY:Color.WHITE,
-                STANDARD_WIDTH/2f - restartPause.getWidth()/2f, PAUSE_RESTART_OFFSET_Y,
-                restartPause.getWidth(), restartPause.getHeight());
+                canvas.getWidth()/2f - restartPause.getWidth()/2f * sx, PAUSE_RESTART_OFFSET_Y * sy,
+                restartPause.getWidth() * sx, restartPause.getHeight() * sy);
         canvas.draw(optionsPause, optionsPressed?Color.GRAY:Color.WHITE,
-                STANDARD_WIDTH/2f - optionsPause.getWidth()/2f, PAUSE_OPTIONS_OFFSET_Y,
-                optionsPause.getWidth(), optionsPause.getHeight());
+                canvas.getWidth()/2f - optionsPause.getWidth()/2f * sx, PAUSE_OPTIONS_OFFSET_Y * sy,
+                optionsPause.getWidth() * sx, optionsPause.getHeight() * sy);
         canvas.draw(menuPause, toMenuPressed?Color.GRAY:Color.WHITE,
-                STANDARD_WIDTH/2f - menuPause.getWidth()/2f, PAUSE_MENU_OFFSET_Y,
-                menuPause.getWidth(), menuPause.getHeight());
+                canvas.getWidth()/2f - menuPause.getWidth()/2f * sx, PAUSE_MENU_OFFSET_Y * sy,
+                menuPause.getWidth() * sx, menuPause.getHeight() * sy);
     }
 
     public void gatherAssets(AssetDirectory directory) {
@@ -512,6 +527,8 @@ public class MenuMode implements Screen, InputProcessor {
 
     @Override
     public void show() {
+        canvas.width = canvas.getWidth();
+        canvas.height = canvas.getHeight();
         active = true;
         Gdx.input.setInputProcessor( this );
     }
@@ -519,11 +536,20 @@ public class MenuMode implements Screen, InputProcessor {
 
     @Override
     public void resize(int width, int height) {
-        canvas.width = width;
-        canvas.height = height;
         // Compute the drawing scale
         sx = ((float)width)/STANDARD_WIDTH;
         sy = ((float)height)/STANDARD_HEIGHT;
+        resizeFont();
+        canvas.width = width;
+        canvas.height = height;
+    }
+
+    private void resizeFont(){
+        titleFont.getData().setScale(sx, sy);
+        buttonFont.getData().setScale(sx, sy);
+        displayFont.getData().setScale(sx, sy);
+        labelFont.getData().setScale(sx, sy);
+        labelFont2.getData().setScale(sx, sy);
     }
 
     @Override
@@ -533,7 +559,6 @@ public class MenuMode implements Screen, InputProcessor {
 
     @Override
     public void resume() {
-
     }
 
     @Override
