@@ -77,11 +77,11 @@ public class LoadingMode implements Screen {
 	/**
 	 * Standard window size (for scaling)
 	 */
-	private static int STANDARD_WIDTH = 1024;
+	private static int STANDARD_WIDTH = 1920;
 	/**
 	 * Standard window height (for scaling)
 	 */
-	private static int STANDARD_HEIGHT = 576;
+	private static int STANDARD_HEIGHT = 1080;
 	/**
 	 * Ratio of the bar width to the screen
 	 */
@@ -218,14 +218,14 @@ public class LoadingMode implements Screen {
 		// No progress so far.
 		progress = 0;
 
-		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
+		Pixmap tonguePixmap = new Pixmap(10, 10, Pixmap.Format.RGBA8888);
 		tonguePixmap.setColor(Color.PINK);
 		tonguePixmap.fill();
 		tongue = new Texture(tonguePixmap);
 
-		Pixmap stickyPartPixmap = new Pixmap(12, 12, Pixmap.Format.RGBA8888);
+		Pixmap stickyPartPixmap = new Pixmap(24, 24, Pixmap.Format.RGBA8888);
 		stickyPartPixmap.setColor(Color.PINK);
-		stickyPartPixmap.fillCircle(6, 6, 5);
+		stickyPartPixmap.fillCircle(12, 12, 10);
 		sticky = new Texture(stickyPartPixmap);
 
 		// Start loading the real assets
@@ -286,9 +286,9 @@ public class LoadingMode implements Screen {
 	private void drawProgress(GameCanvas canvas) {
 		canvas.draw(tongue, Color.WHITE, (DALE_OFFSET_X + dale.getWidth() / 2f) * sx,
 				(DALE_OFFSET_Y + dale.getHeight() / 2f) * sy,
-				700 * progress * sx, tongue.getHeight() * sy);
+				1300 * progress * sx, tongue.getHeight() * sy);
 		canvas.draw(sticky, Color.WHITE, 0, 0,
-				(DALE_OFFSET_X + dale.getWidth() / 2f + 700 * progress - sticky.getWidth()/2f) * sx,
+				(DALE_OFFSET_X + dale.getWidth() / 2f + 1300 * progress - sticky.getWidth()/2f) * sx,
 				(DALE_OFFSET_Y + dale.getHeight() / 2f + tongue.getHeight()/2f - sticky.getHeight()/2f) * sy,
 				0, sx, sy);
 
