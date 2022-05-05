@@ -268,13 +268,11 @@ public class GameCanvas {
 	 * If you do not call this when the window is resized, you will get
 	 * weird scaling issues.
 	 */
-	 public void resizeWindow(Rectangle bounds, int tileSize) {
+	 public void resizeWindow(Rectangle bounds) {
 		// Resizing screws up the spriteBatch projection matrix
-
-		spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
-
-		float x = Math.min(bounds.getWidth()*tileSize, getWidth());
-		float y = Math.min(bounds.getHeight()*tileSize, getHeight());
+		spriteBatch.getProjectionMatrix().setToOrtho2D(0,0, getWidth(), getHeight());
+		float x = Math.min(bounds.getWidth()*64, getWidth());
+		float y = Math.min(bounds.getHeight()*64, getHeight());
 		camera.setToOrtho(false, x, y);
 	}
 
