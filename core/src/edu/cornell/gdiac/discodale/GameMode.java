@@ -864,22 +864,33 @@ public class GameMode implements Screen {
 				});
 				for(FixtureAndDistance fd: fixtureAndDistances){
 					Fixture fixture = fd.fixture;
-					boolean isFly = false;
+					boolean canSeeThrough = false;
+					// check if it is a fly
 					for(FlyController ff:flyControllers){
 						FlyModel flyModel = ff.getFly();
 						for(Fixture flyModelFixture: flyModel.getBody().getFixtureList()){
 							if (fixture==flyModelFixture){
 //								System.out.println(flyModel.getX() +"  "+flyModel.getY() + fd.distance);
-								isFly = true;
+								canSeeThrough = true;
 								ff.setSeeDaleInRealWorld(true);
 							}
 						}
 					}
-					if(!isFly){
-						if(!dale.checkFixtureInDale(fixture)){
-//							System.out.println("Distance to obstacle: "+fd.distance);
-							break;
+					// check if it is a scaffold
+					for(Obstacle obs : scene.getSeeThroughObstacles()){
+						Body obsBody = obs.getBody();
+						for(Fixture obsFixture : obsBody.getFixtureList()){
+							if(fixture == obsFixture){
+								canSeeThrough = true;
+							}
 						}
+					}
+					// check if it is within Dale
+					if(dale.checkFixtureInDale(fixture)){
+						canSeeThrough = true;
+					}
+					if(!canSeeThrough){
+						break;
 					}
 				}
 //				System.out.println("endRay");
