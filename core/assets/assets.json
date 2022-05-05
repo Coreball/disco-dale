@@ -49,12 +49,15 @@
         "menu:exit": "menu/exit.png",
         "menu:bg": "menu/background.png",
         "menu:windowbg": "menu/window_bg.png",
-        "menu:optionsbg": "menu/options_bg.png",
-        "menu:completebg": "menu/complete_bg.png",
         "menu:complete": "menu/complete.png",
         "menu:title": "menu/title.png",
         "menu:level": "menu/level.png",
-        "menu:levelbutton": "menu/level_button.png",
+        "menu:levelbutton1": "menu/level_button_green.png",
+        "menu:levelpage1": "menu/level_page_green.png",
+        "menu:levelbutton2": "menu/level_button_orange.png",
+        "menu:levelpage2": "menu/level_page_orange.png",
+        "menu:levelbutton3": "menu/level_button_purple.png",
+        "menu:levelpage3": "menu/level_page_purple.png",
         "menu:toggleon": "menu/toggle_on.png",
         "menu:toggleoff": "menu/toggle_off.png",
         "menu:slideon": "menu/slide_on.png",
@@ -68,8 +71,7 @@
         "menu:resume": "menu/resume.png",
         "menu:restartpause": "menu/restart_long.png",
         "menu:optionspause": "menu/options.png",
-        "menu:menu": "menu/main_menu.png",
-        "menu:levelpage": "menu/level_page.png"
+        "menu:menu": "menu/main_menu.png"
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json",
@@ -103,23 +105,23 @@
         },
         "shared:alienitalic": {
             "file": "shared/AlienRemixItalic-EaoL4.ttf",
-            "size": 48
+            "size": 80
         },
         "shared:alien": {
              "file": "shared/AlienRemix-ZVL7J.ttf",
-             "size": 48
+             "size": 80
         },
         "shared:aliensmall": {
              "file": "shared/AlienRemix-ZVL7J.ttf",
-             "size": 24
+             "size": 40
         },
        "shared:gothic": {
              "file": "shared/league-gothic-semiexpanded.ttf",
-             "size": 32
+             "size": 56
         }, 
         "shared:gothicsmall": {
              "file": "shared/league-gothic-semiexpanded.ttf",
-             "size": 24
+             "size": 42
         }
     }
 }
