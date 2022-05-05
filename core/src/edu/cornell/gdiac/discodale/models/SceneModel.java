@@ -539,6 +539,7 @@ public class SceneModel {
             obj.deactivatePhysics(world);
         }
         objects.clear();
+        seeThroughObstacles.clear();
     }
 
     public void updateColorRegions(){
