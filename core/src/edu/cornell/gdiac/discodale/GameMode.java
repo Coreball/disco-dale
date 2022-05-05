@@ -513,7 +513,7 @@ public class GameMode implements Screen {
 		float radius = headTextures[0].getRegionHeight() / scale.x / 2f;
 		float width = bodyIdleTextures[0].getRegionWidth() / scale.x;
 		float height = bodyIdleTextures[0].getRegionHeight() / scale.y;
-		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
+		float bodyOffset = radius * 0.625f; // Magic number that produces offset between head and body
 
 		DaleColor[] availableColors = scene.getPossibleColors();
 
