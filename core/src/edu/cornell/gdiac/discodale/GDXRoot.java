@@ -98,8 +98,8 @@ public class GDXRoot extends Game implements ScreenListener {
 	 * @param height The new height in pixels
 	 */
 	public void resize(int width, int height) {
-		canvas.resizeWindow(controller.bounds);
-		//canvas.resize();
+		//canvas.resizeWindow(controller.bounds);
+		canvas.resize();
 		super.resize(width,height);
 	}
 	

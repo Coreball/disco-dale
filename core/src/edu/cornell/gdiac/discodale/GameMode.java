@@ -755,8 +755,8 @@ public class GameMode implements Screen {
 						this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
 				);
 				canvas.updateCam(
-						(float) canvas.getWidth() / 2,
-						(float) canvas.getHeight() / 2,
+						this.bounds.getWidth() * this.scene.getTileSize() / 2,
+						this.bounds.getHeight() * this.scene.getTileSize() / 2,
 						zoomValue,
 						this.bounds,
 						this.scene.getTileSize()

@@ -271,9 +271,14 @@ public class GameCanvas {
 	 public void resizeWindow(Rectangle bounds) {
 		// Resizing screws up the spriteBatch projection matrix
 		spriteBatch.getProjectionMatrix().setToOrtho2D(0,0, getWidth(), getHeight());
-		float x = Math.min(bounds.getWidth()*64, getWidth());
-		float y = Math.min(bounds.getHeight()*64, getHeight());
-		camera.setToOrtho(false, x, y);
+		if ((getWidth() <= bounds.getWidth()*64) && (getHeight() <= bounds.getHeight()*64)){
+			camera.setToOrtho(false, getWidth(), getHeight());
+		} else {
+			System.out.println("Camera out of bounds!");
+		}
+//		float x = Math.min(bounds.getWidth()*64, getWidth());
+//		float y = Math.min(bounds.getHeight()*64, getHeight());
+//		camera.setToOrtho(false, x, y);
 	}
 
 	/**
