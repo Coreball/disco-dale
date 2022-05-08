@@ -533,16 +533,23 @@ public class GameMode implements Screen {
 		dale.setDrawScale(scale);
 		dale.setColor(daleBackground());
 
-		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
+		// Texture for tongue
+		Pixmap tonguePixmap = new Pixmap(1, 10, Pixmap.Format.RGBA8888);
 		tonguePixmap.setColor(Color.PINK);
+		tonguePixmap.fillRectangle(0, 2, 1, 6);
+		dale.setTongueTexture(new Texture(tonguePixmap));
+		tonguePixmap.setColor(Color.BLACK);
 		tonguePixmap.fill();
-		Texture tongueTexture = new Texture(tonguePixmap);
-		dale.setTongueTexture(tongueTexture);
-		Pixmap stickyPartPixmap = new Pixmap(11, 11, Pixmap.Format.RGBA8888);
+		dale.setTongueTextureOutline(new Texture(tonguePixmap));
+
+		// Texture for tongue sticky part
+		Pixmap stickyPartPixmap = new Pixmap(13, 13, Pixmap.Format.RGBA8888);
 		stickyPartPixmap.setColor(Color.PINK);
-		stickyPartPixmap.fillCircle(5, 5, 5);
-		Texture stickyPartTexture = new Texture(stickyPartPixmap);
-		dale.setStickyPartTexture(stickyPartTexture);
+		stickyPartPixmap.fillCircle(6, 6, 4);
+		dale.setStickyPartTexture(new Texture(stickyPartPixmap));
+		stickyPartPixmap.setColor(Color.BLACK);
+		stickyPartPixmap.fillCircle(6, 6, 6);
+		dale.setStickyPartTextureOutline(new Texture(stickyPartPixmap));
 
 		addObject(dale);
 		daleController = new DaleController(this.dale);
