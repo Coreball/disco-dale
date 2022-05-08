@@ -65,6 +65,10 @@ public class DaleModel extends WheelObstacle {
 
 	/** Tongue texture */
 	private Texture tongueTexture;
+	/** Tongue texture outline (drawn before main texture) */
+	private Texture tongueTextureOutline;
+	/** Sticky part texture outline (drawn before main texture) */
+	private Texture stickyPartTextureOutline;
 	/** Speed the grapple sticky part moves at */
 	private float stickyPartSpeed;
 	/** Maximum tongue length before attachment */
@@ -235,11 +239,27 @@ public class DaleModel extends WheelObstacle {
 	}
 
 	/**
+	 * Set the tongue texture outline
+	 * @param tongueTextureOutline tongue texture outline
+	 */
+	public void setTongueTextureOutline(Texture tongueTextureOutline) {
+		this.tongueTextureOutline = tongueTextureOutline;
+	}
+
+	/**
 	 * Set the tongue tip sticky part texture
 	 * @param stickyPartTexture sticky part texture
 	 */
 	public void setStickyPartTexture(Texture stickyPartTexture) {
 		grappleStickyPart.setTexture(new TextureRegion(stickyPartTexture));
+	}
+
+	/**
+	 * Set the tongue tip sticky part texture outline
+	 * @param stickyPartTextureOutline sticky part texture outline
+	 */
+	public void setStickyPartTextureOutline(Texture stickyPartTextureOutline) {
+		this.stickyPartTextureOutline = stickyPartTextureOutline;
 	}
 
 	/**
@@ -708,6 +728,10 @@ public class DaleModel extends WheelObstacle {
 
 		// Reorder this to change if the tongue is on top of Dale or not
 		bodyPart.draw(canvas, 1.0f, bodyFlipY);
+		canvas.draw(tongueTextureOutline, Color.WHITE, 0, tongueTextureOutline.getHeight() / 2f, getX() * drawScale.x, getY() * drawScale.y,
+				getTongueAngle(), getTongueLength() / tongueTextureOutline.getWidth() * drawScale.x, 1);
+		canvas.draw(stickyPartTextureOutline, Color.WHITE, stickyPartTextureOutline.getWidth() / 2f, stickyPartTextureOutline.getHeight() / 2f,
+				grappleStickyPart.getX() * drawScale.x, grappleStickyPart.getY() * drawScale.y, 0, 1, 1);
 		canvas.draw(tongueTexture, Color.WHITE, 0, tongueTexture.getHeight() / 2f, getX() * drawScale.x, getY() * drawScale.y,
 				getTongueAngle(), getTongueLength() / tongueTexture.getWidth() * drawScale.x, 1);
 		grappleStickyPart.draw(canvas);
