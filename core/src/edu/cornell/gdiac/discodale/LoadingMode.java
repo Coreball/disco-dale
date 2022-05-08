@@ -24,11 +24,15 @@ package edu.cornell.gdiac.discodale;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.*;
 
+import com.badlogic.gdx.math.Rectangle;
 import edu.cornell.gdiac.assets.*;
 import edu.cornell.gdiac.util.*;
+
+import java.awt.*;
 
 /**
  * Class that provides a loading screen for the state of the game.
@@ -73,22 +77,14 @@ public class LoadingMode implements Screen {
 	/**
 	 * Standard window size (for scaling)
 	 */
-	private static int STANDARD_WIDTH = 1024;
+	private static int STANDARD_WIDTH = 1920;
 	/**
 	 * Standard window height (for scaling)
 	 */
-	private static int STANDARD_HEIGHT = 576;
-	/**
-	 * Ratio of the bar width to the screen
-	 */
-	private static float BAR_WIDTH_RATIO = 0.66f;
-	/**
-	 * Ration of the bar height to the screen
-	 */
-	private static float BAR_HEIGHT_RATIO = 0.25f;
+	private static int STANDARD_HEIGHT = 1080;
 
 	private static final int DALE_OFFSET_X = 0;
-	private static final int DALE_OFFSET_Y = 100;
+	private static final int DALE_OFFSET_Y = 175;
 
 	/**
 	 * Reference to GameCanvas created by the root
@@ -198,6 +194,8 @@ public class LoadingMode implements Screen {
 
 		// Compute the dimensions from the canvas
 		resize(canvas.getWidth(), canvas.getHeight());
+		canvas.updateCam(canvas.getWidth()/2, canvas.getHeight()/2, 1/sx,
+				new Rectangle(0, 0, 32, 18), 32);
 
 		// We need these files loaded immediately
 		internal = new AssetDirectory("loading.json");
@@ -212,14 +210,14 @@ public class LoadingMode implements Screen {
 		// No progress so far.
 		progress = 0;
 
-		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
+		Pixmap tonguePixmap = new Pixmap(10, 10, Pixmap.Format.RGBA8888);
 		tonguePixmap.setColor(Color.PINK);
 		tonguePixmap.fill();
 		tongue = new Texture(tonguePixmap);
 
-		Pixmap stickyPartPixmap = new Pixmap(12, 12, Pixmap.Format.RGBA8888);
+		Pixmap stickyPartPixmap = new Pixmap(24, 24, Pixmap.Format.RGBA8888);
 		stickyPartPixmap.setColor(Color.PINK);
-		stickyPartPixmap.fillCircle(6, 6, 5);
+		stickyPartPixmap.fillCircle(12, 12, 10);
 		sticky = new Texture(stickyPartPixmap);
 
 		// Start loading the real assets
@@ -262,9 +260,9 @@ public class LoadingMode implements Screen {
 	 */
 	private void draw() {
 		canvas.begin();
-		canvas.draw(background, 0, 0);
+		canvas.draw(background, Color.WHITE,0, 0, canvas.getWidth(), canvas.getHeight());
 		drawProgress(canvas);
-		canvas.draw(dale, DALE_OFFSET_X, DALE_OFFSET_Y);
+		canvas.draw(dale, Color.WHITE, 0, 0, DALE_OFFSET_X * sx, DALE_OFFSET_Y * sy, 0, sx, sy);
 		canvas.end();
 	}
 
@@ -278,10 +276,13 @@ public class LoadingMode implements Screen {
 	 * @param canvas The drawing context
 	 */
 	private void drawProgress(GameCanvas canvas) {
-		canvas.draw(tongue, Color.WHITE, DALE_OFFSET_X + dale.getWidth() / 2, DALE_OFFSET_Y + dale.getHeight() / 2,
-				700 * progress, tongue.getHeight());
-		canvas.draw(sticky, DALE_OFFSET_X + dale.getWidth() / 2 + 700 * progress - sticky.getWidth()/2,
-				DALE_OFFSET_Y + dale.getHeight() / 2 + tongue.getHeight()/2 - sticky.getHeight()/2);
+		canvas.draw(tongue, Color.WHITE, (DALE_OFFSET_X + dale.getWidth() / 2f) * sx,
+				(DALE_OFFSET_Y + dale.getHeight() / 2f) * sy,
+				1300 * progress * sx, tongue.getHeight() * sy);
+		canvas.draw(sticky, Color.WHITE, 0, 0,
+				(DALE_OFFSET_X + dale.getWidth() / 2f + 1300 * progress - sticky.getWidth()/2f) * sx,
+				(DALE_OFFSET_Y + dale.getHeight() / 2f + tongue.getHeight()/2f - sticky.getHeight()/2f) * sy,
+				0, sx, sy);
 
 	}
 
