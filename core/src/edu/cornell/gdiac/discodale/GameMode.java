@@ -68,6 +68,9 @@ public class GameMode implements Screen {
 	private static int NUM_LEVELS = 10;
 
 	private static float ZOOM_AMOUNT = 1.0f;
+	private static int START_HOLD = 15;
+	private static int PAN_TIME = 100;
+	private static int ZOOM_TIME = 60;
 
 	/** The texture for neutral walls */
 	protected TextureRegion brickTile;
@@ -755,32 +758,44 @@ public class GameMode implements Screen {
 			updateSpotlightPosition();
 		}
 
+		float startX = (this.bounds.getWidth() * this.scene.getTileSize()) - dale.getX();
+		float startY = (this.bounds.getHeight() * this.scene.getTileSize()) - dale.getY();
+
 		switch (getCameraState()) {
 			case START:
 				zoomValue = Math.min(
 						this.bounds.getWidth() * this.scene.getTileSize() / this.canvas.getWidth(),
 						this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
 				);
+
+
+				canvas.setCameraWidth(Math.min(this.bounds.getWidth() * this.scene.getTileSize(), canvas.getWidth()));
+				canvas.setCameraHeight(Math.min(this.bounds.getHeight() * this.scene.getTileSize(), canvas.getHeight()));
 				canvas.updateCam(
-						this.bounds.getWidth() * this.scene.getTileSize() / 2,
-						this.bounds.getHeight() * this.scene.getTileSize() / 2,
+						startX,
+						startY,
 						zoomValue,
 						this.bounds,
 						this.scene.getTileSize()
 				);
-				if (ticks >= 55) {
-					zoomFactor = (zoomValue - ZOOM_AMOUNT) / 60;
-					setCameraState(CameraState.ZOOM);
+				if (ticks >= START_HOLD) { // maybe take this out? No hold at the beginning
+					setCameraState(CameraState.PAN);
 				} else {
 					ticks++;
 				}
 				break;
 			case PAN:
-				float x = 0;
-				float y = 0;
-				canvas.updateCam(x, y,zoomValue,this.bounds, this.scene.getTileSize());
-				if (x == dale.getX() && y == dale.getY()) {
+				canvas.cameraPan(startX, startY, dale.getX(), dale.getY(), //these should be changed to exit
+						this.bounds,
+						this.scene.getTileSize(),
+						PAN_TIME);
+				System.out.println("Start: (" + startX + ", " + startY + ")");
+				System.out.println("Dale: (" + dale.getX() + ", " + dale.getY() + ")");
+				if (ticks >= START_HOLD + PAN_TIME) {
+					zoomFactor = (zoomValue - ZOOM_AMOUNT) / ZOOM_TIME;
 					setCameraState(CameraState.ZOOM);
+				} else {
+					ticks++;
 				}
 				break;
 			case ZOOM:

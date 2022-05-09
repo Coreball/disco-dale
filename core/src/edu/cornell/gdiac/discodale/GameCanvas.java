@@ -455,9 +455,21 @@ public class GameCanvas {
 		return camera.position.y;
 	}
 
-	public float cameraPan() {
-		return 0.0f;
+	public void cameraPan(float startX, float startY, float endX, float endY, Rectangle bounds, int tileSize, float fr) {
+		float transX;
+		float transY;
+
+		//if/else branch to check the bounds of the pan
+
+		transX = (endX - startX) / fr;
+		transY = (endY - startY) / fr;
+		camera.translate(transX, transY);
+		//camera.update();
+		updateCam(camera.position.x, camera.position.y, camera.zoom, bounds, tileSize);
 	}
+
+	public void setCameraWidth(float x) {camera.viewportWidth = x;}
+	public void setCameraHeight(float y) {camera.viewportHeight = y;}
 
 	/**
 	 * Converts the screen coordinates to the world coordinates.
