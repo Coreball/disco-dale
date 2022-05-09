@@ -144,7 +144,7 @@ public class MenuMode implements Screen, InputProcessor {
     private boolean toMenuPressed, nextLevelPressed, restartPressed;
     private boolean resumePressed;
     private boolean levelPageLeftPressed, levelPageRightPressed;
-    private int volumeBgm = 0, volumeSfx = 100;
+    private int volumeBgm = 100, volumeSfx = 100;
 
 //    private TextureRegionDrawable test;
 //    private Button testButton;

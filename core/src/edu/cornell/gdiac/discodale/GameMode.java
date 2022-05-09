@@ -78,6 +78,9 @@ public class GameMode implements Screen {
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
 	protected Texture background;
+	private static int BG_ANIMATION_FRAMES = 4;
+	protected Texture[] background_anim = new Texture[BG_ANIMATION_FRAMES];
+	protected int bg_anim_frame = 0;
 
 	/** Reference to the game canvas */
 	protected GameCanvas canvas;
@@ -752,6 +755,9 @@ public class GameMode implements Screen {
 		if(scene.isSpotlightMode()){
 			updateSpotlightPosition();
 		}
+		ticks++;
+		if (ticks % 13 == 0)
+			bg_anim_frame = (bg_anim_frame + 1) % BG_ANIMATION_FRAMES;
 		switch (getCameraState()) {
 			case START:
 				zoomValue = Math.max(
@@ -1029,10 +1035,12 @@ public class GameMode implements Screen {
 			canvas.begin();
 			dale.draw(canvas);
 			canvas.endLight();
-		}
-		else{
+		} else {
 			canvas.begin();
 			canvas.draw(background, Color.WHITE,0, 0, scene.getBounds().getWidth() * scene.getTileSize(),
+					scene.getBounds().getHeight() * scene.getTileSize());
+			canvas.draw(background_anim[bg_anim_frame], Color.WHITE,0, 0,
+					scene.getBounds().getWidth() * scene.getTileSize(),
 					scene.getBounds().getHeight() * scene.getTileSize());
 			scene.draw(canvas);
 			for (Obstacle obj : objects) {
@@ -1198,6 +1206,10 @@ public class GameMode implements Screen {
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
 		background = directory.getEntry("menu:bg", Texture.class);
+		for (int i = 0; i < BG_ANIMATION_FRAMES; i++){
+			background_anim[i] = directory.getEntry("menu:bg" + (i + 1), Texture.class);
+		}
+
 
 		died = directory.getEntry("died", Sound.class);
 		extend = directory.getEntry("extend", Sound.class);
