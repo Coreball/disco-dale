@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objecttypes>
- <objecttype name="color1" color="#f0f018"/>
- <objecttype name="color2" color="#a42240"/>
- <objecttype name="color3" color="#13a424"/>
- <objecttype name="color4" color="#2020a4"/>
- <objecttype name="color5" color="#00ddf1"/>
+ <objecttype name="color1" color="#FD3796"/>
+ <objecttype name="color2" color="#05CDF9"/>
+ <objecttype name="color3" color="#0BE748"/>
+ <objecttype name="color4" color="#FD7900"/>
+ <objecttype name="color5" color="#A933F1"/>
 </objecttypes>
