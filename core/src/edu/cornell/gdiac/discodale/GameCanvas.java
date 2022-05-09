@@ -268,9 +268,28 @@ public class GameCanvas {
 	 * If you do not call this when the window is resized, you will get
 	 * weird scaling issues.
 	 */
-	 public void resize() {
+	 public void resizeWindow(Rectangle bounds) {
 		// Resizing screws up the spriteBatch projection matrix
-		spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, getWidth(), getHeight());
+		spriteBatch.getProjectionMatrix().setToOrtho2D(0,0, getWidth(), getHeight());
+		if ((getWidth() <= bounds.getWidth()*64) && (getHeight() <= bounds.getHeight()*64)){
+			camera.setToOrtho(false, getWidth(), getHeight());
+		} else {
+			System.out.println("Camera out of bounds!");
+		}
+//		float x = Math.min(bounds.getWidth()*64, getWidth());
+//		float y = Math.min(bounds.getHeight()*64, getHeight());
+//		camera.setToOrtho(false, x, y);
+	}
+
+	/**
+	 * Resets the SpriteBatch camera when this canvas is resized.
+	 *
+	 * If you do not call this when the window is resized, you will get
+	 * weird scaling issues.
+	 */
+	public void resize() {
+		// Resizing screws up the spriteBatch projection matrix
+		spriteBatch.getProjectionMatrix().setToOrtho2D(0,0, getWidth(), getHeight());
 		camera.setToOrtho(false, getWidth(), getHeight());
 	}
 	
@@ -435,6 +454,22 @@ public class GameCanvas {
 	public float getCameraY(){
 		return camera.position.y;
 	}
+
+	public void cameraPan(float startX, float startY, float endX, float endY, Rectangle bounds, int tileSize, float fr) {
+		float transX;
+		float transY;
+
+		//if/else branch to check the bounds of the pan
+
+		transX = (endX - startX) / fr;
+		transY = (endY - startY) / fr;
+		camera.translate(transX, transY);
+		//camera.update();
+		updateCam(camera.position.x, camera.position.y, camera.zoom, bounds, tileSize);
+	}
+
+	public void setCameraWidth(float x) {camera.viewportWidth = x;}
+	public void setCameraHeight(float y) {camera.viewportHeight = y;}
 
 	/**
 	 * Converts the screen coordinates to the world coordinates.

@@ -68,6 +68,9 @@ public class GameMode implements Screen {
 	private static int NUM_LEVELS = 10;
 
 	private static float ZOOM_AMOUNT = 1.0f;
+	private static int START_HOLD = 15;
+	private static int PAN_TIME = 100;
+	private static int ZOOM_TIME = 60;
 
 	/** The texture for neutral walls */
 	protected TextureRegion brickTile;
@@ -671,6 +674,8 @@ public class GameMode implements Screen {
 
 	public void setCameraState(CameraState state) {camState = state;}
 
+	public int getTileSize() {return this.scene.getTileSize();}
+
 	public void updateSpotlightPosition(){
 		float[] path = scene.getSpotlightPath();
 		if(spotlightTargetPointIndex*2>=path.length){
@@ -755,24 +760,46 @@ public class GameMode implements Screen {
 		if(scene.isSpotlightMode()){
 			updateSpotlightPosition();
 		}
+		
 		ticks++;
 		if (ticks % 13 == 0)
 			bg_anim_frame = (bg_anim_frame + 1) % BG_ANIMATION_FRAMES;
+
+		float startX = (this.bounds.getWidth() * this.scene.getTileSize()) - dale.getX();
+		float startY = (this.bounds.getHeight() * this.scene.getTileSize()) - dale.getY();
+
 		switch (getCameraState()) {
 			case START:
-				zoomValue = Math.max(
+				zoomValue = Math.min(
 						this.bounds.getWidth() * this.scene.getTileSize() / this.canvas.getWidth(),
 						this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
 				);
+
+
+				canvas.setCameraWidth(Math.min(this.bounds.getWidth() * this.scene.getTileSize(), canvas.getWidth()));
+				canvas.setCameraHeight(Math.min(this.bounds.getHeight() * this.scene.getTileSize(), canvas.getHeight()));
 				canvas.updateCam(
-						(float) canvas.getWidth() / 2,
-						(float) canvas.getHeight() / 2,
+						startX,
+						startY,
 						zoomValue,
 						this.bounds,
 						this.scene.getTileSize()
 				);
-				if (ticks >= 55) {
-					zoomFactor = (zoomValue - ZOOM_AMOUNT) / 60;
+				if (ticks >= START_HOLD) { // maybe take this out? No hold at the beginning
+					setCameraState(CameraState.PAN);
+				} else {
+					ticks++;
+				}
+				break;
+			case PAN:
+				canvas.cameraPan(startX, startY, dale.getX(), dale.getY(), //these should be changed to exit
+						this.bounds,
+						this.scene.getTileSize(),
+						PAN_TIME);
+				System.out.println("Start: (" + startX + ", " + startY + ")");
+				System.out.println("Dale: (" + dale.getX() + ", " + dale.getY() + ")");
+				if (ticks >= START_HOLD + PAN_TIME) {
+					zoomFactor = (zoomValue - ZOOM_AMOUNT) / ZOOM_TIME;
 					setCameraState(CameraState.ZOOM);
 				} else {
 					ticks++;
@@ -1128,7 +1155,7 @@ public class GameMode implements Screen {
 	 */
 	public void resume() {
 		// TODO Auto-generated method stub
-		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, 0.75f, this.bounds, this.scene.getTileSize());
+		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, ZOOM_AMOUNT, this.bounds, this.scene.getTileSize());
 		colorChange.resume(colorChangeId);
 		flyAlert.resume(alertId);
 	}
