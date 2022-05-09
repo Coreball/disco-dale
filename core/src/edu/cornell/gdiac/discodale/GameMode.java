@@ -750,7 +750,7 @@ public class GameMode implements Screen {
 
 		switch (getCameraState()) {
 			case START:
-				zoomValue = Math.max(
+				zoomValue = Math.min(
 						this.bounds.getWidth() * this.scene.getTileSize() / this.canvas.getWidth(),
 						this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
 				);
@@ -766,6 +766,14 @@ public class GameMode implements Screen {
 					setCameraState(CameraState.ZOOM);
 				} else {
 					ticks++;
+				}
+				break;
+			case PAN:
+				float x = 0;
+				float y = 0;
+				canvas.updateCam(x, y,zoomValue,this.bounds, this.scene.getTileSize());
+				if (x == dale.getX() && y == dale.getY()) {
+					setCameraState(CameraState.ZOOM);
 				}
 				break;
 			case ZOOM:

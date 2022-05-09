@@ -455,6 +455,10 @@ public class GameCanvas {
 		return camera.position.y;
 	}
 
+	public float cameraPan() {
+		return 0.0f;
+	}
+
 	/**
 	 * Converts the screen coordinates to the world coordinates.
 	 *
