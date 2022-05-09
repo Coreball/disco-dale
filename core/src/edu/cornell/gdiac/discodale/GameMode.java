@@ -125,6 +125,8 @@ public class GameMode implements Screen {
 	private TextureRegion[] bodyIdleTextures;
 	/** All body walk textures for Dale, in order of colors */
 	private FilmStrip[] bodyWalkTextures;
+	/** All body flying textures for Dale, in order of colors */
+	private FilmStrip[] bodyFlyingTextures;
 
 	private Texture flyIdleTexture;
 	private Texture flyChaseTexture;
@@ -526,16 +528,18 @@ public class GameMode implements Screen {
 		FilmStrip[] availableHeadTextures = new FilmStrip[availableColors.length];
 		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
 		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
+		FilmStrip[] availableBodyFlyingTextures = new FilmStrip[availableColors.length];
 		for (int i = 0; i < availableColors.length; i++) {
 			int colorIndex = availableColors[i].ordinal();
 			availableHeadTextures[i] = headTextures[colorIndex];
 			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
 			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
+			availableBodyFlyingTextures[i] = bodyFlyingTextures[colorIndex];
 		}
 
 		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
 				radius, width, height, bodyOffset, availableColors, availableHeadTextures,
-				availableBodyIdleTextures, availableBodyWalkTextures);
+				availableBodyIdleTextures, availableBodyWalkTextures, availableBodyFlyingTextures);
 		dale.setDrawScale(scale);
 		dale.setColor(daleBackground());
 
@@ -1216,6 +1220,14 @@ public class GameMode implements Screen {
 				new FilmStrip(directory.getEntry("platform:body:walk:green", Texture.class), 1, 10),
 				new FilmStrip(directory.getEntry("platform:body:walk:orange", Texture.class), 1, 10),
 				new FilmStrip(directory.getEntry("platform:body:walk:purple", Texture.class), 1, 10),
+		};
+
+		bodyFlyingTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:body:flying:pink", Texture.class), 1, 4),
+				new FilmStrip(directory.getEntry("platform:body:flying:blue", Texture.class), 1, 4),
+				new FilmStrip(directory.getEntry("platform:body:flying:green", Texture.class), 1, 4),
+				new FilmStrip(directory.getEntry("platform:body:flying:orange", Texture.class), 1, 4),
+				new FilmStrip(directory.getEntry("platform:body:flying:purple", Texture.class), 1, 4),
 		};
 
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
