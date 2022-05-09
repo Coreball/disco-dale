@@ -513,7 +513,7 @@ public class GameMode implements Screen {
 		float radius = headTextures[0].getRegionHeight() / scale.x / 2f;
 		float width = bodyIdleTextures[0].getRegionWidth() / scale.x;
 		float height = bodyIdleTextures[0].getRegionHeight() / scale.y;
-		float bodyOffset = 10 / scale.x; // Magic number that produces offset between head and body
+		float bodyOffset = radius * 0.625f; // Magic number that produces offset between head and body
 
 		DaleColor[] availableColors = scene.getPossibleColors();
 
@@ -533,16 +533,23 @@ public class GameMode implements Screen {
 		dale.setDrawScale(scale);
 		dale.setColor(daleBackground());
 
-		Pixmap tonguePixmap = new Pixmap(5, 5, Pixmap.Format.RGBA8888);
+		// Texture for tongue
+		Pixmap tonguePixmap = new Pixmap(1, 10, Pixmap.Format.RGBA8888);
 		tonguePixmap.setColor(Color.PINK);
+		tonguePixmap.fillRectangle(0, 2, 1, 6);
+		dale.setTongueTexture(new Texture(tonguePixmap));
+		tonguePixmap.setColor(Color.BLACK);
 		tonguePixmap.fill();
-		Texture tongueTexture = new Texture(tonguePixmap);
-		dale.setTongueTexture(tongueTexture);
-		Pixmap stickyPartPixmap = new Pixmap(11, 11, Pixmap.Format.RGBA8888);
+		dale.setTongueTextureOutline(new Texture(tonguePixmap));
+
+		// Texture for tongue sticky part
+		Pixmap stickyPartPixmap = new Pixmap(13, 13, Pixmap.Format.RGBA8888);
 		stickyPartPixmap.setColor(Color.PINK);
-		stickyPartPixmap.fillCircle(5, 5, 5);
-		Texture stickyPartTexture = new Texture(stickyPartPixmap);
-		dale.setStickyPartTexture(stickyPartTexture);
+		stickyPartPixmap.fillCircle(6, 6, 4);
+		dale.setStickyPartTexture(new Texture(stickyPartPixmap));
+		stickyPartPixmap.setColor(Color.BLACK);
+		stickyPartPixmap.fillCircle(6, 6, 6);
+		dale.setStickyPartTextureOutline(new Texture(stickyPartPixmap));
 
 		addObject(dale);
 		daleController = new DaleController(this.dale);
@@ -875,22 +882,33 @@ public class GameMode implements Screen {
 				});
 				for(FixtureAndDistance fd: fixtureAndDistances){
 					Fixture fixture = fd.fixture;
-					boolean isFly = false;
+					boolean canSeeThrough = false;
+					// check if it is a fly
 					for(FlyController ff:flyControllers){
 						FlyModel flyModel = ff.getFly();
 						for(Fixture flyModelFixture: flyModel.getBody().getFixtureList()){
 							if (fixture==flyModelFixture){
 //								System.out.println(flyModel.getX() +"  "+flyModel.getY() + fd.distance);
-								isFly = true;
+								canSeeThrough = true;
 								ff.setSeeDaleInRealWorld(true);
 							}
 						}
 					}
-					if(!isFly){
-						if(!dale.checkFixtureInDale(fixture)){
-//							System.out.println("Distance to obstacle: "+fd.distance);
-							break;
+					// check if it is a scaffold
+					for(Obstacle obs : scene.getSeeThroughObstacles()){
+						Body obsBody = obs.getBody();
+						for(Fixture obsFixture : obsBody.getFixtureList()){
+							if(fixture == obsFixture){
+								canSeeThrough = true;
+							}
 						}
+					}
+					// check if it is within Dale
+					if(dale.checkFixtureInDale(fixture)){
+						canSeeThrough = true;
+					}
+					if(!canSeeThrough){
+						break;
 					}
 				}
 //				System.out.println("endRay");
@@ -1157,7 +1175,7 @@ public class GameMode implements Screen {
 				new TextureRegion(directory.getEntry("platform:body:idle:blue", Texture.class)),
 				new TextureRegion(directory.getEntry("platform:body:idle:green", Texture.class)),
 				new TextureRegion(directory.getEntry("platform:body:idle:orange", Texture.class)),
-				new TextureRegion(directory.getEntry("platform:body:idle:purple", Texture.class))
+				new TextureRegion(directory.getEntry("platform:body:idle:purple", Texture.class)),
 		};
 
 		headTextures = new FilmStrip[]{
@@ -1165,13 +1183,15 @@ public class GameMode implements Screen {
 				new FilmStrip(directory.getEntry("platform:head:blue", Texture.class), 1, 3),
 				new FilmStrip(directory.getEntry("platform:head:green", Texture.class), 1, 3),
 				new FilmStrip(directory.getEntry("platform:head:orange", Texture.class), 1, 3),
-				new FilmStrip(directory.getEntry("platform:head:purple", Texture.class), 1, 3)
+				new FilmStrip(directory.getEntry("platform:head:purple", Texture.class), 1, 3),
 		};
 
 		bodyWalkTextures = new FilmStrip[]{
 				new FilmStrip(directory.getEntry("platform:body:walk:pink", Texture.class), 1, 10),
 				new FilmStrip(directory.getEntry("platform:body:walk:blue", Texture.class), 1, 10),
 				new FilmStrip(directory.getEntry("platform:body:walk:green", Texture.class), 1, 10),
+				new FilmStrip(directory.getEntry("platform:body:walk:orange", Texture.class), 1, 10),
+				new FilmStrip(directory.getEntry("platform:body:walk:purple", Texture.class), 1, 10),
 		};
 
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
@@ -1200,8 +1220,8 @@ public class GameMode implements Screen {
 		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
 		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);
 		colors[2] = directory.getEntry("platform:greencolor", Texture.class);
-		colors[3] = directory.getEntry("platform:purplecolor", Texture.class);
-		colors[4] = directory.getEntry("platform:orangecolor", Texture.class);
+		colors[3] = directory.getEntry("platform:orangecolor", Texture.class);
+		colors[4] = directory.getEntry("platform:purplecolor", Texture.class);
 		ColorRegionModel.setColorTexture(colors);
 
 

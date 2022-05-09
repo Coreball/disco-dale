@@ -73,6 +73,8 @@ public class SceneModel {
     /** All the objects in the world. */
     protected PooledList<Obstacle> objects = new PooledList<>();
 
+    private PooledList<Obstacle> seeThroughObstacles = new PooledList<>();
+
     /** The boundary of the world */
     protected Rectangle bounds;
     protected Vector2 scale;
@@ -167,6 +169,10 @@ public class SceneModel {
     }
     public boolean isDarkMode() {
         return darkMode;
+    }
+
+    public PooledList<Obstacle> getSeeThroughObstacles() {
+        return seeThroughObstacles;
     }
 
     public void setColorChange(){
@@ -438,6 +444,7 @@ public class SceneModel {
         objFilter.maskBits     = 0b00011100;
         obj.setFilterData(objFilter);
         addObject(obj);
+        seeThroughObstacles.add(obj);
     }
 
     public void addReflectiveScaffold(float[] vertices, String name, JsonValue defaults) {
@@ -455,6 +462,7 @@ public class SceneModel {
         objFilter.maskBits     = 0b00011100;
         obj.setFilterData(objFilter);
         addObject(obj);
+        seeThroughObstacles.add(obj);
     }
 
     public void setGoal(float x, float y) {
@@ -531,6 +539,7 @@ public class SceneModel {
             obj.deactivatePhysics(world);
         }
         objects.clear();
+        seeThroughObstacles.clear();
     }
 
     public void updateColorRegions(){
