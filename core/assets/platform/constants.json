@@ -21,7 +21,7 @@
 		"max_walk_speed": 5.0,
 		"max_air_speed": 20.0,
 		"grapple_speed": 30.0,
-		"grapple_force": 30.0,
+		"grapple_force": 25.0,
 		"max_tongue_length": 10.0,
 		"sensor": {
 			"shrink" : 0.6,
