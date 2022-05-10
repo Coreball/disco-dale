@@ -756,8 +756,8 @@ public class MenuMode implements Screen, InputProcessor {
 
     private boolean touchUpLevel(int screenX, int screenY){
         if (levelPressed != -1){
-            int i = levelPressed / LEVEL_BUTTON_COLS;
-            int j = levelPressed % LEVEL_BUTTON_COLS;
+            int i = (levelPressed - levelPage * LEVEL_BUTTON_COLS * LEVEL_BUTTON_ROWS) / LEVEL_BUTTON_COLS;
+            int j = (levelPressed - levelPage * LEVEL_BUTTON_COLS * LEVEL_BUTTON_ROWS) % LEVEL_BUTTON_COLS;
             int left = LEVEL_BUTTONS_OFFSET_X + j * LEVEL_BUTTONS_MARGIN - levelButton[0].getWidth() / 2;
             int right = LEVEL_BUTTONS_OFFSET_X + j * LEVEL_BUTTONS_MARGIN + levelButton[0].getWidth() / 2;
             int up = LEVEL_BUTTONS_OFFSET_Y - i * LEVEL_BUTTONS_MARGIN + levelButton[0].getHeight() / 2;
