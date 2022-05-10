@@ -74,10 +74,16 @@ public class MenuMode implements Screen, InputProcessor {
     private static final int COMPLETE_NEXT_OFFSET_X = 1100;
     private static final int COMPLETE_BUTTONS_OFFSET_Y = 90;
 
-    private static final int PAUSE_RESUME_OFFSET_Y = 640;
-    private static final int PAUSE_RESTART_OFFSET_Y = 480;
-    private static final int PAUSE_OPTIONS_OFFSET_Y = 310;
-    private static final int PAUSE_MENU_OFFSET_Y = 150;
+    private static final int PAUSE_LABEL_OFFSET_X = 1025;
+    private static final int PAUSE_LABEL_OFFSET_Y = 200;
+    private static final int PAUSE_ANIM_OFFSET_X = 303;
+    private static final int PAUSE_ANIM_OFFSET_Y = 105;
+    private static final int PAUSE_BUTTONS_OFFSET_X = 425;
+    private static final int PAUSE_RESUME_OFFSET_Y = 700;
+    private static final int PAUSE_RESTART_OFFSET_Y = 550;
+    private static final int PAUSE_OPTIONS_OFFSET_Y = 400;
+    private static final int PAUSE_MENU_OFFSET_Y = 250;
+
 
     /** Whether this is an active controller */
     protected boolean active;
@@ -95,6 +101,9 @@ public class MenuMode implements Screen, InputProcessor {
     /** The texture for the options, complete and pause background */
     protected Texture windowBg;
     protected Texture complete;
+    private static final int PAUSE_ANIM_FRAME = 4;
+    protected Texture[] pause = new Texture[PAUSE_ANIM_FRAME];
+    protected int pause_anim_frame = 0;
     /** The texture for title */
     protected Texture title;
     /** The textures for toggle button */
@@ -144,7 +153,9 @@ public class MenuMode implements Screen, InputProcessor {
     private boolean toMenuPressed, nextLevelPressed, restartPressed;
     private boolean resumePressed;
     private boolean levelPageLeftPressed, levelPageRightPressed;
-    private int volumeBgm = 100, volumeSfx = 100;
+    private int volumeBgm = 0, volumeSfx = 100;
+
+    private int ticks = 0;
 
 //    private TextureRegionDrawable test;
 //    private Button testButton;
@@ -265,26 +276,26 @@ public class MenuMode implements Screen, InputProcessor {
     }
 
     private boolean inResumeBounds(int x, int y){
-        return inBounds(x, y, canvas.getWidth() / 2f - resume.getWidth() / 2f * sx,
-                canvas.getWidth() / 2f + resume.getWidth() / 2f * sx,
+        return inBounds(x, y, PAUSE_BUTTONS_OFFSET_X * sx,
+                (PAUSE_BUTTONS_OFFSET_X + resume.getWidth()) * sx,
                 (PAUSE_RESUME_OFFSET_Y + resume.getHeight()) * sy, PAUSE_RESUME_OFFSET_Y * sy);
     }
 
     private boolean inRestartPauseBounds(int x, int y){
-        return inBounds(x, y, canvas.getWidth() / 2f - restartPause.getWidth() / 2f * sx,
-                canvas.getWidth() / 2f + restartPause.getWidth() / 2f * sx,
+        return inBounds(x, y, PAUSE_BUTTONS_OFFSET_X * sx,
+                (PAUSE_BUTTONS_OFFSET_X + restartPause.getWidth()) * sx,
                 (PAUSE_RESTART_OFFSET_Y + restartPause.getHeight()) * sy, PAUSE_RESTART_OFFSET_Y * sy);
     }
 
     private boolean inOptionsPauseBounds(int x, int y){
-        return inBounds(x, y, canvas.getWidth() / 2f - optionsPause.getWidth() / 2f * sx,
-                canvas.getWidth() / 2f + optionsPause.getWidth() / 2f * sx,
+        return inBounds(x, y, PAUSE_BUTTONS_OFFSET_X * sx,
+                (PAUSE_BUTTONS_OFFSET_X + optionsPause.getWidth()) * sx,
                 (PAUSE_OPTIONS_OFFSET_Y + optionsPause.getHeight()) * sy, PAUSE_OPTIONS_OFFSET_Y * sy);
     }
 
     private boolean inMenuPauseBounds(int x, int y){
-        return inBounds(x, y, canvas.getWidth() / 2f - menuPause.getWidth() / 2f * sx,
-                canvas.getWidth() / 2f + menuPause.getWidth() / 2f * sx,
+        return inBounds(x, y, PAUSE_BUTTONS_OFFSET_X * sx,
+                (PAUSE_BUTTONS_OFFSET_X + menuPause.getWidth()) * sx,
                 (PAUSE_MENU_OFFSET_Y + menuPause.getHeight()) * sy, PAUSE_MENU_OFFSET_Y * sy);
     }
 
@@ -308,6 +319,9 @@ public class MenuMode implements Screen, InputProcessor {
 
     public void update(float dt) {
         themeId = SoundPlayer.loopSound(theme, themeId, volumeBgm / 100f);
+        ticks++;
+        if (type == Type.PAUSE && ticks % 30 == 0)
+            pause_anim_frame = (pause_anim_frame + 1) % PAUSE_ANIM_FRAME;
     }
 
     public void draw(){
@@ -461,17 +475,21 @@ public class MenuMode implements Screen, InputProcessor {
     public void drawPause() {
         canvas.draw(windowBg, Color.WHITE, 0, 0,
                 canvas.getWidth()/2f - windowBg.getWidth()/2f * sx, WINDOW_BG_OFFSET_Y * sy,0, sx, sy);
-        canvas.drawText("paused", titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
-        canvas.draw(resume, resumePressed?Color.GRAY:Color.WHITE, canvas.getWidth()/2f - resume.getWidth()/2f * sx,
+        canvas.draw(pause[pause_anim_frame], Color.WHITE,0, 0,
+                PAUSE_ANIM_OFFSET_X * sx, PAUSE_ANIM_OFFSET_Y * sy, 0, sx, sy);
+        titleFont.setColor(Color.WHITE);
+        canvas.drawText("paused", titleFont, PAUSE_LABEL_OFFSET_X * sx, PAUSE_LABEL_OFFSET_Y * sy);
+        titleFont.setColor(labelColor);
+        canvas.draw(resume, resumePressed?Color.GRAY:Color.WHITE, PAUSE_BUTTONS_OFFSET_X * sx,
                 PAUSE_RESUME_OFFSET_Y * sy, resume.getWidth() * sx, resume.getHeight() * sy);
         canvas.draw(restartPause, restartPressed?Color.GRAY:Color.WHITE,
-                canvas.getWidth()/2f - restartPause.getWidth()/2f * sx, PAUSE_RESTART_OFFSET_Y * sy,
+                PAUSE_BUTTONS_OFFSET_X * sx, PAUSE_RESTART_OFFSET_Y * sy,
                 restartPause.getWidth() * sx, restartPause.getHeight() * sy);
         canvas.draw(optionsPause, optionsPressed?Color.GRAY:Color.WHITE,
-                canvas.getWidth()/2f - optionsPause.getWidth()/2f * sx, PAUSE_OPTIONS_OFFSET_Y * sy,
+                PAUSE_BUTTONS_OFFSET_X * sx, PAUSE_OPTIONS_OFFSET_Y * sy,
                 optionsPause.getWidth() * sx, optionsPause.getHeight() * sy);
         canvas.draw(menuPause, toMenuPressed?Color.GRAY:Color.WHITE,
-                canvas.getWidth()/2f - menuPause.getWidth()/2f * sx, PAUSE_MENU_OFFSET_Y * sy,
+                PAUSE_BUTTONS_OFFSET_X * sx, PAUSE_MENU_OFFSET_Y * sy,
                 menuPause.getWidth() * sx, menuPause.getHeight() * sy);
     }
 
@@ -481,6 +499,9 @@ public class MenuMode implements Screen, InputProcessor {
         exitButton = directory.getEntry("menu:exit", Texture.class);
         background = directory.getEntry("menu:bg", Texture.class);
         windowBg = directory.getEntry("menu:windowbg", Texture.class);
+        for (int i = 0; i < PAUSE_ANIM_FRAME; i++){
+            pause[i] = directory.getEntry("menu:pause" + (i+1), Texture.class);
+        }
         complete = directory.getEntry("menu:complete", Texture.class);
         title = directory.getEntry("menu:title", Texture.class);
         levelSelect = directory.getEntry("menu:level", Texture.class);
