@@ -68,7 +68,7 @@ public class GameMode implements Screen {
 	private static int NUM_LEVELS = 30;
 
 	private static float ZOOM_AMOUNT = 1.0f;
-	private static int START_HOLD = 15;
+	private static int START_HOLD = 20;
 	private static int PAN_TIME = 100;
 	private static int ZOOM_TIME = 60;
 
@@ -680,7 +680,6 @@ public class GameMode implements Screen {
 
 	public void setCameraState(CameraState state) {camState = state;}
 
-	public int getTileSize() {return this.scene.getTileSize();}
 
 	public void updateSpotlightPosition(){
 		float[] path = scene.getSpotlightPath();
