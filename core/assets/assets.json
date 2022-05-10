@@ -42,7 +42,7 @@
         "platform:body:flying:green": "platform/flying/flyinggreen.png",
         "platform:body:flying:purple": "platform/flying/flyingpurple.png",
         "platform:body:flying:orange": "platform/flying/flyingorange.png",
-        "platform:flyidle": "platform/fly_idle_blue.png",
+        "platform:flyidle": "platform/fly_idle.png",
         "platform:flychasing": "platform/fly_chasing.png",
         "platform:pinkcolor": "platform/color_pink.png",
         "platform:bluecolor": "platform/color_blue.png",
