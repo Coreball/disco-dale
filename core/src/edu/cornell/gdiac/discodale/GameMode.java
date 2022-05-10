@@ -100,6 +100,7 @@ public class GameMode implements Screen {
 	private float zoomFactor;
 	private float zoomValue;
 	private int ticks;
+	private int cam_ticks;
 
 	/** The Box2D world */
 	protected World world;
@@ -790,10 +791,10 @@ public class GameMode implements Screen {
 						this.bounds,
 						this.scene.getTileSize()
 				);
-				if (ticks >= START_HOLD) { // maybe take this out? No hold at the beginning
+				if (cam_ticks >= START_HOLD) { // maybe take this out? No hold at the beginning
 					setCameraState(CameraState.PAN);
 				} else {
-					ticks++;
+					cam_ticks++;
 				}
 				break;
 			case PAN:
@@ -801,13 +802,11 @@ public class GameMode implements Screen {
 						this.bounds,
 						this.scene.getTileSize(),
 						PAN_TIME);
-				System.out.println("Start: (" + startX + ", " + startY + ")");
-				System.out.println("Dale: (" + dale.getX() + ", " + dale.getY() + ")");
-				if (ticks >= START_HOLD + PAN_TIME) {
+				if (cam_ticks >= START_HOLD + PAN_TIME) {
 					zoomFactor = (zoomValue - ZOOM_AMOUNT) / ZOOM_TIME;
 					setCameraState(CameraState.ZOOM);
 				} else {
-					ticks++;
+					cam_ticks++;
 				}
 				break;
 			case ZOOM:
@@ -822,7 +821,6 @@ public class GameMode implements Screen {
 							this.bounds,
 							this.scene.getTileSize()
 					);
-//					scene.updateGrid();
 				}
 				break;
 			case PLAY:
@@ -1287,6 +1285,7 @@ public class GameMode implements Screen {
 		this.bounds = new Rectangle(scene.getBounds());
 		updateScale();
 		ticks = 0;
+		cam_ticks = 0;
 		if (isNewLevel)
 			setCameraState(CameraState.START);
 		else
