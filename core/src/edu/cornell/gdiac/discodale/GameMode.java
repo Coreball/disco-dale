@@ -477,6 +477,7 @@ public class GameMode implements Screen {
 		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
 		populateLevel();
+		this.scene.updateGrid();
 	}
 
 	/**
@@ -821,7 +822,7 @@ public class GameMode implements Screen {
 							this.bounds,
 							this.scene.getTileSize()
 					);
-					scene.updateGrid();
+//					scene.updateGrid();
 				}
 				break;
 			case PLAY:
@@ -867,8 +868,7 @@ public class GameMode implements Screen {
 				if (dale.getY() * scale.y < -150 && winLose != WIN_CODE) {
 					reset();
 				}
-
-				scene.updateGrid();
+//				scene.updateGrid();
 				scene.updateColorRegionMovement();
 				break;
 		}
@@ -1019,7 +1019,7 @@ public class GameMode implements Screen {
 			float h = light.getRegionHeight();
 			float w = light.getRegionWidth();
 			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
-			float lightScale = 2f;
+			float lightScale = 2.5f;
 			canvas.draw(light,new Color(256,256,256,0f),w*lightScale/2f,h*lightScale/2f,dale.getX()*scale.x,dale.getY()*scale.y,w*lightScale,h*lightScale);
 			canvas.endLight();
 
