@@ -99,7 +99,13 @@
         "level6": "levels/funkylevel.json",
         "level7": "levels/medium.json",
         "level8": "levels/lv8.json",
-        "level9": "levels/oliverlvl1.json"
+        "level9": "levels/oliverlvl1.json",
+        "level10": "levels/1.json",
+        "level11": "levels/cl1.json",
+        "level12": "levels/cl2.json",
+        "level13": "levels/cl3.json",
+        "level14": "levels/cl4.json",
+        "level15": "levels/cl5.json"
     },
     "sounds" : {
         "theme" : "sound/theme.mp3",
