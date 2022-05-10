@@ -86,7 +86,7 @@
         "menu:pause1": "menu/pausec1.png",
         "menu:pause2": "menu/pausec2.png",
         "menu:pause3": "menu/pausec3.png",
-        "menu:pause4": "menu/pausec4.png",
+        "menu:pause4": "menu/pausec4.png"
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json",
@@ -111,7 +111,8 @@
         "level18": "levels/funkylevel.json",
         "level19": "levels/lv8.json",
         "level20": "levels/medium.json",
-        "level21": "levels/jh1.json"
+        "level21": "levels/jh1.json",
+        "level22": "levels/cz1.json"
     },
     "sounds" : {
         "theme" : "sound/theme.mp3",
@@ -123,7 +124,7 @@
         "colorchange": "sound/colorchange.mp3",
         "platform:jump" : "platform/jump.mp3",
         "platform:pew"  : "platform/pew.mp3",
-        "platform:plop" : "platform/plop.mp3",
+        "platform:plop" : "platform/plop.mp3"
     },
     "fonts": {
         "shared:retro": {
