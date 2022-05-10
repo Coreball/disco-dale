@@ -65,7 +65,7 @@ public class GameMode implements Screen {
 
 	private static int FLY_SIZE = 32;
 
-	private static int NUM_LEVELS = 20;
+	private static int NUM_LEVELS = 30;
 
 	private static float ZOOM_AMOUNT = 1.0f;
 	private static int START_HOLD = 15;
