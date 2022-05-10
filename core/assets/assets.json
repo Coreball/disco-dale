@@ -107,7 +107,9 @@
         "level14": "levels/cl4.json",
         "level15": "levels/cl5.json",
         "level16": "levels/cl6.json",
-        "level17": "levels/cl7.json"
+        "level17": "levels/cl7.json",
+        "level18": "levels/cl8.json",
+        "level19": "levels/cz1.json"
     },
     "sounds" : {
         "theme" : "sound/theme.mp3",
