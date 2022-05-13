@@ -1,4 +1,4 @@
-# Disco Dale Beta Release
+# Disco Dale Golden Master
 
 ## Controls
 
@@ -7,6 +7,7 @@
 - **A/D** or **Left/Right** - Walk left/right
 - **C** - Toggle color region accessibility mode
 - **G** - Toggle physics debug rendering
+- **N** - Skip to next level
 - **M** - Return to main menu
 - **Esc** - Pause screen
 
