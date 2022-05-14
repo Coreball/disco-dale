@@ -139,6 +139,7 @@ public class GDXRoot extends Game implements ScreenListener {
 			controller.pause();
 			menu.setType(MenuMode.Type.LEVEL_COMPLETE);
 			menu.setCompletedLevelTime(controller.getLevelTime());
+			menu.setShowNewBestTime(controller.wasNewBestTime());
 			setScreen(menu);
 		} else if (exitCode == Constants.EXIT_NEXT) {
 			controller.setVolumeBgm(menu.getVolumeBgm());

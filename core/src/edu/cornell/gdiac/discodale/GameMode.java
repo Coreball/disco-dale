@@ -122,6 +122,8 @@ public class GameMode implements Screen {
 
 	/** Time since level started (after camera movement ends) */
 	private float levelTime;
+	/** After the level was complete, was it a new best? */
+	private boolean wasNewBestTime;
 
 	/** All head textures for Dale, in order of colors */
 	private FilmStrip[] headTextures;
@@ -244,6 +246,15 @@ public class GameMode implements Screen {
 	 */
 	public float getLevelTime() {
 		return levelTime;
+	}
+
+	/**
+	 * Return true if this level time was a new best (only valid after level ends)
+	 *
+	 * @return true if was new best time
+	 */
+	public boolean wasNewBestTime() {
+		return wasNewBestTime;
 	}
 
 	/**
@@ -484,6 +495,7 @@ public class GameMode implements Screen {
 		setFailure(false);
 		countdown = -1;
 		levelTime = 0;
+		wasNewBestTime = false;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
 		loadLevel(levelIndex);
 		isNewLevel = false;
@@ -663,6 +675,7 @@ public class GameMode implements Screen {
 				float previousBestTime = SaveManager.getInstance().getBestTime("level" + (levelIndex + 1));
 				if (previousBestTime == -1 || levelTime < previousBestTime) {
 					SaveManager.getInstance().putBestTime("level" + (levelIndex + 1), levelTime);
+					wasNewBestTime = true;
 				}
 				pause();
 				listener.exitScreen(this, Constants.EXIT_COMPLETE);

@@ -161,6 +161,8 @@ public class MenuMode implements Screen, InputProcessor {
 
     /** Completion screen level time to show, in seconds */
     private float completedLevelTime;
+    /** Whether to show "new best" time */
+    private boolean showNewBestTime;
 
 //    private TextureRegionDrawable test;
 //    private Button testButton;
@@ -200,6 +202,14 @@ public class MenuMode implements Screen, InputProcessor {
      */
     public void setCompletedLevelTime(float completedLevelTime) {
         this.completedLevelTime = completedLevelTime;
+    }
+
+    /**
+     * Set whether to show "new best" for the time
+     * @param showNewBestTime true if show new best
+     */
+    public void setShowNewBestTime(boolean showNewBestTime) {
+        this.showNewBestTime = showNewBestTime;
     }
 
     /**
@@ -470,8 +480,10 @@ public class MenuMode implements Screen, InputProcessor {
         canvas.draw(windowBg, Color.WHITE, 0, 0,
                 canvas.getWidth()/2f - windowBg.getWidth()/2f * sx, WINDOW_BG_OFFSET_Y * sy,0, sx, sy);
         canvas.drawText("Level completed!", titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
-        canvas.drawText("Time: " + formatSecondsString(completedLevelTime), titleFont,
-                COMPLETE_LEVEL_TIME_OFFSET_X * sx, COMPLETE_LEVEL_TIME_OFFSET_Y * sy);
+        String timeString = showNewBestTime
+                ? "Time: [#FD3796]" + formatSecondsString(completedLevelTime) + " New Best![]"
+                : "Time: " + formatSecondsString(completedLevelTime);
+        canvas.drawText(timeString, titleFont, COMPLETE_LEVEL_TIME_OFFSET_X * sx, COMPLETE_LEVEL_TIME_OFFSET_Y * sy);
         canvas.draw(complete, Color.WHITE, complete.getWidth()/2f, complete.getHeight()/2f,
                 canvas.getWidth()/2f, canvas.getHeight()/2f, 0, sx, sy);
         canvas.draw(exitToMenu, toMenuPressed?Color.GRAY:Color.WHITE, COMPLETE_MENU_OFFSET_X * sx,
@@ -535,6 +547,7 @@ public class MenuMode implements Screen, InputProcessor {
         menuPause = directory.getEntry("menu:menu", Texture.class);
         displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
         titleFont = directory.getEntry("shared:alien", BitmapFont.class);
+        titleFont.getData().markupEnabled = true;
         buttonFont = directory.getEntry("shared:aliensmall", BitmapFont.class);
         labelFont = directory.getEntry("shared:gothic", BitmapFont.class);
         labelFont2 = directory.getEntry("shared:gothicsmall", BitmapFont.class);
