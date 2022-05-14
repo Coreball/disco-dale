@@ -69,6 +69,8 @@ public class MenuMode implements Screen, InputProcessor {
     private static final int LEVEL_PAGE_OFFSET_X_RIGHT = 1700;
     private static final int LEVEL_PAGE_OFFSET_Y = 380;
 
+    private static final int COMPLETE_LEVEL_TIME_OFFSET_X = 420;
+    private static final int COMPLETE_LEVEL_TIME_OFFSET_Y = 850;
     private static final int COMPLETE_MENU_OFFSET_X = 300;
     private static final int COMPLETE_RESTART_OFFSET_X = 825;
     private static final int COMPLETE_NEXT_OFFSET_X = 1100;
@@ -157,6 +159,9 @@ public class MenuMode implements Screen, InputProcessor {
 
     private int ticks = 0;
 
+    /** Completion screen level time to show, in seconds */
+    private float completedLevelTime;
+
 //    private TextureRegionDrawable test;
 //    private Button testButton;
 
@@ -189,7 +194,22 @@ public class MenuMode implements Screen, InputProcessor {
                 new Rectangle(0, 0, 32, 18), 32);
     }
 
+    /**
+     * Set the completed-level time
+     * @param completedLevelTime time to show, in seconds
+     */
+    public void setCompletedLevelTime(float completedLevelTime) {
+        this.completedLevelTime = completedLevelTime;
+    }
 
+    /**
+     * Format float seconds into a nicer string
+     * @param seconds seconds to format
+     * @return seconds string with two decimal places
+     */
+    private String formatSecondsString(float seconds) {
+        return String.format("%.2f", seconds);
+    }
 
     /**
      * Called when the Screen should render itself.
@@ -444,6 +464,8 @@ public class MenuMode implements Screen, InputProcessor {
         canvas.draw(windowBg, Color.WHITE, 0, 0,
                 canvas.getWidth()/2f - windowBg.getWidth()/2f * sx, WINDOW_BG_OFFSET_Y * sy,0, sx, sy);
         canvas.drawText("Level completed!", titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
+        canvas.drawText("Time: " + formatSecondsString(completedLevelTime), titleFont,
+                COMPLETE_LEVEL_TIME_OFFSET_X * sx, COMPLETE_LEVEL_TIME_OFFSET_Y * sy);
         canvas.draw(complete, Color.WHITE, complete.getWidth()/2f, complete.getHeight()/2f,
                 canvas.getWidth()/2f, canvas.getHeight()/2f, 0, sx, sy);
         canvas.draw(exitToMenu, toMenuPressed?Color.GRAY:Color.WHITE, COMPLETE_MENU_OFFSET_X * sx,

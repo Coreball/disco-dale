@@ -120,6 +120,9 @@ public class GameMode implements Screen {
 	/** Countdown active for winning or losing */
 	protected int countdown;
 
+	/** Time since level started (after camera movement ends) */
+	private float levelTime;
+
 	/** All head textures for Dale, in order of colors */
 	private FilmStrip[] headTextures;
 	/** All body idle textures for Dale, in order of colors */
@@ -232,6 +235,15 @@ public class GameMode implements Screen {
 	 */
 	public void setDebug(boolean value) {
 		debug = value;
+	}
+
+	/**
+	 * Return the time spent on this try of the level
+	 *
+	 * @return level time
+	 */
+	public float getLevelTime() {
+		return levelTime;
 	}
 
 	/**
@@ -471,6 +483,7 @@ public class GameMode implements Screen {
 		setComplete(false);
 		setFailure(false);
 		countdown = -1;
+		levelTime = 0;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
 		loadLevel(levelIndex);
 		isNewLevel = false;
@@ -879,6 +892,13 @@ public class GameMode implements Screen {
 
 		if(winLose == LOSE_CODE){
 			setFailure(true);
+		}
+
+		if (camState == CameraState.PLAY && winLose != WIN_CODE && winLose != LOSE_CODE) {
+			levelTime += dt;
+			System.out.println("PLAYING " + levelTime);
+		} else {
+			System.out.println("STOPPED " + levelTime);
 		}
 
 		CustomizedRayCastCallBack callback = new CustomizedRayCastCallBack();
