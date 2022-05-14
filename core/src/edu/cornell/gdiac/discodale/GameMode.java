@@ -659,6 +659,11 @@ public class GameMode implements Screen {
 			if (failed) {
 				reset();
 			} else if (complete) {
+				// Possibly save new best time
+				float previousBestTime = SaveManager.getInstance().getBestTime("level" + (levelIndex + 1));
+				if (previousBestTime == -1 || levelTime < previousBestTime) {
+					SaveManager.getInstance().putBestTime("level" + (levelIndex + 1), levelTime);
+				}
 				pause();
 				listener.exitScreen(this, Constants.EXIT_COMPLETE);
 				return false;

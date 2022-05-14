@@ -60,14 +60,14 @@ public class MenuMode implements Screen, InputProcessor {
     private static final int LEVEL_BUTTONS_OFFSET_X = 356;
     private static final int LEVEL_BUTTONS_OFFSET_Y = 534;
     private static final int LEVEL_BUTTONS_MARGIN = 285;
-    private static final int LEVEL_FONT_MARGIN_X = 40;
-    private static final int LEVEL_FONT_MARGIN_Y = 27;
     private static final int LEVEL_BUTTON_ROWS = 2;
     private static final int LEVEL_BUTTON_COLS = 5;
     private static final int LEVEL_PAGES = 3;
     private static final int LEVEL_PAGE_OFFSET_X_LEFT = 150;
     private static final int LEVEL_PAGE_OFFSET_X_RIGHT = 1700;
     private static final int LEVEL_PAGE_OFFSET_Y = 380;
+    private static final int LEVEL_BEST_TIME_OFFSET_X = -15;
+    private static final int LEVEL_BEST_TIME_OFFSET_Y = -50;
 
     private static final int COMPLETE_LEVEL_TIME_OFFSET_X = 420;
     private static final int COMPLETE_LEVEL_TIME_OFFSET_Y = 850;
@@ -380,6 +380,7 @@ public class MenuMode implements Screen, InputProcessor {
         canvas.draw(levelSelect, Color.WHITE, levelSelect.getWidth()/2f, levelSelect.getHeight()/2f,
                 canvas.getWidth()/2f, TITLE_OFFSET_Y*sy, 0, sx, sy);
         int x, y, num;
+        float bestTime;
         Color tint;
         for (int i = 0; i < LEVEL_BUTTON_ROWS; i++){
             for (int j = 0; j < LEVEL_BUTTON_COLS; j++){
@@ -390,6 +391,11 @@ public class MenuMode implements Screen, InputProcessor {
                 canvas.draw(levelButton[levelPage], tint, levelButton[0].getWidth()/2f,
                         levelButton[0].getHeight()/2f, x*sx, y*sy, 0, sx, sy);
                 canvas.drawTextCentered(Integer.toString(num + 1), displayFont, x * sx, y * sy);
+                bestTime = SaveManager.getInstance().getBestTime("level" + (num + 1));
+                if (bestTime != -1) {
+                    canvas.drawTextCentered(formatSecondsString(bestTime), buttonFont,
+                            (x + LEVEL_BEST_TIME_OFFSET_X) * sx, (y + LEVEL_BEST_TIME_OFFSET_Y) * sy);
+                }
             }
         }
         if (levelPage != 0) {
