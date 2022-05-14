@@ -47,4 +47,12 @@ public class SaveManager {
         bestTimes.putFloat(levelName, bestTime);
         bestTimes.flush();
     }
+
+    /**
+     * Clear all best times, erasing the save
+     */
+    public void clearBestTimes() {
+        bestTimes.clear();
+        bestTimes.flush(); // Maybe not necessary
+    }
 }

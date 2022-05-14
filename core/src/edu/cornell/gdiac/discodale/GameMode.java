@@ -914,9 +914,6 @@ public class GameMode implements Screen {
 
 		if (camState == CameraState.PLAY && winLose != WIN_CODE && winLose != LOSE_CODE) {
 			levelTime += dt;
-			System.out.println("PLAYING " + levelTime);
-		} else {
-			System.out.println("STOPPED " + levelTime);
 		}
 
 		CustomizedRayCastCallBack callback = new CustomizedRayCastCallBack();

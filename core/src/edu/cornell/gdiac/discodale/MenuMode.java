@@ -44,6 +44,8 @@ public class MenuMode implements Screen, InputProcessor {
 
     private static final int OPTIONS_RETURN_OFFSET_X = 1275;
     private static final int OPTIONS_RETURN_OFFSET_Y = 125;
+    private static final int OPTIONS_CLEAR_SAVE_OFFSET_X = 800;
+    private static final int OPTIONS_CLEAR_SAVE_OFFSET_Y = 125;
     private static final int OPTIONS_LABEL_OFFSET_X = 420;
     private static final int OPTIONS_LABEL_2_OFFSET_X = 480;
     private static final int OPTIONS_VOLUME_LABEL_OFFSET_Y = 712;
@@ -150,6 +152,7 @@ public class MenuMode implements Screen, InputProcessor {
     private boolean optionsPressed;
     private boolean exitPressed;
     private boolean optionsReturnPressed;
+    private boolean clearSavePressed;
     private boolean accessibilitySelected;
     private boolean bgmPressed, sfxPressed;
     private boolean toMenuPressed, nextLevelPressed, restartPressed;
@@ -266,6 +269,11 @@ public class MenuMode implements Screen, InputProcessor {
     private boolean inOptionsReturnBounds(int x, int y){
         return inBounds(x, y, OPTIONS_RETURN_OFFSET_X * sx, (OPTIONS_RETURN_OFFSET_X + 200f) * sx,
                 OPTIONS_RETURN_OFFSET_Y * sy, (OPTIONS_RETURN_OFFSET_Y - 40f) * sy);
+    }
+
+    private boolean inClearSaveBounds(int x, int y) {
+        return inBounds(x, y, OPTIONS_CLEAR_SAVE_OFFSET_X * sx, (OPTIONS_CLEAR_SAVE_OFFSET_X + 440f) * sx,
+                OPTIONS_CLEAR_SAVE_OFFSET_Y * sy, (OPTIONS_CLEAR_SAVE_OFFSET_Y - 40f) * sy);
     }
 
     private boolean inToggleBounds(int x, int y){
@@ -427,6 +435,7 @@ public class MenuMode implements Screen, InputProcessor {
                 canvas.getWidth()/2f - windowBg.getWidth()/2f * sx, WINDOW_BG_OFFSET_Y * sy,0, sx, sy);
         canvas.drawText("options", titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
         canvas.drawText("return", buttonFont, OPTIONS_RETURN_OFFSET_X * sx, OPTIONS_RETURN_OFFSET_Y * sy);
+        canvas.drawText("[GRAY]clear save data[]", buttonFont, OPTIONS_CLEAR_SAVE_OFFSET_X * sx, OPTIONS_CLEAR_SAVE_OFFSET_Y * sy);
 
         canvas.drawText("Volume", labelFont, OPTIONS_LABEL_OFFSET_X * sx, OPTIONS_VOLUME_LABEL_OFFSET_Y * sy);
         canvas.drawText("BGM", labelFont2, OPTIONS_LABEL_2_OFFSET_X * sx, OPTIONS_BGM_LABEL_OFFSET_Y * sy);
@@ -549,6 +558,7 @@ public class MenuMode implements Screen, InputProcessor {
         titleFont = directory.getEntry("shared:alien", BitmapFont.class);
         titleFont.getData().markupEnabled = true;
         buttonFont = directory.getEntry("shared:aliensmall", BitmapFont.class);
+        buttonFont.getData().markupEnabled = true;
         labelFont = directory.getEntry("shared:gothic", BitmapFont.class);
         labelFont2 = directory.getEntry("shared:gothicsmall", BitmapFont.class);
         theme = directory.getEntry("theme", Sound.class);
@@ -694,6 +704,9 @@ public class MenuMode implements Screen, InputProcessor {
         if (inOptionsReturnBounds(screenX, screenY)) {
             optionsReturnPressed = true;
             return false;
+        } else if (inClearSaveBounds(screenX, screenY)) {
+            clearSavePressed = true;
+            return false;
         } else if (inToggleBounds(screenX, screenY)){
             accessibilitySelected = !accessibilitySelected;
             return false;
@@ -807,6 +820,9 @@ public class MenuMode implements Screen, InputProcessor {
             this.type = typePrevious;
             typePrevious = Type.OPTIONS;
             result = false;
+        } else if (inClearSaveBounds(screenX, screenY) && clearSavePressed) {
+            SaveManager.getInstance().clearBestTimes();
+            result = false; // what does this do
         }
         sfxPressed = false;
         bgmPressed = false;
