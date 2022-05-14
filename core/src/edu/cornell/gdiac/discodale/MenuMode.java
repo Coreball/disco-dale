@@ -356,38 +356,20 @@ public class MenuMode implements Screen, InputProcessor {
                 sx, sy);
     }
 
-    private int getLevelNumOffset(int num){
-        int tens = (num + 1) / 10;
-        int ones = (num + 1) % 10;
-        if (tens == 0 && ones == 1) {
-            return -20;
-        }else if (tens == 0) {
-            return 0;
-        } else if (tens == 1 && ones == 1) {
-            return -15;
-        } else if (tens == 1 || ones == 1) {
-            return 6;
-        } else {
-            return 30;
-        }
-    }
-
     public void drawLevelSelect(){
         canvas.draw(levelSelect, Color.WHITE, levelSelect.getWidth()/2f, levelSelect.getHeight()/2f,
                 canvas.getWidth()/2f, TITLE_OFFSET_Y*sy, 0, sx, sy);
-        int x, y, num, offset;
+        int x, y, num;
         Color tint;
         for (int i = 0; i < LEVEL_BUTTON_ROWS; i++){
             for (int j = 0; j < LEVEL_BUTTON_COLS; j++){
                 num = i * LEVEL_BUTTON_COLS + j + levelPage * LEVEL_BUTTON_COLS * LEVEL_BUTTON_ROWS;
-                offset = getLevelNumOffset(num);
                 tint = levelPressed == num ? Color.GRAY : Color.WHITE;
                 x = LEVEL_BUTTONS_OFFSET_X + j * LEVEL_BUTTONS_MARGIN;
                 y = LEVEL_BUTTONS_OFFSET_Y - i * LEVEL_BUTTONS_MARGIN;
                 canvas.draw(levelButton[levelPage], tint, levelButton[0].getWidth()/2f,
                         levelButton[0].getHeight()/2f, x*sx, y*sy, 0, sx, sy);
-                canvas.drawText(Integer.toString(num + 1), displayFont,
-                        (x - LEVEL_FONT_MARGIN_X - offset) * sx, (y + LEVEL_FONT_MARGIN_Y) * sy);
+                canvas.drawTextCentered(Integer.toString(num + 1), displayFont, x * sx, y * sy);
             }
         }
         if (levelPage != 0) {
