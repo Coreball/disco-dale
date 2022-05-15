@@ -68,7 +68,7 @@ public class GameMode implements Screen {
 	private static int NUM_LEVELS = 30;
 
 	private static float ZOOM_AMOUNT = 1.0f;
-	private static int START_HOLD = 15;
+	private static int START_HOLD = 20;
 	private static int PAN_TIME = 100;
 	private static int ZOOM_TIME = 60;
 
@@ -99,7 +99,8 @@ public class GameMode implements Screen {
 
 	private float zoomFactor;
 	private float zoomValue;
-	private int ticks;
+	private int ticks1;
+	private int ticks2;
 
 	/** The Box2D world */
 	protected World world;
@@ -476,6 +477,7 @@ public class GameMode implements Screen {
 		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
 		populateLevel();
+		this.scene.updateGrid();
 	}
 
 	/**
@@ -678,7 +680,6 @@ public class GameMode implements Screen {
 
 	public void setCameraState(CameraState state) {camState = state;}
 
-	public int getTileSize() {return this.scene.getTileSize();}
 
 	public void updateSpotlightPosition(){
 		float[] path = scene.getSpotlightPath();
@@ -765,8 +766,8 @@ public class GameMode implements Screen {
 			updateSpotlightPosition();
 		}
 		
-		ticks++;
-		if (ticks % 13 == 0)
+		ticks1++;
+		if (ticks1 % 13 == 0)
 			bg_anim_frame = (bg_anim_frame + 1) % BG_ANIMATION_FRAMES;
 
 		float startX = (this.bounds.getWidth() * this.scene.getTileSize()) - dale.getX();
@@ -789,10 +790,10 @@ public class GameMode implements Screen {
 						this.bounds,
 						this.scene.getTileSize()
 				);
-				if (ticks >= START_HOLD) { // maybe take this out? No hold at the beginning
+				if (ticks2 >= START_HOLD) { // maybe take this out? No hold at the beginning
 					setCameraState(CameraState.PAN);
 				} else {
-					ticks++;
+					ticks2++;
 				}
 				break;
 			case PAN:
@@ -802,11 +803,11 @@ public class GameMode implements Screen {
 						PAN_TIME);
 				System.out.println("Start: (" + startX + ", " + startY + ")");
 				System.out.println("Dale: (" + dale.getX() + ", " + dale.getY() + ")");
-				if (ticks >= START_HOLD + PAN_TIME) {
+				if (ticks2 >= START_HOLD + PAN_TIME) {
 					zoomFactor = (zoomValue - ZOOM_AMOUNT) / ZOOM_TIME;
 					setCameraState(CameraState.ZOOM);
 				} else {
-					ticks++;
+					ticks2++;
 				}
 				break;
 			case ZOOM:
@@ -821,7 +822,7 @@ public class GameMode implements Screen {
 							this.bounds,
 							this.scene.getTileSize()
 					);
-					scene.updateGrid();
+//					scene.updateGrid();
 				}
 				break;
 			case PLAY:
@@ -867,8 +868,7 @@ public class GameMode implements Screen {
 				if (dale.getY() * scale.y < -150 && winLose != WIN_CODE) {
 					reset();
 				}
-
-				scene.updateGrid();
+//				scene.updateGrid();
 				scene.updateColorRegionMovement();
 				break;
 		}
@@ -1019,7 +1019,7 @@ public class GameMode implements Screen {
 			float h = light.getRegionHeight();
 			float w = light.getRegionWidth();
 			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
-			float lightScale = 2f;
+			float lightScale = 2.5f;
 			canvas.draw(light,new Color(256,256,256,0f),w*lightScale/2f,h*lightScale/2f,dale.getX()*scale.x,dale.getY()*scale.y,w*lightScale,h*lightScale);
 			canvas.endLight();
 
@@ -1286,7 +1286,8 @@ public class GameMode implements Screen {
 		scene.setColorChange();
 		this.bounds = new Rectangle(scene.getBounds());
 		updateScale();
-		ticks = 0;
+		ticks1 = 0;
+		ticks2 = 0;
 		if (isNewLevel)
 			setCameraState(CameraState.START);
 		else
