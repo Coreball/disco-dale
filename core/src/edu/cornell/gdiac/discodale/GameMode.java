@@ -72,6 +72,9 @@ public class GameMode implements Screen {
 	private static int PAN_TIME = 120;
 	private static int ZOOM_TIME = 60;
 
+	/** The scale for dark mode light */
+	private static float lightScale = 4f;
+
 	/** The texture for neutral walls */
 	protected TextureRegion brickTile;
 	/** The texture for non-grappleable walls */
@@ -119,6 +122,11 @@ public class GameMode implements Screen {
 	protected boolean debug;
 	/** Countdown active for winning or losing */
 	protected int countdown;
+
+	/** Time since level started (after camera movement ends) */
+	private float levelTime;
+	/** After the level was complete, was it a new best? */
+	private boolean wasNewBestTime;
 
 	/** All head textures for Dale, in order of colors */
 	private FilmStrip[] headTextures;
@@ -232,6 +240,24 @@ public class GameMode implements Screen {
 	 */
 	public void setDebug(boolean value) {
 		debug = value;
+	}
+
+	/**
+	 * Return the time spent on this try of the level
+	 *
+	 * @return level time
+	 */
+	public float getLevelTime() {
+		return levelTime;
+	}
+
+	/**
+	 * Return true if this level time was a new best (only valid after level ends)
+	 *
+	 * @return true if was new best time
+	 */
+	public boolean wasNewBestTime() {
+		return wasNewBestTime;
 	}
 
 	/**
@@ -471,6 +497,8 @@ public class GameMode implements Screen {
 		setComplete(false);
 		setFailure(false);
 		countdown = -1;
+		levelTime = 0;
+		wasNewBestTime = false;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
 		loadLevel(levelIndex);
 		isNewLevel = false;
@@ -646,6 +674,12 @@ public class GameMode implements Screen {
 			if (failed) {
 				reset();
 			} else if (complete) {
+				// Possibly save new best time
+				float previousBestTime = SaveManager.getInstance().getBestTime("level" + (levelIndex + 1));
+				if (previousBestTime == -1 || levelTime < previousBestTime) {
+					SaveManager.getInstance().putBestTime("level" + (levelIndex + 1), levelTime);
+					wasNewBestTime = true;
+				}
 				pause();
 				listener.exitScreen(this, Constants.EXIT_COMPLETE);
 				return false;
@@ -880,6 +914,10 @@ public class GameMode implements Screen {
 			setFailure(true);
 		}
 
+		if (camState == CameraState.PLAY && winLose != WIN_CODE && winLose != LOSE_CODE) {
+			levelTime += dt;
+		}
+
 		CustomizedRayCastCallBack callback = new CustomizedRayCastCallBack();
 
 		if(scene.isRealSightMode()){
@@ -1017,8 +1055,7 @@ public class GameMode implements Screen {
 			canvas.beginLight();
 			float h = light.getRegionHeight();
 			float w = light.getRegionWidth();
-			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
-			float lightScale = 2.5f;
+			// Some magic number to determine the size of the light. Original size of light: 64 x 64
 			canvas.draw(light,new Color(256,256,256,0f),w*lightScale/2f,h*lightScale/2f,dale.getX()*scale.x,dale.getY()*scale.y,w*lightScale,h*lightScale);
 			canvas.endLight();
 
@@ -1049,7 +1086,6 @@ public class GameMode implements Screen {
 			canvas.beginLight();
 			float h = light.getRegionHeight();
 			float w = light.getRegionWidth();
-			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
 			float lightScaleX = scene.getSpotlightRadius()*2/w;
 			float lightScaleY = scene.getSpotlightRadius()*2/h;
 			canvas.draw(light,new Color(256,256,256,0f),w*lightScaleX/2f,h*lightScaleY/2f,spotlightX,spotlightY,w*lightScaleX,h*lightScaleY);
