@@ -456,15 +456,9 @@ public class GameCanvas {
 	}
 
 	public void cameraPan(float startX, float startY, float endX, float endY, Rectangle bounds, int tileSize, float fr) {
-		float transX;
-		float transY;
-
-		//if/else branch to check the bounds of the pan
-
-		transX = (endX - startX) / fr;
-		transY = (endY - startY) / fr;
+		float transX = ((endX - startX) / fr);
+		float transY = ((endY - startY) / fr);
 		camera.translate(transX, transY);
-		//camera.update();
 		updateCam(camera.position.x, camera.position.y, camera.zoom, bounds, tileSize);
 	}
 

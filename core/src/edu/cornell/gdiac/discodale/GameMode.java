@@ -69,7 +69,7 @@ public class GameMode implements Screen {
 
 	private static float ZOOM_AMOUNT = 1.0f;
 	private static int START_HOLD = 20;
-	private static int PAN_TIME = 100;
+	private static int PAN_TIME = 120;
 	private static int ZOOM_TIME = 60;
 
 	/** The texture for neutral walls */
@@ -780,7 +780,6 @@ public class GameMode implements Screen {
 						this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
 				);
 
-
 				canvas.setCameraWidth(Math.min(this.bounds.getWidth() * this.scene.getTileSize(), canvas.getWidth()));
 				canvas.setCameraHeight(Math.min(this.bounds.getHeight() * this.scene.getTileSize(), canvas.getHeight()));
 				canvas.updateCam(
@@ -797,11 +796,14 @@ public class GameMode implements Screen {
 				}
 				break;
 			case PAN:
+				float time = PAN_TIME *
+						((this.bounds.getWidth() * this.scene.getTileSize()) / 2048) *
+						((this.bounds.getHeight() * this.scene.getTileSize()) / 1152);
 				canvas.cameraPan(startX, startY, dale.getX(), dale.getY(), //these should be changed to exit
 						this.bounds,
 						this.scene.getTileSize(),
-						PAN_TIME);
-				if (cam_ticks >= START_HOLD + PAN_TIME) {
+						time);
+				if (cam_ticks >= time + START_HOLD) {
 					zoomFactor = (zoomValue - ZOOM_AMOUNT) / ZOOM_TIME;
 					setCameraState(CameraState.ZOOM);
 				} else {
