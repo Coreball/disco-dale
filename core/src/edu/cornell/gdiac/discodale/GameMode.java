@@ -16,10 +16,7 @@
  */
 package edu.cornell.gdiac.discodale;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.*;
@@ -37,6 +34,7 @@ import edu.cornell.gdiac.discodale.models.*;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.discodale.obstacle.*;
+import org.w3c.dom.Text;
 
 /**
  * Base class for a world-specific controller.
@@ -188,8 +186,8 @@ public class GameMode implements Screen {
 
 	/** Which value to change with the increase/decrease buttons */
 	private AdjustTarget adjustTarget = AdjustTarget.GRAPPLE_SPEED;
-	private TextureRegion brickScaffold;
-	private TextureRegion reflectiveScaffold;
+	private Map<ScaffoldType, TextureRegion> brickScaffolds;
+	private Map<ScaffoldType, TextureRegion> reflectiveScaffolds;
 
 	/** Enum for which value to change with the increase/decrease buttons */
 	private enum AdjustTarget {
@@ -1240,8 +1238,22 @@ public class GameMode implements Screen {
 		// Allocate the tiles
 		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
-		brickScaffold = new TextureRegion(directory.getEntry("shared:brickScaffold", Texture.class));
-		reflectiveScaffold = new TextureRegion(directory.getEntry("shared:reflectiveScaffold", Texture.class));
+//		brickScaffold = new TextureRegion(directory.getEntry("shared:brickScaffold", Texture.class));
+//		reflectiveScaffold = new TextureRegion(directory.getEntry("shared:reflectiveScaffold", Texture.class));
+		this.brickScaffolds = new HashMap<>();
+		this.reflectiveScaffolds = new HashMap<>();
+		this.brickScaffolds.put(ScaffoldType.HORIZONTAL, new TextureRegion(directory.getEntry("shared:brickScaffoldHorizontal", Texture.class)));
+		this.brickScaffolds.put(ScaffoldType.VERTICAL, new TextureRegion(directory.getEntry("shared:brickScaffoldVertical", Texture.class)));
+		this.brickScaffolds.put(ScaffoldType.DOWN_LEFT, new TextureRegion(directory.getEntry("shared:brickScaffoldDownLeft", Texture.class)));
+		this.brickScaffolds.put(ScaffoldType.DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:brickScaffoldDownRight", Texture.class)));
+		this.brickScaffolds.put(ScaffoldType.UP_LEFT, new TextureRegion(directory.getEntry("shared:brickScaffoldUpLeft", Texture.class)));
+		this.brickScaffolds.put(ScaffoldType.UP_RIGHT, new TextureRegion(directory.getEntry("shared:brickScaffoldUpRight", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.HORIZONTAL, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldHorizontal", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.VERTICAL, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldVertical", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.DOWN_LEFT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldDownLeft", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldDownRight", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.UP_LEFT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpLeft", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.UP_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpRight", Texture.class)));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
 		background = directory.getEntry("menu:bg", Texture.class);
@@ -1272,7 +1284,7 @@ public class GameMode implements Screen {
 			levels[i] = directory.getEntry("level" + Integer.toString(i + 1), JsonValue.class);
 		}
 
-		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, brickScaffold, reflectiveScaffold, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, brickScaffolds, reflectiveScaffolds, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
 		// loadLevel(levelIndex);
 		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
 	}
