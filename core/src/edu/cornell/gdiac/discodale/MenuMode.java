@@ -45,6 +45,8 @@ public class MenuMode implements Screen, InputProcessor {
 
     private static final int OPTIONS_RETURN_OFFSET_X = 1275;
     private static final int OPTIONS_RETURN_OFFSET_Y = 125;
+    private static final int OPTIONS_CLEAR_SAVE_OFFSET_X = 800;
+    private static final int OPTIONS_CLEAR_SAVE_OFFSET_Y = 125;
     private static final int OPTIONS_LABEL_OFFSET_X = 420;
     private static final int OPTIONS_LABEL_2_OFFSET_X = 480;
     private static final int OPTIONS_VOLUME_LABEL_OFFSET_Y = 712;
@@ -61,15 +63,17 @@ public class MenuMode implements Screen, InputProcessor {
     private static final int LEVEL_BUTTONS_OFFSET_X = 356;
     private static final int LEVEL_BUTTONS_OFFSET_Y = 534;
     private static final int LEVEL_BUTTONS_MARGIN = 285;
-    private static final int LEVEL_FONT_MARGIN_X = 40;
-    private static final int LEVEL_FONT_MARGIN_Y = 27;
     private static final int LEVEL_BUTTON_ROWS = 2;
     private static final int LEVEL_BUTTON_COLS = 5;
     private static final int LEVEL_PAGES = 3;
     private static final int LEVEL_PAGE_OFFSET_X_LEFT = 150;
     private static final int LEVEL_PAGE_OFFSET_X_RIGHT = 1700;
     private static final int LEVEL_PAGE_OFFSET_Y = 380;
+    private static final int LEVEL_BEST_TIME_OFFSET_X = -15;
+    private static final int LEVEL_BEST_TIME_OFFSET_Y = -50;
 
+    private static final int COMPLETE_LEVEL_TIME_OFFSET_X = 420;
+    private static final int COMPLETE_LEVEL_TIME_OFFSET_Y = 850;
     private static final int COMPLETE_MENU_OFFSET_X = 300;
     private static final int COMPLETE_RESTART_OFFSET_X = 825;
     private static final int COMPLETE_NEXT_OFFSET_X = 1100;
@@ -154,6 +158,7 @@ public class MenuMode implements Screen, InputProcessor {
     private boolean optionsPressed;
     private boolean exitPressed;
     private boolean optionsReturnPressed;
+    private boolean clearSavePressed;
     private boolean accessibilitySelected;
     private boolean bgmPressed, sfxPressed;
     private boolean toMenuPressed, nextLevelPressed, restartPressed;
@@ -162,6 +167,11 @@ public class MenuMode implements Screen, InputProcessor {
     private int volumeBgm = 100, volumeSfx = 100;
 
     private int ticks = 0;
+
+    /** Completion screen level time to show, in seconds */
+    private float completedLevelTime;
+    /** Whether to show "new best" time */
+    private boolean showNewBestTime;
 
 //    private TextureRegionDrawable test;
 //    private Button testButton;
@@ -195,7 +205,30 @@ public class MenuMode implements Screen, InputProcessor {
                 new Rectangle(0, 0, 32, 18), 32);
     }
 
+    /**
+     * Set the completed-level time
+     * @param completedLevelTime time to show, in seconds
+     */
+    public void setCompletedLevelTime(float completedLevelTime) {
+        this.completedLevelTime = completedLevelTime;
+    }
 
+    /**
+     * Set whether to show "new best" for the time
+     * @param showNewBestTime true if show new best
+     */
+    public void setShowNewBestTime(boolean showNewBestTime) {
+        this.showNewBestTime = showNewBestTime;
+    }
+
+    /**
+     * Format float seconds into a nicer string
+     * @param seconds seconds to format
+     * @return seconds string with two decimal places
+     */
+    private String formatSecondsString(float seconds) {
+        return String.format("%.2f", seconds);
+    }
 
     /**
      * Called when the Screen should render itself.
@@ -242,6 +275,11 @@ public class MenuMode implements Screen, InputProcessor {
     private boolean inOptionsReturnBounds(int x, int y){
         return inBounds(x, y, OPTIONS_RETURN_OFFSET_X * sx, (OPTIONS_RETURN_OFFSET_X + 200f) * sx,
                 OPTIONS_RETURN_OFFSET_Y * sy, (OPTIONS_RETURN_OFFSET_Y - 40f) * sy);
+    }
+
+    private boolean inClearSaveBounds(int x, int y) {
+        return inBounds(x, y, OPTIONS_CLEAR_SAVE_OFFSET_X * sx, (OPTIONS_CLEAR_SAVE_OFFSET_X + 440f) * sx,
+                OPTIONS_CLEAR_SAVE_OFFSET_Y * sy, (OPTIONS_CLEAR_SAVE_OFFSET_Y - 40f) * sy);
     }
 
     private boolean inToggleBounds(int x, int y){
@@ -364,38 +402,26 @@ public class MenuMode implements Screen, InputProcessor {
                 sx, sy);
     }
 
-    private int getLevelNumOffset(int num){
-        int tens = (num + 1) / 10;
-        int ones = (num + 1) % 10;
-        if (tens == 0 && ones == 1) {
-            return -20;
-        }else if (tens == 0) {
-            return 0;
-        } else if (tens == 1 && ones == 1) {
-            return -15;
-        } else if (tens == 1 || ones == 1) {
-            return 6;
-        } else {
-            return 30;
-        }
-    }
-
     public void drawLevelSelect(){
         canvas.draw(levelSelect, Color.WHITE, levelSelect.getWidth()/2f, levelSelect.getHeight()/2f,
                 canvas.getWidth()/2f, TITLE_OFFSET_Y*sy, 0, sx, sy);
-        int x, y, num, offset;
+        int x, y, num;
+        float bestTime;
         Color tint;
         for (int i = 0; i < LEVEL_BUTTON_ROWS; i++){
             for (int j = 0; j < LEVEL_BUTTON_COLS; j++){
                 num = i * LEVEL_BUTTON_COLS + j + levelPage * LEVEL_BUTTON_COLS * LEVEL_BUTTON_ROWS;
-                offset = getLevelNumOffset(num);
                 tint = levelPressed == num ? Color.GRAY : Color.WHITE;
                 x = LEVEL_BUTTONS_OFFSET_X + j * LEVEL_BUTTONS_MARGIN;
                 y = LEVEL_BUTTONS_OFFSET_Y - i * LEVEL_BUTTONS_MARGIN;
                 canvas.draw(levelButton[levelPage], tint, levelButton[0].getWidth()/2f,
                         levelButton[0].getHeight()/2f, x*sx, y*sy, 0, sx, sy);
-                canvas.drawText(Integer.toString(num + 1), displayFont,
-                        (x - LEVEL_FONT_MARGIN_X - offset) * sx, (y + LEVEL_FONT_MARGIN_Y) * sy);
+                canvas.drawTextCentered(Integer.toString(num + 1), displayFont, x * sx, y * sy);
+                bestTime = SaveManager.getInstance().getBestTime("level" + (num + 1));
+                if (bestTime != -1) {
+                    canvas.drawTextCentered(formatSecondsString(bestTime), buttonFont,
+                            (x + LEVEL_BEST_TIME_OFFSET_X) * sx, (y + LEVEL_BEST_TIME_OFFSET_Y) * sy);
+                }
             }
         }
         if (levelPage != 0) {
@@ -417,6 +443,7 @@ public class MenuMode implements Screen, InputProcessor {
                 canvas.getWidth()/2f - windowBg.getWidth()/2f * sx, WINDOW_BG_OFFSET_Y * sy,0, sx, sy);
         canvas.drawText("options", titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
         canvas.drawText("return", buttonFont, OPTIONS_RETURN_OFFSET_X * sx, OPTIONS_RETURN_OFFSET_Y * sy);
+        canvas.drawText("[GRAY]clear save data[]", buttonFont, OPTIONS_CLEAR_SAVE_OFFSET_X * sx, OPTIONS_CLEAR_SAVE_OFFSET_Y * sy);
 
         canvas.drawText("Volume", labelFont, OPTIONS_LABEL_OFFSET_X * sx, OPTIONS_VOLUME_LABEL_OFFSET_Y * sy);
         canvas.drawText("BGM", labelFont2, OPTIONS_LABEL_2_OFFSET_X * sx, OPTIONS_BGM_LABEL_OFFSET_Y * sy);
@@ -470,11 +497,16 @@ public class MenuMode implements Screen, InputProcessor {
         canvas.draw(windowBg, Color.WHITE, 0, 0,
                 canvas.getWidth()/2f - windowBg.getWidth()/2f * sx, WINDOW_BG_OFFSET_Y * sy,0, sx, sy);
         canvas.drawText("Level completed!", titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
-//        canvas.draw(complete, Color.WHITE, complete.getWidth()/2f, complete.getHeight()/2f,
-//                canvas.getWidth()/2f, canvas.getHeight()/2f, 0, sx, sy);
+
         win.setFrame((int)winFrame);
         canvas.draw(win, Color.WHITE, win.getRegionWidth()/2f, win.getRegionHeight()/2f,
                 canvas.getWidth()/2f, canvas.getHeight()/2f, 0, sx, sy);
+
+        String timeString = showNewBestTime
+                ? "Time: [#FD3796]" + formatSecondsString(completedLevelTime) + " New Best![]"
+                : "Time: " + formatSecondsString(completedLevelTime);
+        canvas.drawText(timeString, titleFont, COMPLETE_LEVEL_TIME_OFFSET_X * sx, COMPLETE_LEVEL_TIME_OFFSET_Y * sy);
+
 
         canvas.draw(exitToMenu, toMenuPressed?Color.GRAY:Color.WHITE, COMPLETE_MENU_OFFSET_X * sx,
                 COMPLETE_BUTTONS_OFFSET_Y * sy, exitToMenu.getWidth() * sx, exitToMenu.getHeight() * sy);
@@ -538,7 +570,9 @@ public class MenuMode implements Screen, InputProcessor {
         menuPause = directory.getEntry("menu:menu", Texture.class);
         displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
         titleFont = directory.getEntry("shared:alien", BitmapFont.class);
+        titleFont.getData().markupEnabled = true;
         buttonFont = directory.getEntry("shared:aliensmall", BitmapFont.class);
+        buttonFont.getData().markupEnabled = true;
         labelFont = directory.getEntry("shared:gothic", BitmapFont.class);
         labelFont2 = directory.getEntry("shared:gothicsmall", BitmapFont.class);
         theme = directory.getEntry("theme", Sound.class);
@@ -684,6 +718,9 @@ public class MenuMode implements Screen, InputProcessor {
         if (inOptionsReturnBounds(screenX, screenY)) {
             optionsReturnPressed = true;
             return false;
+        } else if (inClearSaveBounds(screenX, screenY)) {
+            clearSavePressed = true;
+            return false;
         } else if (inToggleBounds(screenX, screenY)){
             accessibilitySelected = !accessibilitySelected;
             return false;
@@ -769,8 +806,8 @@ public class MenuMode implements Screen, InputProcessor {
 
     private boolean touchUpLevel(int screenX, int screenY){
         if (levelPressed != -1){
-            int i = levelPressed / LEVEL_BUTTON_COLS;
-            int j = levelPressed % LEVEL_BUTTON_COLS;
+            int i = (levelPressed - levelPage * LEVEL_BUTTON_COLS * LEVEL_BUTTON_ROWS) / LEVEL_BUTTON_COLS;
+            int j = (levelPressed - levelPage * LEVEL_BUTTON_COLS * LEVEL_BUTTON_ROWS) % LEVEL_BUTTON_COLS;
             int left = LEVEL_BUTTONS_OFFSET_X + j * LEVEL_BUTTONS_MARGIN - levelButton[0].getWidth() / 2;
             int right = LEVEL_BUTTONS_OFFSET_X + j * LEVEL_BUTTONS_MARGIN + levelButton[0].getWidth() / 2;
             int up = LEVEL_BUTTONS_OFFSET_Y - i * LEVEL_BUTTONS_MARGIN + levelButton[0].getHeight() / 2;
@@ -797,6 +834,9 @@ public class MenuMode implements Screen, InputProcessor {
             this.type = typePrevious;
             typePrevious = Type.OPTIONS;
             result = false;
+        } else if (inClearSaveBounds(screenX, screenY) && clearSavePressed) {
+            SaveManager.getInstance().clearBestTimes();
+            result = false; // what does this do
         }
         sfxPressed = false;
         bgmPressed = false;

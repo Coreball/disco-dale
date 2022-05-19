@@ -10,13 +10,63 @@
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
-        "shared:brickScaffold" : {
+        "shared:brickScaffoldHorizontal" : {
             "file":  "platform/scaffoldstickhorizontalsmall.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
-        "shared:reflectiveScaffold" : {
+        "shared:brickScaffoldVertical" : {
+            "file":  "platform/scaffoldvertical.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:brickScaffoldDownLeft" : {
+            "file":  "platform/stickdownleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:brickScaffoldDownRight" : {
+            "file":  "platform/stickdownright.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:brickScaffoldUpLeft" : {
+            "file":  "platform/stickupleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:brickScaffoldUpRight" : {
+            "file":  "platform/stickupright.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldHorizontal" : {
             "file":  "platform/scaffoldnonstickhorizontalsmall.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldVertical" : {
+            "file":  "platform/nonstickvertical.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldDownLeft" : {
+            "file":  "platform/nonstickdownleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldDownRight" : {
+            "file":  "platform/nonstickdownright.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldUpLeft" : {
+            "file":  "platform/nonstickupleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldUpRight" : {
+            "file":  "platform/nonstickupright.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
@@ -44,11 +94,11 @@
         "platform:body:flying:orange": "platform/flying/flyingorange.png",
         "platform:flyidle": "platform/fly_idle.png",
         "platform:flychasing": "platform/fly_chasing.png",
-        "platform:pinkcolor": "platform/color_pink.png",
-        "platform:bluecolor": "platform/color_blue.png",
-        "platform:greencolor": "platform/color_green.png",
-        "platform:purplecolor": "platform/color_purple.png",
-        "platform:orangecolor": "platform/color_orange.png",
+        "platform:pinkcolor": "platform/pink_tile.png",
+        "platform:bluecolor": "platform/blue_tile.png",
+        "platform:greencolor": "platform/green_tile.png",
+        "platform:purplecolor": "platform/purple_tile.png",
+        "platform:orangecolor": "platform/orange_tile.png",
         "platform:light": "platform/light.png",
         "platform:darkness": "platform/darkness.png",
         "menu:play": "menu/play_button.png",
@@ -87,20 +137,35 @@
         "menu:pause1": "menu/pausec1.png",
         "menu:pause2": "menu/pausec2.png",
         "menu:pause3": "menu/pausec3.png",
-        "menu:pause4": "menu/pausec4.png",
+        "menu:pause4": "menu/pausec4.png"
     },
     "jsons"  : {
         "platform:constants": "platform/constants.json",
         "testlevel": "platform/testlevel.json",
         "level1": "levels/tutorial1.json",
-        "level2": "levels/tutorial2.json",
-        "level3": "levels/tutorial3.json",
-        "level4": "levels/tutorial5.json",
-        "level5": "levels/4.json",
-        "level6": "levels/funkylevel.json",
-        "level7": "levels/medium.json",
-        "level8": "levels/lv8.json",
-        "level9": "levels/oliverlvl1.json"
+        "level2": "levels/cl1.json",
+        "level3": "levels/tutorial2.json",
+        "level4": "levels/cl2.json",
+        "level5": "levels/tutorial5.json",
+        "level6": "levels/cl3.json",
+        "level7": "levels/cl4.json",
+        "level8": "levels/cl6.json",
+        "level9": "levels/cl5.json",
+        "level10": "levels/cl7.json",
+        "level11": "levels/3.json",
+        "level12": "levels/jh2.json",
+        "level13": "levels/cl8.json",
+        "level14": "levels/tutorial3.json",
+        "level15": "levels/oliverlvl1.json",
+        "level16": "levels/4.json",
+        "level17": "levels/jh3.json",
+        "level18": "levels/funkylevel.json",
+        "level19": "levels/lv8.json",
+        "level20": "levels/medium.json",
+        "level21": "levels/jh1.json",
+        "level22": "levels/cz1.json",
+        "level23": "levels/cl9.json",
+        "level24": "levels/cl10.json"
     },
     "sounds" : {
         "theme" : "sound/theme.mp3",
@@ -112,7 +177,7 @@
         "colorchange": "sound/colorchange.mp3",
         "platform:jump" : "platform/jump.mp3",
         "platform:pew"  : "platform/pew.mp3",
-        "platform:plop" : "platform/plop.mp3",
+        "platform:plop" : "platform/plop.mp3"
     },
     "fonts": {
         "shared:retro": {

@@ -16,10 +16,7 @@
  */
 package edu.cornell.gdiac.discodale;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.*;
@@ -37,6 +34,7 @@ import edu.cornell.gdiac.discodale.models.*;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.discodale.obstacle.*;
+import org.w3c.dom.Text;
 
 /**
  * Base class for a world-specific controller.
@@ -65,12 +63,15 @@ public class GameMode implements Screen {
 
 	private static int FLY_SIZE = 32;
 
-	private static int NUM_LEVELS = 10;
+	private static int NUM_LEVELS = 30;
 
-	private static float ZOOM_AMOUNT = 1.0f;
-	private static int START_HOLD = 15;
-	private static int PAN_TIME = 100;
+	private static float zoom_amount = 1.0f;
+	private static int START_HOLD = 20;
+	private static int PAN_TIME = 120;
 	private static int ZOOM_TIME = 60;
+
+	/** The scale for dark mode light */
+	private static float lightScale = 4f;
 
 	/** The texture for neutral walls */
 	protected TextureRegion brickTile;
@@ -100,6 +101,7 @@ public class GameMode implements Screen {
 	private float zoomFactor;
 	private float zoomValue;
 	private int ticks;
+	private int cam_ticks;
 
 	/** The Box2D world */
 	protected World world;
@@ -118,6 +120,11 @@ public class GameMode implements Screen {
 	protected boolean debug;
 	/** Countdown active for winning or losing */
 	protected int countdown;
+
+	/** Time since level started (after camera movement ends) */
+	private float levelTime;
+	/** After the level was complete, was it a new best? */
+	private boolean wasNewBestTime;
 
 	/** All head textures for Dale, in order of colors */
 	private FilmStrip[] headTextures;
@@ -187,8 +194,8 @@ public class GameMode implements Screen {
 
 	/** Which value to change with the increase/decrease buttons */
 	private AdjustTarget adjustTarget = AdjustTarget.GRAPPLE_SPEED;
-	private TextureRegion brickScaffold;
-	private TextureRegion reflectiveScaffold;
+	private Map<ScaffoldType, TextureRegion> brickScaffolds;
+	private Map<ScaffoldType, TextureRegion> reflectiveScaffolds;
 
 	/** Enum for which value to change with the increase/decrease buttons */
 	private enum AdjustTarget {
@@ -231,6 +238,24 @@ public class GameMode implements Screen {
 	 */
 	public void setDebug(boolean value) {
 		debug = value;
+	}
+
+	/**
+	 * Return the time spent on this try of the level
+	 *
+	 * @return level time
+	 */
+	public float getLevelTime() {
+		return levelTime;
+	}
+
+	/**
+	 * Return true if this level time was a new best (only valid after level ends)
+	 *
+	 * @return true if was new best time
+	 */
+	public boolean wasNewBestTime() {
+		return wasNewBestTime;
 	}
 
 	/**
@@ -470,12 +495,15 @@ public class GameMode implements Screen {
 		setComplete(false);
 		setFailure(false);
 		countdown = -1;
+		levelTime = 0;
+		wasNewBestTime = false;
 		colorChangeCountdown = CHANGE_COLOR_TIME;
 		loadLevel(levelIndex);
 		isNewLevel = false;
 		// this.scene = levelLoader.load(this.testlevel, constants.get("defaults"), new Rectangle(0, 0, canvas.width, canvas.height));
 		this.scene.setCanvas(canvas);
 		populateLevel();
+		this.scene.updateGrid();
 	}
 
 	/**
@@ -620,6 +648,12 @@ public class GameMode implements Screen {
 			reset();
 		}
 
+		if (input.didZoomOut() && getCameraState() == camState.PLAY) {
+			zoom_amount = zoomValue;
+		} else {
+			zoom_amount = 1.0f;
+		}
+
 		// Now it is time to maybe switch screens.
 		if (input.didPause()) {
 			pause();
@@ -644,6 +678,12 @@ public class GameMode implements Screen {
 			if (failed) {
 				reset();
 			} else if (complete) {
+				// Possibly save new best time
+				float previousBestTime = SaveManager.getInstance().getBestTime("level" + (levelIndex + 1));
+				if (previousBestTime == -1 || levelTime < previousBestTime) {
+					SaveManager.getInstance().putBestTime("level" + (levelIndex + 1), levelTime);
+					wasNewBestTime = true;
+				}
 				pause();
 				listener.exitScreen(this, Constants.EXIT_COMPLETE);
 				return false;
@@ -678,7 +718,6 @@ public class GameMode implements Screen {
 
 	public void setCameraState(CameraState state) {camState = state;}
 
-	public int getTileSize() {return this.scene.getTileSize();}
 
 	public void updateSpotlightPosition(){
 		float[] path = scene.getSpotlightPath();
@@ -779,7 +818,6 @@ public class GameMode implements Screen {
 						this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
 				);
 
-
 				canvas.setCameraWidth(Math.min(this.bounds.getWidth() * this.scene.getTileSize(), canvas.getWidth()));
 				canvas.setCameraHeight(Math.min(this.bounds.getHeight() * this.scene.getTileSize(), canvas.getHeight()));
 				canvas.updateCam(
@@ -789,28 +827,29 @@ public class GameMode implements Screen {
 						this.bounds,
 						this.scene.getTileSize()
 				);
-				if (ticks >= START_HOLD) { // maybe take this out? No hold at the beginning
+				if (cam_ticks >= START_HOLD) { // maybe take this out? No hold at the beginning
 					setCameraState(CameraState.PAN);
 				} else {
-					ticks++;
+					cam_ticks++;
 				}
 				break;
 			case PAN:
+				float time = PAN_TIME *
+						((this.bounds.getWidth() * this.scene.getTileSize()) / 2048) *
+						((this.bounds.getHeight() * this.scene.getTileSize()) / 1152);
 				canvas.cameraPan(startX, startY, dale.getX(), dale.getY(), //these should be changed to exit
 						this.bounds,
 						this.scene.getTileSize(),
-						PAN_TIME);
-				System.out.println("Start: (" + startX + ", " + startY + ")");
-				System.out.println("Dale: (" + dale.getX() + ", " + dale.getY() + ")");
-				if (ticks >= START_HOLD + PAN_TIME) {
-					zoomFactor = (zoomValue - ZOOM_AMOUNT) / ZOOM_TIME;
+						time);
+				if (cam_ticks >= time + START_HOLD) {
+					zoomFactor = (zoomValue - zoom_amount) / ZOOM_TIME;
 					setCameraState(CameraState.ZOOM);
 				} else {
-					ticks++;
+					cam_ticks++;
 				}
 				break;
 			case ZOOM:
-				if (canvas.getCameraZoom() <= ZOOM_AMOUNT) {
+				if (canvas.getCameraZoom() <= zoom_amount) {
 					setCameraState(CameraState.PLAY);
 				} else {
 					float zoom = canvas.getCameraZoom();
@@ -821,14 +860,13 @@ public class GameMode implements Screen {
 							this.bounds,
 							this.scene.getTileSize()
 					);
-					scene.updateGrid();
 				}
 				break;
 			case PLAY:
 				canvas.updateCam(
 						dale.getX() * scale.x,
 						dale.getY() * scale.y,
-						ZOOM_AMOUNT,
+						zoom_amount,
 						this.bounds,
 						this.scene.getTileSize()
 				);
@@ -867,8 +905,7 @@ public class GameMode implements Screen {
 				if (dale.getY() * scale.y < -150 && winLose != WIN_CODE) {
 					reset();
 				}
-
-				scene.updateGrid();
+//				scene.updateGrid();
 				scene.updateColorRegionMovement();
 				break;
 		}
@@ -879,6 +916,10 @@ public class GameMode implements Screen {
 
 		if(winLose == LOSE_CODE){
 			setFailure(true);
+		}
+
+		if (camState == CameraState.PLAY && winLose != WIN_CODE && winLose != LOSE_CODE) {
+			levelTime += dt;
 		}
 
 		CustomizedRayCastCallBack callback = new CustomizedRayCastCallBack();
@@ -1018,8 +1059,7 @@ public class GameMode implements Screen {
 			canvas.beginLight();
 			float h = light.getRegionHeight();
 			float w = light.getRegionWidth();
-			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
-			float lightScale = 2f;
+			// Some magic number to determine the size of the light. Original size of light: 64 x 64
 			canvas.draw(light,new Color(256,256,256,0f),w*lightScale/2f,h*lightScale/2f,dale.getX()*scale.x,dale.getY()*scale.y,w*lightScale,h*lightScale);
 			canvas.endLight();
 
@@ -1050,7 +1090,6 @@ public class GameMode implements Screen {
 			canvas.beginLight();
 			float h = light.getRegionHeight();
 			float w = light.getRegionWidth();
-			// Some magic number to determine the size of the light. Original size of light: 64 x 64.
 			float lightScaleX = scene.getSpotlightRadius()*2/w;
 			float lightScaleY = scene.getSpotlightRadius()*2/h;
 			canvas.draw(light,new Color(256,256,256,0f),w*lightScaleX/2f,h*lightScaleY/2f,spotlightX,spotlightY,w*lightScaleX,h*lightScaleY);
@@ -1093,18 +1132,18 @@ public class GameMode implements Screen {
 
 		// Final message
 
-		if (complete) {
-			displayFont.setColor(Color.BLACK);
-			canvas.begin(); // DO NOT SCALE
-			canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
-			canvas.end();
-		} else if (failed) {
-			diedId = SoundPlayer.playSound(died, diedId, volumeSfx);
-			displayFont.setColor(Color.BLACK);
-			canvas.begin(); // DO NOT SCALE
-			canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
-			canvas.end();
-		}
+//		if (complete) {
+//			displayFont.setColor(Color.BLACK);
+//			canvas.begin(); // DO NOT SCALE
+//			canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
+//			canvas.end();
+//		} else if (failed) {
+//			diedId = SoundPlayer.playSound(died, diedId, volumeSfx);
+//			displayFont.setColor(Color.BLACK);
+//			canvas.begin(); // DO NOT SCALE
+//			canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
+//			canvas.end();
+//		}
 	}
 
 	/**
@@ -1159,7 +1198,7 @@ public class GameMode implements Screen {
 	 */
 	public void resume() {
 		// TODO Auto-generated method stub
-		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, ZOOM_AMOUNT, this.bounds, this.scene.getTileSize());
+		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom_amount, this.bounds, this.scene.getTileSize());
 		colorChange.resume(colorChangeId);
 		flyAlert.resume(alertId);
 	}
@@ -1240,8 +1279,22 @@ public class GameMode implements Screen {
 		// Allocate the tiles
 		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
-		brickScaffold = new TextureRegion(directory.getEntry("shared:brickScaffold", Texture.class));
-		reflectiveScaffold = new TextureRegion(directory.getEntry("shared:reflectiveScaffold", Texture.class));
+//		brickScaffold = new TextureRegion(directory.getEntry("shared:brickScaffold", Texture.class));
+//		reflectiveScaffold = new TextureRegion(directory.getEntry("shared:reflectiveScaffold", Texture.class));
+		this.brickScaffolds = new HashMap<>();
+		this.reflectiveScaffolds = new HashMap<>();
+		this.brickScaffolds.put(ScaffoldType.HORIZONTAL, new TextureRegion(directory.getEntry("shared:brickScaffoldHorizontal", Texture.class)));
+		this.brickScaffolds.put(ScaffoldType.VERTICAL, new TextureRegion(directory.getEntry("shared:brickScaffoldVertical", Texture.class)));
+		this.brickScaffolds.put(ScaffoldType.DOWN_LEFT, new TextureRegion(directory.getEntry("shared:brickScaffoldDownLeft", Texture.class)));
+		this.brickScaffolds.put(ScaffoldType.DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:brickScaffoldDownRight", Texture.class)));
+		this.brickScaffolds.put(ScaffoldType.UP_LEFT, new TextureRegion(directory.getEntry("shared:brickScaffoldUpLeft", Texture.class)));
+		this.brickScaffolds.put(ScaffoldType.UP_RIGHT, new TextureRegion(directory.getEntry("shared:brickScaffoldUpRight", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.HORIZONTAL, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldHorizontal", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.VERTICAL, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldVertical", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.DOWN_LEFT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldDownLeft", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldDownRight", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.UP_LEFT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpLeft", Texture.class)));
+		this.reflectiveScaffolds.put(ScaffoldType.UP_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpRight", Texture.class)));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
 		background = directory.getEntry("menu:bg", Texture.class);
@@ -1272,7 +1325,7 @@ public class GameMode implements Screen {
 			levels[i] = directory.getEntry("level" + Integer.toString(i + 1), JsonValue.class);
 		}
 
-		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, brickScaffold, reflectiveScaffold, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, brickScaffolds, reflectiveScaffolds, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
 		// loadLevel(levelIndex);
 		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
 	}
@@ -1287,6 +1340,7 @@ public class GameMode implements Screen {
 		this.bounds = new Rectangle(scene.getBounds());
 		updateScale();
 		ticks = 0;
+		cam_ticks = 0;
 		if (isNewLevel)
 			setCameraState(CameraState.START);
 		else

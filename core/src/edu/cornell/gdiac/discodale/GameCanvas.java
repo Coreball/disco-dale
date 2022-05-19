@@ -456,15 +456,9 @@ public class GameCanvas {
 	}
 
 	public void cameraPan(float startX, float startY, float endX, float endY, Rectangle bounds, int tileSize, float fr) {
-		float transX;
-		float transY;
-
-		//if/else branch to check the bounds of the pan
-
-		transX = (endX - startX) / fr;
-		transY = (endY - startY) / fr;
+		float transX = ((endX - startX) / fr);
+		float transY = ((endY - startY) / fr);
 		camera.translate(transX, transY);
-		//camera.update();
 		updateCam(camera.position.x, camera.position.y, camera.zoom, bounds, tileSize);
 	}
 
@@ -1054,6 +1048,26 @@ public class GameCanvas {
 		GlyphLayout layout = new GlyphLayout(font,text);
 		font.draw(spriteBatch, layout, x, y);
     }
+
+	/**
+	 * Draws text centered at a specific location
+	 *
+	 * @param text The string to draw
+	 * @param font The font to use
+	 * @param x    The x-coordinate of the center of the text
+	 * @param y    The y-coordinate of the center of the text
+	 */
+	public void drawTextCentered(String text, BitmapFont font, float x, float y) {
+		if (active != DrawPass.STANDARD) {
+			Gdx.app.error("GameCanvas", "Cannot draw without active begin()", new IllegalStateException());
+			return;
+		}
+
+		GlyphLayout layout = new GlyphLayout(font,text);
+		float offsetX = -layout.width / 2.0f;
+		float offsetY = layout.height / 2.0f;
+		font.draw(spriteBatch, layout, x + offsetX, y + offsetY);
+	}
 
     /**
      * Draws text centered on the screen.
