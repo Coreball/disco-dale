@@ -88,11 +88,11 @@ public class InputController {
 	/** Whether the color button was pressed (for changing color region displays */
 	private boolean colorPressed;
 	private boolean colorPrevious;
+	private boolean zoomOutPressed;
+	private boolean zoomOutPrevious;
 
 	/** How much did we move horizontally? */
 	private float horizontal;
-	/** How much did we move vertically? */
-	private float vertical;
 	/** The crosshair position (for raddoll) */
 	private Vector2 crosshair;
 	/** The crosshair cache (for using as a return value) */
@@ -248,6 +248,8 @@ public class InputController {
 	}
 
 	public boolean didColor() { return colorPressed && !colorPrevious; }
+
+	public boolean didZoomOut() {return zoomOutPressed && zoomOutPrevious; }
 	
 	/**
 	 * Creates a new input controller
@@ -292,6 +294,7 @@ public class InputController {
 		decreasePrevious = decreasePressed;
 		menuPrevious = menuPressed;
 		colorPrevious = colorPressed;
+		zoomOutPrevious = zoomOutPressed;
 		
 		// Check to see if a GamePad is connected
 		if (xbox != null && xbox.isConnected()) {
@@ -356,6 +359,7 @@ public class InputController {
 		prevPressed = (secondary && prevPressed) || (Gdx.input.isKeyPressed(Input.Keys.P));
 		nextPressed = (secondary && nextPressed) || (Gdx.input.isKeyPressed(Input.Keys.N));
 		pausePressed  = (secondary && pausePressed) || (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));
+		zoomOutPressed = (secondary && zoomOutPressed) || (Gdx.input.isKeyPressed(Input.Keys.Z));
 		
 		// Directional controls
 		horizontal = (secondary ? horizontal : 0.0f);
@@ -376,6 +380,7 @@ public class InputController {
 		// Mouse results
 		clickPressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 		clickHeld = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+
 
 		Vector3 vec = canvas.cameraConvert(Gdx.input.getX(Input.Buttons.LEFT), Gdx.input.getY(Input.Buttons.LEFT));
 		crosshair.set(vec.x / scale.x, vec.y / scale.y);
