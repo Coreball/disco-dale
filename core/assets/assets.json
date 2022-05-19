@@ -10,13 +10,63 @@
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
-        "shared:brickScaffold" : {
+        "shared:brickScaffoldHorizontal" : {
             "file":  "platform/scaffoldstickhorizontalsmall.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
-        "shared:reflectiveScaffold" : {
+        "shared:brickScaffoldVertical" : {
+            "file":  "platform/scaffoldvertical.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:brickScaffoldDownLeft" : {
+            "file":  "platform/stickdownleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:brickScaffoldDownRight" : {
+            "file":  "platform/stickdownright.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:brickScaffoldUpLeft" : {
+            "file":  "platform/stickupleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:brickScaffoldUpRight" : {
+            "file":  "platform/stickupright.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldHorizontal" : {
             "file":  "platform/scaffoldnonstickhorizontalsmall.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldVertical" : {
+            "file":  "platform/nonstickvertical.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldDownLeft" : {
+            "file":  "platform/nonstickdownleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldDownRight" : {
+            "file":  "platform/nonstickdownright.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldUpLeft" : {
+            "file":  "platform/nonstickupleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:reflectiveScaffoldUpRight" : {
+            "file":  "platform/nonstickupright.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },

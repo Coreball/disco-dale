@@ -15,9 +15,13 @@ import edu.cornell.gdiac.discodale.obstacle.PolygonObstacle;
 import edu.cornell.gdiac.util.PooledList;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class SceneModel {
+
+    private TextureRegion brickTile;
+    private TextureRegion reflectiveTile;
 
     public enum ColorMovement {
         NO_MOVEMENT,
@@ -63,10 +67,8 @@ public class SceneModel {
     private boolean hasColorChange;
 
     /** The texture for walls and platforms */
-    protected TextureRegion brickTile;
-    protected TextureRegion reflectiveTile;
-    protected TextureRegion brickScaffold;
-    protected TextureRegion reflectiveScaffold;
+    protected Map<ScaffoldType, TextureRegion> brickScaffolds;
+    protected Map<ScaffoldType, TextureRegion> reflectiveScaffolds;
     /** The texture for the exit condition */
     protected TextureRegion goalTile;
 
@@ -132,12 +134,12 @@ public class SceneModel {
         this.reflectiveTile = texture;
     }
 
-    public void setBrickScaffold(TextureRegion brickScaffold) {
-        this.brickScaffold = brickScaffold;
+    public void setBrickScaffolds(Map<ScaffoldType, TextureRegion> brickScaffolds) {
+        this.brickScaffolds = brickScaffolds;
     }
 
-    public void setReflectiveScaffold(TextureRegion reflectiveScaffold) {
-        this.reflectiveScaffold = reflectiveScaffold;
+    public void setReflectiveScaffolds(Map<ScaffoldType, TextureRegion> reflectiveScaffolds) {
+        this.reflectiveScaffolds = reflectiveScaffolds;
     }
 
     public Vector2 getDaleStart() {
@@ -429,7 +431,7 @@ public class SceneModel {
         addObject(obj);
     }
 
-    public void addBrickScaffold(float[] vertices, String name, JsonValue defaults) {
+    public void addBrickScaffold(float[] vertices, String name, JsonValue defaults, ScaffoldType type) {
         PolygonObstacle obj;
         obj = new PolygonObstacle(vertices, 0, 0);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
@@ -437,7 +439,7 @@ public class SceneModel {
         obj.setFriction(defaults.getFloat("friction", 0.0f));
         obj.setRestitution(defaults.getFloat("restitution", 0.0f));
         obj.setDrawScale(scale);
-        obj.setTexture(brickScaffold);
+        obj.setTexture(brickScaffolds.get(type));
         obj.setName(name);
         Filter objFilter = new Filter();
         objFilter.categoryBits = 0b00000001;
@@ -447,7 +449,7 @@ public class SceneModel {
         seeThroughObstacles.add(obj);
     }
 
-    public void addReflectiveScaffold(float[] vertices, String name, JsonValue defaults) {
+    public void addReflectiveScaffold(float[] vertices, String name, JsonValue defaults, ScaffoldType type) {
         PolygonObstacle obj;
         obj = new PolygonObstacle(vertices, 0, 0);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
@@ -455,7 +457,7 @@ public class SceneModel {
         obj.setFriction(defaults.getFloat("friction", 0.0f));
         obj.setRestitution(defaults.getFloat("restitution", 0.0f));
         obj.setDrawScale(scale);
-        obj.setTexture(reflectiveScaffold);
+        obj.setTexture(reflectiveScaffolds.get(type));
         obj.setName(name);
         Filter objFilter = new Filter();
         objFilter.categoryBits = 0b00000001;
