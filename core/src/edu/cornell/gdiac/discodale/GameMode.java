@@ -67,7 +67,7 @@ public class GameMode implements Screen {
 
 	private static int NUM_LEVELS = 30;
 
-	private static float ZOOM_AMOUNT = 1.0f;
+	private static float zoom_amount = 1.0f;
 	private static int START_HOLD = 20;
 	private static int PAN_TIME = 120;
 	private static int ZOOM_TIME = 60;
@@ -650,6 +650,12 @@ public class GameMode implements Screen {
 			reset();
 		}
 
+		if (input.didZoomOut() && getCameraState() == camState.PLAY) {
+			zoom_amount = zoomValue;
+		} else {
+			zoom_amount = 1.0f;
+		}
+
 		// Now it is time to maybe switch screens.
 		if (input.didPause()) {
 			pause();
@@ -838,14 +844,14 @@ public class GameMode implements Screen {
 						this.scene.getTileSize(),
 						time);
 				if (cam_ticks >= time + START_HOLD) {
-					zoomFactor = (zoomValue - ZOOM_AMOUNT) / ZOOM_TIME;
+					zoomFactor = (zoomValue - zoom_amount) / ZOOM_TIME;
 					setCameraState(CameraState.ZOOM);
 				} else {
 					cam_ticks++;
 				}
 				break;
 			case ZOOM:
-				if (canvas.getCameraZoom() <= ZOOM_AMOUNT) {
+				if (canvas.getCameraZoom() <= zoom_amount) {
 					setCameraState(CameraState.PLAY);
 				} else {
 					float zoom = canvas.getCameraZoom();
@@ -862,7 +868,7 @@ public class GameMode implements Screen {
 				canvas.updateCam(
 						dale.getX() * scale.x,
 						dale.getY() * scale.y,
-						ZOOM_AMOUNT,
+						zoom_amount,
 						this.bounds,
 						this.scene.getTileSize()
 				);
@@ -1194,7 +1200,7 @@ public class GameMode implements Screen {
 	 */
 	public void resume() {
 		// TODO Auto-generated method stub
-		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, ZOOM_AMOUNT, this.bounds, this.scene.getTileSize());
+		canvas.updateCam(dale.getX() * scale.x, dale.getY() * scale.y, zoom_amount, this.bounds, this.scene.getTileSize());
 		colorChange.resume(colorChangeId);
 		flyAlert.resume(alertId);
 	}
