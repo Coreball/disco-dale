@@ -61,6 +61,7 @@
         "menu:bg4": "shared/bg4.png",
         "menu:windowbg": "menu/window_bg.png",
         "menu:complete": "menu/complete.png",
+        "menu:win":"menu/win.png",
         "menu:title": "menu/title.png",
         "menu:level": "menu/level.png",
         "menu:levelbutton1": "menu/level_button_green.png",

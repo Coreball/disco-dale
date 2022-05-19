@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Rectangle;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.discodale.models.ColorRegionModel;
+import edu.cornell.gdiac.util.FilmStrip;
 import edu.cornell.gdiac.util.ScreenListener;
 
 public class MenuMode implements Screen, InputProcessor {
@@ -101,6 +102,11 @@ public class MenuMode implements Screen, InputProcessor {
     /** The texture for the options, complete and pause background */
     protected Texture windowBg;
     protected Texture complete;
+
+    private static final int WIN_FRAME = 12;
+    protected FilmStrip win;
+    protected float winFrame;
+
     private static final int PAUSE_ANIM_FRAME = 4;
     protected Texture[] pause = new Texture[PAUSE_ANIM_FRAME];
     protected int pause_anim_frame = 0;
@@ -322,6 +328,8 @@ public class MenuMode implements Screen, InputProcessor {
         ticks++;
         if (type == Type.PAUSE && ticks % 30 == 0)
             pause_anim_frame = (pause_anim_frame + 1) % PAUSE_ANIM_FRAME;
+        if (type == Type.LEVEL_COMPLETE && ticks % 10 == 0)
+            winFrame = (winFrame + 1) % WIN_FRAME;
     }
 
     public void draw(){
@@ -462,8 +470,12 @@ public class MenuMode implements Screen, InputProcessor {
         canvas.draw(windowBg, Color.WHITE, 0, 0,
                 canvas.getWidth()/2f - windowBg.getWidth()/2f * sx, WINDOW_BG_OFFSET_Y * sy,0, sx, sy);
         canvas.drawText("Level completed!", titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
-        canvas.draw(complete, Color.WHITE, complete.getWidth()/2f, complete.getHeight()/2f,
+//        canvas.draw(complete, Color.WHITE, complete.getWidth()/2f, complete.getHeight()/2f,
+//                canvas.getWidth()/2f, canvas.getHeight()/2f, 0, sx, sy);
+        win.setFrame((int)winFrame);
+        canvas.draw(win, Color.WHITE, win.getRegionWidth()/2f, win.getRegionHeight()/2f,
                 canvas.getWidth()/2f, canvas.getHeight()/2f, 0, sx, sy);
+
         canvas.draw(exitToMenu, toMenuPressed?Color.GRAY:Color.WHITE, COMPLETE_MENU_OFFSET_X * sx,
                 COMPLETE_BUTTONS_OFFSET_Y * sy, exitToMenu.getWidth() * sx, exitToMenu.getHeight() * sy);
         canvas.draw(restart, restartPressed?Color.GRAY:Color.WHITE, COMPLETE_RESTART_OFFSET_X * sx,
@@ -503,6 +515,7 @@ public class MenuMode implements Screen, InputProcessor {
             pause[i] = directory.getEntry("menu:pause" + (i+1), Texture.class);
         }
         complete = directory.getEntry("menu:complete", Texture.class);
+        win = new FilmStrip(directory.getEntry("menu:win", Texture.class), 2, 6);
         title = directory.getEntry("menu:title", Texture.class);
         levelSelect = directory.getEntry("menu:level", Texture.class);
         for (int i = 0; i < LEVEL_PAGES; i++){
