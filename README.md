@@ -1,4 +1,6 @@
-# Disco Dale Golden Master
+![banner](https://user-images.githubusercontent.com/22627336/168685772-fd56e2ae-730e-452a-9859-f6bd3d23e6f2.png)
+
+# Disco Dale
 
 ## Controls
 

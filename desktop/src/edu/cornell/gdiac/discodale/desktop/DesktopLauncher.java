@@ -37,6 +37,7 @@ public class DesktopLauncher {
 		config.width  = 1280;
 		config.height = 720;
 		config.resizable = true;
+		config.title = "Disco Dale";
 // 		config.fullscreen = true;
 		new LwjglApplication(new GDXRoot(), config);
 	}
