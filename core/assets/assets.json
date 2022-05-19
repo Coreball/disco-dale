@@ -1,7 +1,67 @@
 {
     "textures": {
-        "shared:brick" : {
+        "shared:wallNeutral" : {
             "file":  "platform/wall.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallUp" : {
+            "file":  "platform/wallup.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallRight" : {
+            "file":  "platform/wallright.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallLeft" : {
+            "file":  "platform/wallleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallDown" : {
+            "file":  "platform/walldown.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallOuterUpLeft" : {
+            "file":  "platform/wallcornerupleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallOuterUpRight" : {
+            "file":  "platform/wallcornerupright.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallOuterDownLeft" : {
+            "file":  "platform/wallcornerdownleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallOuterDownRight" : {
+            "file":  "platform/wallcornerdownright.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallInnerUpRight" : {
+            "file":  "platform/wallupright.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallInnerUpLeft" : {
+            "file":  "platform/wallupleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallInnerDownLeft" : {
+            "file":  "platform/walldownleft.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:wallInnerDownRight" : {
+            "file":  "platform/walldownright.png",
             "wrapU": "repeated",
             "wrapV": "repeated"
         },

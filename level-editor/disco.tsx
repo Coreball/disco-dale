@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.8" tiledversion="1.8.2" name="disco" tilewidth="32" tileheight="32" tilecount="22" columns="0">
+<tileset version="1.8" tiledversion="1.8.2" name="disco" tilewidth="32" tileheight="32" tilecount="34" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <image width="32" height="32" source="tiles/wall.png"/>
@@ -66,5 +66,41 @@
  </tile>
  <tile id="24">
   <image width="32" height="32" source="tiles/nonstickcornerdownright.png"/>
+ </tile>
+ <tile id="25">
+  <image width="32" height="32" source="tiles/wallupright.png"/>
+ </tile>
+ <tile id="26">
+  <image width="32" height="32" source="tiles/wallupleft.png"/>
+ </tile>
+ <tile id="27">
+  <image width="32" height="32" source="tiles/wallup.png"/>
+ </tile>
+ <tile id="28">
+  <image width="32" height="32" source="tiles/wallright.png"/>
+ </tile>
+ <tile id="29">
+  <image width="32" height="32" source="tiles/wallleft.png"/>
+ </tile>
+ <tile id="30">
+  <image width="32" height="32" source="tiles/walldownright.png"/>
+ </tile>
+ <tile id="31">
+  <image width="32" height="32" source="tiles/walldownleft.png"/>
+ </tile>
+ <tile id="32">
+  <image width="32" height="32" source="tiles/walldown.png"/>
+ </tile>
+ <tile id="33">
+  <image width="32" height="32" source="tiles/wallcornerupright.png"/>
+ </tile>
+ <tile id="34">
+  <image width="32" height="32" source="tiles/wallcornerupleft.png"/>
+ </tile>
+ <tile id="35">
+  <image width="32" height="32" source="tiles/wallcornerdownright.png"/>
+ </tile>
+ <tile id="36">
+  <image width="32" height="32" source="tiles/wallcornerdownleft.png"/>
  </tile>
 </tileset>
