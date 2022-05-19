@@ -96,10 +96,26 @@ public class LevelLoader {
                 addColors(model, layer);
             } else if (layer.getString("name").equals("platforms")) {
                 addPlatforms(model, layer, defaults);
+            } else if (layer.getString("name").equalsIgnoreCase("spotlight")) {
+                addSpotlight(model, layer, defaults);
             }
         }
 
         return model;
+    }
+
+    private void addSpotlight(SceneModel model, JsonValue layer, JsonValue defaults) {
+        for (JsonValue o : layer.get("objects")) {
+            float cx = o.getFloat("x") * this.tileScale;
+            float cy = o.getFloat("y") * this.tileScale;
+
+            model.setSpotlightMode(true);
+
+            float[] vertices = toPrimitive(StreamSupport.stream(o.get("polygon").spliterator(), false)
+                    .flatMap(p -> Stream.of(p.getFloat("x") * this.tileScale + cx, this.levelBounds.getHeight() - p.getFloat("y") * this.tileScale - cy))
+                    .toArray(Float[]::new));
+            model.setSpotlightPath(vertices);
+        }
     }
 
     private void addColors(SceneModel model, JsonValue colors) {
