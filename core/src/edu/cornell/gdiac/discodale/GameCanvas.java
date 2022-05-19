@@ -464,7 +464,6 @@ public class GameCanvas {
 		transX = (endX - startX) / fr;
 		transY = (endY - startY) / fr;
 		camera.translate(transX, transY);
-		//camera.update();
 		updateCam(camera.position.x, camera.position.y, camera.zoom, bounds, tileSize);
 	}
 
