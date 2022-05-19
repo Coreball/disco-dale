@@ -4,10 +4,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.JsonValue;
-import edu.cornell.gdiac.discodale.models.ColorRegionModel;
-import edu.cornell.gdiac.discodale.models.DaleColor;
-import edu.cornell.gdiac.discodale.models.ScaffoldType;
-import edu.cornell.gdiac.discodale.models.SceneModel;
+import edu.cornell.gdiac.discodale.models.*;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -17,7 +14,7 @@ import java.util.stream.StreamSupport;
 public class LevelLoader {
 
     /** The texture for brick and reflective walls */
-    protected TextureRegion brickTile;
+    protected Map<WallType, TextureRegion> wallTiles;
     protected TextureRegion reflectiveTile;
     protected Map<ScaffoldType, TextureRegion> brickScaffolds;
     protected Map<ScaffoldType, TextureRegion> reflectiveScaffolds;
@@ -32,8 +29,8 @@ public class LevelLoader {
     private Rectangle bounds;
     private Vector2 scale;
 
-    public LevelLoader(TextureRegion brickTile, TextureRegion reflectiveTile, Map<ScaffoldType, TextureRegion> brickScaffolds, Map<ScaffoldType, TextureRegion> reflectiveScaffolds, TextureRegion goalTile, float width, float height) {
-        this.brickTile = brickTile;
+    public LevelLoader(Map<WallType, TextureRegion> wallTiles, TextureRegion reflectiveTile, Map<ScaffoldType, TextureRegion> brickScaffolds, Map<ScaffoldType, TextureRegion> reflectiveScaffolds, TextureRegion goalTile, float width, float height) {
+        this.wallTiles = wallTiles;
         this.reflectiveTile = reflectiveTile;
         this.brickScaffolds = brickScaffolds;
         this.reflectiveScaffolds = reflectiveScaffolds;
@@ -84,7 +81,8 @@ public class LevelLoader {
             }
         }
         SceneModel model = new SceneModel(this.bounds, m, this.tileWidth);
-        model.setBrickTexture(this.brickTile);
+        model.setWalls(this.wallTiles);
+//        model.setBrickTexture(this.brickTile);
         model.setReflectiveTexture(this.reflectiveTile);
         model.setBrickScaffolds(this.brickScaffolds);
         model.setReflectiveScaffolds(this.reflectiveScaffolds);
@@ -154,7 +152,7 @@ public class LevelLoader {
                     case 0:
                         break;
                     case 1:
-                        model.addBrickWall(v, "brick" + (j + i * width), defaults);
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.NEUTRAL);
                         break;
                     case 2:
                         model.addReflectiveWall(v, "reflective" + (j + i * width), defaults);
@@ -212,6 +210,42 @@ public class LevelLoader {
                         break;
                     case 25:
                         model.addBrickScaffold(v, "brickscaffold" + (j + i * width), defaults, ScaffoldType.DOWN_RIGHT);
+                        break;
+                    case 26:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.INNER_UP_RIGHT);
+                        break;
+                    case 27:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.INNER_UP_LEFT);
+                        break;
+                    case 28:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.UP);
+                        break;
+                    case 29:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.RIGHT);
+                        break;
+                    case 30:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.LEFT);
+                        break;
+                    case 31:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.INNER_DOWN_RIGHT);
+                        break;
+                    case 32:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.INNER_DOWN_LEFT);
+                        break;
+                    case 33:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.DOWN);
+                        break;
+                    case 34:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.OUTER_UP_RIGHT);
+                        break;
+                    case 35:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.OUTER_UP_LEFT);
+                        break;
+                    case 36:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.OUTER_DOWN_RIGHT);
+                        break;
+                    case 37:
+                        model.addBrickWall(v, "brick" + (j + i * width), defaults, WallType.OUTER_DOWN_LEFT);
                         break;
                 }
             }
