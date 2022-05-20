@@ -125,8 +125,15 @@ public class DaleModel extends WheelObstacle {
 		colorIndex = Arrays.asList(availableColors).indexOf(color);
 	}
 
-	public void rotateColor() {
+	public void rotateColorForward() {
 		colorIndex = (colorIndex + 1) % availableColors.length;
+	}
+	public void rotateColorBackward() {
+		if (colorIndex - 1 < 0) {
+			colorIndex = availableColors.length - 1;
+		} else {
+			colorIndex = colorIndex - 1;
+		}
 	}
 
 	public void setVisible(boolean visible) { this.isVisible = visible; }
