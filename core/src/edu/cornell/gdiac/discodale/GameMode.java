@@ -76,13 +76,15 @@ public class GameMode implements Screen {
 	/** The texture for non-grappleable walls */
 	protected TextureRegion reflectiveTile;
 	/** The texture for the exit condition */
-	protected TextureRegion goalTile;
+	protected FilmStrip goalTile;
 	/** The font for giving messages to the player */
 	protected BitmapFont displayFont;
 	protected Texture background;
 	private static int BG_ANIMATION_FRAMES = 4;
+	private static int EXIT_ANIMATION_FRAMES = 2;
 	protected Texture[] background_anim = new Texture[BG_ANIMATION_FRAMES];
 	protected int bgAnimFrame = 0;
+	protected int exit_anim_frame = 0;
 
 	/** Reference to the game canvas */
 	protected GameCanvas canvas;
@@ -819,8 +821,12 @@ public class GameMode implements Screen {
 		}
 		
 		ticks++;
-		if (ticks % 13 == 0)
+		if (ticks % 13 == 0) {
 			bgAnimFrame = (bgAnimFrame + 1) % BG_ANIMATION_FRAMES;
+		} else if (ticks % 50 == 0) {
+			exit_anim_frame = (exit_anim_frame + 1) % EXIT_ANIMATION_FRAMES;
+		}
+
 		if (winLose == LOSE_CODE){
 			if (ticks % 4 == 0)
 				failFrame = (failFrame + 1) % FAIL_FRAMES;
@@ -829,7 +835,6 @@ public class GameMode implements Screen {
 			failAnimY += 0.14f * failAnimSpeed;
 			failAnimSpeed *= 1.02f;
 		}
-
 
 		float startX = (this.bounds.getWidth() * this.scene.getTileSize()) - dale.getX();
 		float startY = (this.bounds.getHeight() * this.scene.getTileSize()) - dale.getY();
@@ -1140,6 +1145,7 @@ public class GameMode implements Screen {
 			canvas.endLight();
 		} else {
 			canvas.begin();
+			goalTile.setFrame(exit_anim_frame);
 			canvas.draw(background, Color.WHITE,0, 0, scene.getBounds().getWidth() * scene.getTileSize(),
 					scene.getBounds().getHeight() * scene.getTileSize());
 			canvas.draw(background_anim[bgAnimFrame], Color.WHITE,0, 0,
@@ -1337,6 +1343,7 @@ public class GameMode implements Screen {
 		this.reflectiveScaffolds.put(ScaffoldType.DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldDownRight", Texture.class)));
 		this.reflectiveScaffolds.put(ScaffoldType.UP_LEFT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpLeft", Texture.class)));
 		this.reflectiveScaffolds.put(ScaffoldType.UP_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpRight", Texture.class)));
+
 		this.walls.put(WallType.NEUTRAL, new TextureRegion(directory.getEntry("shared:wallNeutral", Texture.class)));
 		this.walls.put(WallType.DOWN, new TextureRegion(directory.getEntry("shared:wallDown", Texture.class)));
 		this.walls.put(WallType.UP, new TextureRegion(directory.getEntry("shared:wallUp", Texture.class)));
@@ -1350,7 +1357,8 @@ public class GameMode implements Screen {
 		this.walls.put(WallType.INNER_DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:wallInnerDownRight", Texture.class)));
 		this.walls.put(WallType.INNER_UP_LEFT, new TextureRegion(directory.getEntry("shared:wallInnerUpLeft", Texture.class)));
 		this.walls.put(WallType.INNER_UP_RIGHT, new TextureRegion(directory.getEntry("shared:wallInnerUpRight", Texture.class)));
-		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
+		goalTile = new FilmStrip(directory.getEntry("shared:goal", Texture.class), 1, 2);
+
 		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
 		background = directory.getEntry("menu:bg", Texture.class);
 		for (int i = 0; i < BG_ANIMATION_FRAMES; i++){
