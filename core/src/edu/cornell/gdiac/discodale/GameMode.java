@@ -373,6 +373,8 @@ public class GameMode implements Screen {
 		isNewLevel = true;
 	}
 
+	public int getLevel() { return levelIndex; }
+
 	public void nextLevel(){
 		setLevel((levelIndex + 1) % NUM_LEVELS);
 	}

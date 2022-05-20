@@ -192,6 +192,8 @@ public class MenuMode implements Screen, InputProcessor {
         return levelPressed;
     }
 
+    public void setLevel(int level) { levelPressed = level; }
+
     public int getVolumeBgm() { return volumeBgm; }
 
     public int getVolumeSfx() { return volumeSfx; }
@@ -495,7 +497,8 @@ public class MenuMode implements Screen, InputProcessor {
     public void drawComplete() {
         canvas.draw(windowBg, Color.WHITE, 0, 0,
                 canvas.getWidth()/2f - windowBg.getWidth()/2f * sx, WINDOW_BG_OFFSET_Y * sy,0, sx, sy);
-        canvas.drawText("Level completed!", titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
+        canvas.drawText("Level " + (levelPressed + 1) + " completed!",
+                titleFont, WINDOW_TITLE_OFFSET_X * sx, WINDOW_TITLE_OFFSET_Y * sy);
 
         win.setFrame((int)winFrame);
         canvas.draw(win, Color.WHITE, win.getRegionWidth()/2f, win.getRegionHeight()/2f,
@@ -784,6 +787,7 @@ public class MenuMode implements Screen, InputProcessor {
         boolean result = true;
         if (inPlayBounds(screenX, screenY) && playPressed) {
             typePrevious = Type.START;
+            levelPressed = -1;
             this.type = Type.LEVEL_SELECT;
             result = false;
         } else if (inOptionsBounds(screenX, screenY) && optionsPressed) {
