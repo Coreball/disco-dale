@@ -105,7 +105,6 @@ public class MenuMode implements Screen, InputProcessor {
     protected Texture background;
     /** The texture for the options, complete and pause background */
     protected Texture windowBg;
-    protected Texture complete;
 
     private static final int WIN_FRAME = 12;
     protected FilmStrip win;
@@ -500,7 +499,7 @@ public class MenuMode implements Screen, InputProcessor {
 
         win.setFrame((int)winFrame);
         canvas.draw(win, Color.WHITE, win.getRegionWidth()/2f, win.getRegionHeight()/2f,
-                canvas.getWidth()/2f, canvas.getHeight()/2f, 0, sx, sy);
+                canvas.getWidth()/2f, canvas.getHeight()/2.5f, 0, sx, sy);
 
         String timeString = showNewBestTime
                 ? "Time: [#FD3796]" + formatSecondsString(completedLevelTime) + " New Best![]"
@@ -546,7 +545,6 @@ public class MenuMode implements Screen, InputProcessor {
         for (int i = 0; i < PAUSE_ANIM_FRAME; i++){
             pause[i] = directory.getEntry("menu:pause" + (i+1), Texture.class);
         }
-        complete = directory.getEntry("menu:complete", Texture.class);
         win = new FilmStrip(directory.getEntry("menu:win", Texture.class), 2, 6);
         title = directory.getEntry("menu:title", Texture.class);
         levelSelect = directory.getEntry("menu:level", Texture.class);

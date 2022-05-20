@@ -26,7 +26,6 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 
-import com.badlogic.gdx.utils.Timer;
 import edu.cornell.gdiac.discodale.controllers.DaleController;
 import edu.cornell.gdiac.discodale.controllers.FlyController;
 
@@ -34,7 +33,6 @@ import edu.cornell.gdiac.discodale.models.*;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.discodale.obstacle.*;
-import org.w3c.dom.Text;
 
 /**
  * Base class for a world-specific controller.
@@ -84,7 +82,7 @@ public class GameMode implements Screen {
 	protected Texture background;
 	private static int BG_ANIMATION_FRAMES = 4;
 	protected Texture[] background_anim = new Texture[BG_ANIMATION_FRAMES];
-	protected int bg_anim_frame = 0;
+	protected int bgAnimFrame = 0;
 
 	/** Reference to the game canvas */
 	protected GameCanvas canvas;
@@ -134,6 +132,13 @@ public class GameMode implements Screen {
 	private FilmStrip[] bodyWalkTextures;
 	/** All body flying textures for Dale, in order of colors */
 	private FilmStrip[] bodyFlyingTextures;
+	/** All failure textures, in order of colors */
+	private FilmStrip[] failTextures;
+	private FilmStrip failTexture;
+	private static final int FAIL_FRAMES = 7;
+	private int failFrame;
+	private float failAnimX;
+	private float failAnimY;
 
 	private Texture flyIdleTexture;
 	private Texture flyChaseTexture;
@@ -310,6 +315,9 @@ public class GameMode implements Screen {
 		}
 		if (value && countdown<0) {
 			countdown = Constants.EXIT_COUNT;
+			setCameraState(CameraState.FAIL);
+			failAnimX = dale.getX();
+			failAnimY = dale.getY();
 		}
 		failed = value;
 	}
@@ -806,7 +814,15 @@ public class GameMode implements Screen {
 		
 		ticks++;
 		if (ticks % 13 == 0)
-			bg_anim_frame = (bg_anim_frame + 1) % BG_ANIMATION_FRAMES;
+			bgAnimFrame = (bgAnimFrame + 1) % BG_ANIMATION_FRAMES;
+		if (winLose == LOSE_CODE){
+			if (ticks % 4 == 0)
+				failFrame = (failFrame + 1) % FAIL_FRAMES;
+			// TODO: get rid of magic numbers
+			failAnimX -= 0.1f;
+			failAnimY += 0.07f;
+		}
+
 
 		float startX = (this.bounds.getWidth() * this.scene.getTileSize()) - dale.getX();
 		float startY = (this.bounds.getHeight() * this.scene.getTileSize()) - dale.getY();
@@ -870,13 +886,13 @@ public class GameMode implements Screen {
 						this.bounds,
 						this.scene.getTileSize()
 				);
-
-				daleController.processMovement();
-				daleController.processColorRotation();
-				daleController.processGrappleAction(world);
-				dale.applyForce();
-				dale.applyStickyPartMovement(dt);
-
+				if (dale.getVisible()){
+					daleController.processMovement();
+					daleController.processColorRotation();
+					daleController.processGrappleAction(world);
+					dale.applyForce();
+					dale.applyStickyPartMovement(dt);
+				}
 				isAlert = false;
 
 				for (FlyController flyController : flyControllers) {
@@ -903,10 +919,19 @@ public class GameMode implements Screen {
 				}
 
 				if (dale.getY() * scale.y < -150 && winLose != WIN_CODE) {
-					reset();
+					winLose = LOSE_CODE;
 				}
 //				scene.updateGrid();
 				scene.updateColorRegionMovement();
+				break;
+			case FAIL:
+				canvas.updateCam(
+						failAnimX * scale.x,
+						failAnimY * scale.y,
+						zoom_amount,
+						this.bounds,
+						this.scene.getTileSize()
+				);
 				break;
 		}
 
@@ -916,6 +941,7 @@ public class GameMode implements Screen {
 
 		if(winLose == LOSE_CODE){
 			setFailure(true);
+			failTexture = failTextures[dale.getColor().ordinal()];
 		}
 
 		if (camState == CameraState.PLAY && winLose != WIN_CODE && winLose != LOSE_CODE) {
@@ -1109,7 +1135,7 @@ public class GameMode implements Screen {
 			canvas.begin();
 			canvas.draw(background, Color.WHITE,0, 0, scene.getBounds().getWidth() * scene.getTileSize(),
 					scene.getBounds().getHeight() * scene.getTileSize());
-			canvas.draw(background_anim[bg_anim_frame], Color.WHITE,0, 0,
+			canvas.draw(background_anim[bgAnimFrame], Color.WHITE,0, 0,
 					scene.getBounds().getWidth() * scene.getTileSize(),
 					scene.getBounds().getHeight() * scene.getTileSize());
 			scene.draw(canvas);
@@ -1132,18 +1158,18 @@ public class GameMode implements Screen {
 
 		// Final message
 
-//		if (complete) {
-//			displayFont.setColor(Color.BLACK);
-//			canvas.begin(); // DO NOT SCALE
-//			canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
-//			canvas.end();
-//		} else if (failed) {
-//			diedId = SoundPlayer.playSound(died, diedId, volumeSfx);
-//			displayFont.setColor(Color.BLACK);
-//			canvas.begin(); // DO NOT SCALE
-//			canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
-//			canvas.end();
-//		}
+		if (complete) {
+			displayFont.setColor(Color.BLACK);
+			canvas.begin(); // DO NOT SCALE
+			//canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
+			canvas.end();
+		} else if (failed) {
+			diedId = SoundPlayer.playSound(died, diedId, volumeSfx);
+			canvas.begin();
+			failTexture.setFrame(failFrame);
+			canvas.draw(failTexture, failAnimX * scale.x, failAnimY * scale.y);
+			canvas.end();
+		}
 	}
 
 	/**
@@ -1267,6 +1293,14 @@ public class GameMode implements Screen {
 				new FilmStrip(directory.getEntry("platform:body:flying:green", Texture.class), 1, 4),
 				new FilmStrip(directory.getEntry("platform:body:flying:orange", Texture.class), 1, 4),
 				new FilmStrip(directory.getEntry("platform:body:flying:purple", Texture.class), 1, 4),
+		};
+
+		failTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:fail:pink", Texture.class), 1, 7),
+				new FilmStrip(directory.getEntry("platform:fail:blue", Texture.class), 1, 7),
+				new FilmStrip(directory.getEntry("platform:fail:green", Texture.class), 1, 7),
+				new FilmStrip(directory.getEntry("platform:fail:orange", Texture.class), 1, 7),
+				new FilmStrip(directory.getEntry("platform:fail:purple", Texture.class), 1, 7),
 		};
 
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
