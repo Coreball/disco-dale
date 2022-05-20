@@ -78,6 +78,8 @@ public class SceneModel {
 
     private PooledList<Obstacle> seeThroughObstacles = new PooledList<>();
 
+    private PooledList<TutorialElement> tutorialElements = new PooledList<>();
+
     /** The boundary of the world */
     protected Rectangle bounds;
     protected Vector2 scale;
@@ -161,6 +163,10 @@ public class SceneModel {
 
     public void addFly(float x, float y) {
         this.flyLocations.add(new Vector2(x, y));
+    }
+
+    public void addTutorialElement(TutorialElement te) {
+        this.tutorialElements.add(te);
     }
 
     public boolean isAreaSightMode() {
@@ -523,6 +529,9 @@ public class SceneModel {
         }
         for (Obstacle obj : objects) {
             obj.draw(canvas);
+        }
+        for (TutorialElement tutorialElement : this.tutorialElements) {
+            tutorialElement.draw(canvas);
         }
     }
 

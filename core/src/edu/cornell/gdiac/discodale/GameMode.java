@@ -197,6 +197,7 @@ public class GameMode implements Screen {
 	private Map<ScaffoldType, TextureRegion> brickScaffolds;
 	private Map<ScaffoldType, TextureRegion> reflectiveScaffolds;
 	private Map<WallType, TextureRegion> walls;
+	private TextureRegion[] tutorialUI;
 
 	/** Enum for which value to change with the increase/decrease buttons */
 	private enum AdjustTarget {
@@ -1317,6 +1318,12 @@ public class GameMode implements Screen {
 			background_anim[i] = directory.getEntry("menu:bg" + (i + 1), Texture.class);
 		}
 
+		this.tutorialUI = new TextureRegion[11];
+		for (int i = 0; i < this.tutorialUI.length; i++) {
+			System.out.println(i + " " + (1 + i));
+			this.tutorialUI[i] = new TextureRegion(directory.getEntry("shared:t" + (i + 1), Texture.class));
+		}
+
 
 		died = directory.getEntry("died", Sound.class);
 		extend = directory.getEntry("extend", Sound.class);
@@ -1340,7 +1347,7 @@ public class GameMode implements Screen {
 			levels[i] = directory.getEntry("level" + Integer.toString(i + 1), JsonValue.class);
 		}
 
-		this.levelLoader = new LevelLoader(this.walls, reflectiveTile, brickScaffolds, reflectiveScaffolds, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		this.levelLoader = new LevelLoader(this.walls, reflectiveTile, brickScaffolds, reflectiveScaffolds, goalTile, this.bounds.getWidth(), this.bounds.getHeight(), this.tutorialUI);
 		// loadLevel(levelIndex);
 		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
 	}
