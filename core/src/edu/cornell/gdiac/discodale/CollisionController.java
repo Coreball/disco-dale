@@ -86,7 +86,6 @@ public class CollisionController implements ContactListener {
                     (isFly(bd2) && (bd1 == dale || bd1 == dale.getBodyPart()))) {
                 flyCatch = isFly(bd1) ? (FlyModel) bd1 : (FlyModel) bd2;
                 flyCatch.setVisible(false);
-                dale.setVisible(false);
                 dale.setWinLose(false);
             }
         } catch (Exception e) {
