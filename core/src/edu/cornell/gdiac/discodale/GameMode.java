@@ -83,7 +83,7 @@ public class GameMode implements Screen {
 	protected BitmapFont displayFont;
 	protected Texture background;
 	private static int BG_ANIMATION_FRAMES = 4;
-	private static int EXIT_ANIMATION_FRAMES = 43;
+	private static int EXIT_ANIMATION_FRAMES = 2;
 	protected Texture[] background_anim = new Texture[BG_ANIMATION_FRAMES];
 	protected int bg_anim_frame = 0;
 	protected int exit_anim_frame = 0;
@@ -809,6 +809,7 @@ public class GameMode implements Screen {
 		ticks++;
 		if (ticks % 13 == 0) {
 			bg_anim_frame = (bg_anim_frame + 1) % BG_ANIMATION_FRAMES;
+		} else if (ticks % 50 == 0) {
 			exit_anim_frame = (exit_anim_frame + 1) % EXIT_ANIMATION_FRAMES;
 		}
 
@@ -1302,7 +1303,7 @@ public class GameMode implements Screen {
 		this.reflectiveScaffolds.put(ScaffoldType.DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldDownRight", Texture.class)));
 		this.reflectiveScaffolds.put(ScaffoldType.UP_LEFT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpLeft", Texture.class)));
 		this.reflectiveScaffolds.put(ScaffoldType.UP_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpRight", Texture.class)));
-		goalTile = new FilmStrip(directory.getEntry("shared:goal", Texture.class), 6, 8);
+		goalTile = new FilmStrip(directory.getEntry("shared:goal", Texture.class), 1, 2);
 		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
 		background = directory.getEntry("menu:bg", Texture.class);
 		for (int i = 0; i < BG_ANIMATION_FRAMES; i++){

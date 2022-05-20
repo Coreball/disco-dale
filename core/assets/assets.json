@@ -70,7 +70,7 @@
             "wrapU": "repeated",
             "wrapV": "repeated"
         },
-        "shared:goal":   "platform/exit_right_spritesheet.png",
+        "shared:goal":   "platform/exit_static.png",
         "platform:fly": "platform/fly.png",
         "platform:head:pink": "platform/head/headpink.png",
         "platform:head:blue": "platform/head/headblue.png",
