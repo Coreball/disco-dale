@@ -104,6 +104,8 @@ public class DaleModel extends WheelObstacle {
 	private FilmStrip[] bodyWalkTextures;
 	private FilmStrip[] bodyFlyingTextures;
 
+	private boolean isVisible = true;
+
 	/** Seconds per frame */
 	private static final float ANIMATION_SPEED = 0.10f;
 	private float bodyWalkAnimationClock;
@@ -126,6 +128,10 @@ public class DaleModel extends WheelObstacle {
 	public void rotateColor() {
 		colorIndex = (colorIndex + 1) % availableColors.length;
 	}
+
+	public void setVisible(boolean visible) { this.isVisible = visible; }
+
+	public boolean getVisible() { return isVisible; }
 
 	/**
 	 * Returns left/right movement of this character.
@@ -724,6 +730,7 @@ public class DaleModel extends WheelObstacle {
 	 * @param canvas Drawing context
 	 */
 	public void draw(GameCanvas canvas) {
+		if (!isVisible) return;
 		boolean headFacingRight = Math.cos(getAngle()) >= 0;
 		float headFlipY = headFacingRight ? 1.0f : -1.0f;
 		boolean bodyFacingRight = Math.cos(bodyPart.getAngle()) >= 0;
