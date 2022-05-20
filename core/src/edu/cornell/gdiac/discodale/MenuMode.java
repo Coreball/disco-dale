@@ -106,7 +106,7 @@ public class MenuMode implements Screen, InputProcessor {
     /** The texture for the options, complete and pause background */
     protected Texture windowBg;
 
-    private static final int WIN_FRAME = 12;
+    private static final int WIN_FRAME = 24;
     protected FilmStrip win;
     protected float winFrame;
 
@@ -365,7 +365,7 @@ public class MenuMode implements Screen, InputProcessor {
         ticks++;
         if (type == Type.PAUSE && ticks % 30 == 0)
             pause_anim_frame = (pause_anim_frame + 1) % PAUSE_ANIM_FRAME;
-        if (type == Type.LEVEL_COMPLETE && ticks % 10 == 0)
+        if (type == Type.LEVEL_COMPLETE && ticks % 5 == 0)
             winFrame = (winFrame + 1) % WIN_FRAME;
     }
 
@@ -499,7 +499,7 @@ public class MenuMode implements Screen, InputProcessor {
 
         win.setFrame((int)winFrame);
         canvas.draw(win, Color.WHITE, win.getRegionWidth()/2f, win.getRegionHeight()/2f,
-                canvas.getWidth()/2f, canvas.getHeight()/2.5f, 0, sx, sy);
+                canvas.getWidth()/2f, canvas.getHeight()/2.5f, 0, sx * 1.5f, sy * 1.5f);
 
         String timeString = showNewBestTime
                 ? "Time: [#FD3796]" + formatSecondsString(completedLevelTime) + " New Best![]"
@@ -545,7 +545,7 @@ public class MenuMode implements Screen, InputProcessor {
         for (int i = 0; i < PAUSE_ANIM_FRAME; i++){
             pause[i] = directory.getEntry("menu:pause" + (i+1), Texture.class);
         }
-        win = new FilmStrip(directory.getEntry("menu:win", Texture.class), 2, 6);
+        win = new FilmStrip(directory.getEntry("menu:win", Texture.class), 4, 6);
         title = directory.getEntry("menu:title", Texture.class);
         levelSelect = directory.getEntry("menu:level", Texture.class);
         for (int i = 0; i < LEVEL_PAGES; i++){
