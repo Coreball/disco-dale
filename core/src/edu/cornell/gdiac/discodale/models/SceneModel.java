@@ -69,6 +69,7 @@ public class SceneModel {
     /** The texture for walls and platforms */
     protected Map<ScaffoldType, TextureRegion> brickScaffolds;
     protected Map<ScaffoldType, TextureRegion> reflectiveScaffolds;
+    protected Map<WallType, TextureRegion> walls;
     /** The texture for the exit condition */
     protected TextureRegion goalTile;
 
@@ -140,6 +141,10 @@ public class SceneModel {
 
     public void setReflectiveScaffolds(Map<ScaffoldType, TextureRegion> reflectiveScaffolds) {
         this.reflectiveScaffolds = reflectiveScaffolds;
+    }
+
+    public void setWalls(Map<WallType, TextureRegion> walls) {
+        this.walls = walls;
     }
 
     public Vector2 getDaleStart() {
@@ -397,7 +402,7 @@ public class SceneModel {
         updateGrid();
     }
 
-    public void addBrickWall(float[] vertices, String name, JsonValue defaults) {
+    public void addBrickWall(float[] vertices, String name, JsonValue defaults, WallType type) {
         PolygonObstacle obj;
         obj = new PolygonObstacle(vertices, 0, 0);
         obj.setBodyType(BodyDef.BodyType.StaticBody);
@@ -405,7 +410,7 @@ public class SceneModel {
         obj.setFriction(defaults.getFloat("friction", 0.0f));
         obj.setRestitution(defaults.getFloat("restitution", 0.0f));
         obj.setDrawScale(scale);
-        obj.setTexture(brickTile);
+        obj.setTexture(walls.get(type));
         obj.setName(name);
         Filter objFilter = new Filter();
         objFilter.categoryBits = 0b00000001;

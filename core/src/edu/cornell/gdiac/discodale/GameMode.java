@@ -201,6 +201,7 @@ public class GameMode implements Screen {
 	private AdjustTarget adjustTarget = AdjustTarget.GRAPPLE_SPEED;
 	private Map<ScaffoldType, TextureRegion> brickScaffolds;
 	private Map<ScaffoldType, TextureRegion> reflectiveScaffolds;
+	private Map<WallType, TextureRegion> walls;
 
 	/** Enum for which value to change with the increase/decrease buttons */
 	private enum AdjustTarget {
@@ -1311,12 +1312,13 @@ public class GameMode implements Screen {
 
 		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles
-		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
+//		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
 //		brickScaffold = new TextureRegion(directory.getEntry("shared:brickScaffold", Texture.class));
 //		reflectiveScaffold = new TextureRegion(directory.getEntry("shared:reflectiveScaffold", Texture.class));
 		this.brickScaffolds = new HashMap<>();
 		this.reflectiveScaffolds = new HashMap<>();
+		this.walls = new HashMap<>();
 		this.brickScaffolds.put(ScaffoldType.HORIZONTAL, new TextureRegion(directory.getEntry("shared:brickScaffoldHorizontal", Texture.class)));
 		this.brickScaffolds.put(ScaffoldType.VERTICAL, new TextureRegion(directory.getEntry("shared:brickScaffoldVertical", Texture.class)));
 		this.brickScaffolds.put(ScaffoldType.DOWN_LEFT, new TextureRegion(directory.getEntry("shared:brickScaffoldDownLeft", Texture.class)));
@@ -1329,6 +1331,19 @@ public class GameMode implements Screen {
 		this.reflectiveScaffolds.put(ScaffoldType.DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldDownRight", Texture.class)));
 		this.reflectiveScaffolds.put(ScaffoldType.UP_LEFT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpLeft", Texture.class)));
 		this.reflectiveScaffolds.put(ScaffoldType.UP_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpRight", Texture.class)));
+		this.walls.put(WallType.NEUTRAL, new TextureRegion(directory.getEntry("shared:wallNeutral", Texture.class)));
+		this.walls.put(WallType.DOWN, new TextureRegion(directory.getEntry("shared:wallDown", Texture.class)));
+		this.walls.put(WallType.UP, new TextureRegion(directory.getEntry("shared:wallUp", Texture.class)));
+		this.walls.put(WallType.LEFT, new TextureRegion(directory.getEntry("shared:wallLeft", Texture.class)));
+		this.walls.put(WallType.RIGHT, new TextureRegion(directory.getEntry("shared:wallRight", Texture.class)));
+		this.walls.put(WallType.OUTER_DOWN_LEFT, new TextureRegion(directory.getEntry("shared:wallOuterDownLeft", Texture.class)));
+		this.walls.put(WallType.OUTER_DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:wallOuterDownRight", Texture.class)));
+		this.walls.put(WallType.OUTER_UP_LEFT, new TextureRegion(directory.getEntry("shared:wallOuterUpLeft", Texture.class)));
+		this.walls.put(WallType.OUTER_UP_RIGHT, new TextureRegion(directory.getEntry("shared:wallOuterUpRight", Texture.class)));
+		this.walls.put(WallType.INNER_DOWN_LEFT, new TextureRegion(directory.getEntry("shared:wallInnerDownLeft", Texture.class)));
+		this.walls.put(WallType.INNER_DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:wallInnerDownRight", Texture.class)));
+		this.walls.put(WallType.INNER_UP_LEFT, new TextureRegion(directory.getEntry("shared:wallInnerUpLeft", Texture.class)));
+		this.walls.put(WallType.INNER_UP_RIGHT, new TextureRegion(directory.getEntry("shared:wallInnerUpRight", Texture.class)));
 		goalTile = new TextureRegion(directory.getEntry("shared:goal", Texture.class));
 		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
 		background = directory.getEntry("menu:bg", Texture.class);
@@ -1359,7 +1374,7 @@ public class GameMode implements Screen {
 			levels[i] = directory.getEntry("level" + Integer.toString(i + 1), JsonValue.class);
 		}
 
-		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, brickScaffolds, reflectiveScaffolds, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		this.levelLoader = new LevelLoader(this.walls, reflectiveTile, brickScaffolds, reflectiveScaffolds, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
 		// loadLevel(levelIndex);
 		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
 	}
