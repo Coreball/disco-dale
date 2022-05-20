@@ -820,8 +820,8 @@ public class GameMode implements Screen {
 			if (ticks % 4 == 0)
 				failFrame = (failFrame + 1) % FAIL_FRAMES;
 			// TODO: get rid of magic numbers
-			failAnimX -= 0.1f;
-			failAnimY += 0.07f;
+			failAnimX -= 0.2f;
+			failAnimY += 0.14f;
 		}
 
 
