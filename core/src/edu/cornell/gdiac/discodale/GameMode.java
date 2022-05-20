@@ -141,6 +141,7 @@ public class GameMode implements Screen {
 	private int failFrame;
 	private float failAnimX;
 	private float failAnimY;
+	private float failAnimSpeed = 1f;
 
 	private Texture flyIdleTexture;
 	private Texture flyChaseTexture;
@@ -318,9 +319,11 @@ public class GameMode implements Screen {
 		}
 		if (value && countdown<0) {
 			countdown = Constants.EXIT_COUNT;
+			dale.setVisible(false);
 			setCameraState(CameraState.FAIL);
 			failAnimX = dale.getX();
 			failAnimY = dale.getY();
+			failAnimSpeed = 1f;
 		}
 		failed = value;
 	}
@@ -371,6 +374,8 @@ public class GameMode implements Screen {
 		levelIndex = index;
 		isNewLevel = true;
 	}
+
+	public int getLevel() { return levelIndex; }
 
 	public void nextLevel(){
 		setLevel((levelIndex + 1) % NUM_LEVELS);
@@ -826,8 +831,9 @@ public class GameMode implements Screen {
 			if (ticks % 4 == 0)
 				failFrame = (failFrame + 1) % FAIL_FRAMES;
 			// TODO: get rid of magic numbers
-			failAnimX -= 0.1f;
-			failAnimY += 0.07f;
+			failAnimX -= 0.2f * failAnimSpeed;
+			failAnimY += 0.14f * failAnimSpeed;
+			failAnimSpeed *= 1.02f;
 		}
 
 		float startX = (this.bounds.getWidth() * this.scene.getTileSize()) - dale.getX();
