@@ -26,7 +26,6 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.JsonValue;
 
-import com.badlogic.gdx.utils.Timer;
 import edu.cornell.gdiac.discodale.controllers.DaleController;
 import edu.cornell.gdiac.discodale.controllers.FlyController;
 
@@ -34,7 +33,6 @@ import edu.cornell.gdiac.discodale.models.*;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.util.*;
 import edu.cornell.gdiac.discodale.obstacle.*;
-import org.w3c.dom.Text;
 
 /**
  * Base class for a world-specific controller.
@@ -85,7 +83,7 @@ public class GameMode implements Screen {
 	private static int BG_ANIMATION_FRAMES = 4;
 	private static int EXIT_ANIMATION_FRAMES = 2;
 	protected Texture[] background_anim = new Texture[BG_ANIMATION_FRAMES];
-	protected int bg_anim_frame = 0;
+	protected int bgAnimFrame = 0;
 	protected int exit_anim_frame = 0;
 
 	/** Reference to the game canvas */
@@ -136,6 +134,13 @@ public class GameMode implements Screen {
 	private FilmStrip[] bodyWalkTextures;
 	/** All body flying textures for Dale, in order of colors */
 	private FilmStrip[] bodyFlyingTextures;
+	/** All failure textures, in order of colors */
+	private FilmStrip[] failTextures;
+	private FilmStrip failTexture;
+	private static final int FAIL_FRAMES = 7;
+	private int failFrame;
+	private float failAnimX;
+	private float failAnimY;
 
 	private Texture flyIdleTexture;
 	private Texture flyChaseTexture;
@@ -198,6 +203,7 @@ public class GameMode implements Screen {
 	private AdjustTarget adjustTarget = AdjustTarget.GRAPPLE_SPEED;
 	private Map<ScaffoldType, TextureRegion> brickScaffolds;
 	private Map<ScaffoldType, TextureRegion> reflectiveScaffolds;
+	private Map<WallType, TextureRegion> walls;
 
 	/** Enum for which value to change with the increase/decrease buttons */
 	private enum AdjustTarget {
@@ -312,6 +318,9 @@ public class GameMode implements Screen {
 		}
 		if (value && countdown<0) {
 			countdown = Constants.EXIT_COUNT;
+			setCameraState(CameraState.FAIL);
+			failAnimX = dale.getX();
+			failAnimY = dale.getY();
 		}
 		failed = value;
 	}
@@ -808,12 +817,18 @@ public class GameMode implements Screen {
 		
 		ticks++;
 		if (ticks % 13 == 0) {
-			bg_anim_frame = (bg_anim_frame + 1) % BG_ANIMATION_FRAMES;
+			bgAnimFrame = (bgAnimFrame + 1) % BG_ANIMATION_FRAMES;
 		} else if (ticks % 50 == 0) {
 			exit_anim_frame = (exit_anim_frame + 1) % EXIT_ANIMATION_FRAMES;
 		}
 
-
+		if (winLose == LOSE_CODE){
+			if (ticks % 4 == 0)
+				failFrame = (failFrame + 1) % FAIL_FRAMES;
+			// TODO: get rid of magic numbers
+			failAnimX -= 0.1f;
+			failAnimY += 0.07f;
+		}
 
 		float startX = (this.bounds.getWidth() * this.scene.getTileSize()) - dale.getX();
 		float startY = (this.bounds.getHeight() * this.scene.getTileSize()) - dale.getY();
@@ -877,13 +892,13 @@ public class GameMode implements Screen {
 						this.bounds,
 						this.scene.getTileSize()
 				);
-
-				daleController.processMovement();
-				daleController.processColorRotation();
-				daleController.processGrappleAction(world);
-				dale.applyForce();
-				dale.applyStickyPartMovement(dt);
-
+				if (dale.getVisible()){
+					daleController.processMovement();
+					daleController.processColorRotation();
+					daleController.processGrappleAction(world);
+					dale.applyForce();
+					dale.applyStickyPartMovement(dt);
+				}
 				isAlert = false;
 
 				for (FlyController flyController : flyControllers) {
@@ -910,10 +925,19 @@ public class GameMode implements Screen {
 				}
 
 				if (dale.getY() * scale.y < -150 && winLose != WIN_CODE) {
-					reset();
+					winLose = LOSE_CODE;
 				}
 //				scene.updateGrid();
 				scene.updateColorRegionMovement();
+				break;
+			case FAIL:
+				canvas.updateCam(
+						failAnimX * scale.x,
+						failAnimY * scale.y,
+						zoom_amount,
+						this.bounds,
+						this.scene.getTileSize()
+				);
 				break;
 		}
 
@@ -923,6 +947,7 @@ public class GameMode implements Screen {
 
 		if(winLose == LOSE_CODE){
 			setFailure(true);
+			failTexture = failTextures[dale.getColor().ordinal()];
 		}
 
 		if (camState == CameraState.PLAY && winLose != WIN_CODE && winLose != LOSE_CODE) {
@@ -1117,7 +1142,7 @@ public class GameMode implements Screen {
 			goalTile.setFrame(exit_anim_frame);
 			canvas.draw(background, Color.WHITE,0, 0, scene.getBounds().getWidth() * scene.getTileSize(),
 					scene.getBounds().getHeight() * scene.getTileSize());
-			canvas.draw(background_anim[bg_anim_frame], Color.WHITE,0, 0,
+			canvas.draw(background_anim[bgAnimFrame], Color.WHITE,0, 0,
 					scene.getBounds().getWidth() * scene.getTileSize(),
 					scene.getBounds().getHeight() * scene.getTileSize());
 			scene.draw(canvas);
@@ -1140,18 +1165,18 @@ public class GameMode implements Screen {
 
 		// Final message
 
-//		if (complete) {
-//			displayFont.setColor(Color.BLACK);
-//			canvas.begin(); // DO NOT SCALE
-//			canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
-//			canvas.end();
-//		} else if (failed) {
-//			diedId = SoundPlayer.playSound(died, diedId, volumeSfx);
-//			displayFont.setColor(Color.BLACK);
-//			canvas.begin(); // DO NOT SCALE
-//			canvas.drawText("FAILURE!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
-//			canvas.end();
-//		}
+		if (complete) {
+			displayFont.setColor(Color.BLACK);
+			canvas.begin(); // DO NOT SCALE
+			//canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
+			canvas.end();
+		} else if (failed) {
+			diedId = SoundPlayer.playSound(died, diedId, volumeSfx);
+			canvas.begin();
+			failTexture.setFrame(failFrame);
+			canvas.draw(failTexture, failAnimX * scale.x, failAnimY * scale.y);
+			canvas.end();
+		}
 	}
 
 	/**
@@ -1277,6 +1302,14 @@ public class GameMode implements Screen {
 				new FilmStrip(directory.getEntry("platform:body:flying:purple", Texture.class), 1, 4),
 		};
 
+		failTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:fail:pink", Texture.class), 1, 7),
+				new FilmStrip(directory.getEntry("platform:fail:blue", Texture.class), 1, 7),
+				new FilmStrip(directory.getEntry("platform:fail:green", Texture.class), 1, 7),
+				new FilmStrip(directory.getEntry("platform:fail:orange", Texture.class), 1, 7),
+				new FilmStrip(directory.getEntry("platform:fail:purple", Texture.class), 1, 7),
+		};
+
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
 		flyChaseTexture = directory.getEntry("platform:flychasing", Texture.class);
 
@@ -1285,12 +1318,13 @@ public class GameMode implements Screen {
 
 		constants = directory.getEntry("platform:constants", JsonValue.class);
 		// Allocate the tiles
-		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
+//		brickTile = new TextureRegion(directory.getEntry("shared:brick", Texture.class));
 		reflectiveTile = new TextureRegion(directory.getEntry("shared:reflective", Texture.class));
 //		brickScaffold = new TextureRegion(directory.getEntry("shared:brickScaffold", Texture.class));
 //		reflectiveScaffold = new TextureRegion(directory.getEntry("shared:reflectiveScaffold", Texture.class));
 		this.brickScaffolds = new HashMap<>();
 		this.reflectiveScaffolds = new HashMap<>();
+		this.walls = new HashMap<>();
 		this.brickScaffolds.put(ScaffoldType.HORIZONTAL, new TextureRegion(directory.getEntry("shared:brickScaffoldHorizontal", Texture.class)));
 		this.brickScaffolds.put(ScaffoldType.VERTICAL, new TextureRegion(directory.getEntry("shared:brickScaffoldVertical", Texture.class)));
 		this.brickScaffolds.put(ScaffoldType.DOWN_LEFT, new TextureRegion(directory.getEntry("shared:brickScaffoldDownLeft", Texture.class)));
@@ -1303,7 +1337,22 @@ public class GameMode implements Screen {
 		this.reflectiveScaffolds.put(ScaffoldType.DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldDownRight", Texture.class)));
 		this.reflectiveScaffolds.put(ScaffoldType.UP_LEFT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpLeft", Texture.class)));
 		this.reflectiveScaffolds.put(ScaffoldType.UP_RIGHT, new TextureRegion(directory.getEntry("shared:reflectiveScaffoldUpRight", Texture.class)));
+
+		this.walls.put(WallType.NEUTRAL, new TextureRegion(directory.getEntry("shared:wallNeutral", Texture.class)));
+		this.walls.put(WallType.DOWN, new TextureRegion(directory.getEntry("shared:wallDown", Texture.class)));
+		this.walls.put(WallType.UP, new TextureRegion(directory.getEntry("shared:wallUp", Texture.class)));
+		this.walls.put(WallType.LEFT, new TextureRegion(directory.getEntry("shared:wallLeft", Texture.class)));
+		this.walls.put(WallType.RIGHT, new TextureRegion(directory.getEntry("shared:wallRight", Texture.class)));
+		this.walls.put(WallType.OUTER_DOWN_LEFT, new TextureRegion(directory.getEntry("shared:wallOuterDownLeft", Texture.class)));
+		this.walls.put(WallType.OUTER_DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:wallOuterDownRight", Texture.class)));
+		this.walls.put(WallType.OUTER_UP_LEFT, new TextureRegion(directory.getEntry("shared:wallOuterUpLeft", Texture.class)));
+		this.walls.put(WallType.OUTER_UP_RIGHT, new TextureRegion(directory.getEntry("shared:wallOuterUpRight", Texture.class)));
+		this.walls.put(WallType.INNER_DOWN_LEFT, new TextureRegion(directory.getEntry("shared:wallInnerDownLeft", Texture.class)));
+		this.walls.put(WallType.INNER_DOWN_RIGHT, new TextureRegion(directory.getEntry("shared:wallInnerDownRight", Texture.class)));
+		this.walls.put(WallType.INNER_UP_LEFT, new TextureRegion(directory.getEntry("shared:wallInnerUpLeft", Texture.class)));
+		this.walls.put(WallType.INNER_UP_RIGHT, new TextureRegion(directory.getEntry("shared:wallInnerUpRight", Texture.class)));
 		goalTile = new FilmStrip(directory.getEntry("shared:goal", Texture.class), 1, 2);
+
 		displayFont = directory.getEntry("shared:alienitalic", BitmapFont.class);
 		background = directory.getEntry("menu:bg", Texture.class);
 		for (int i = 0; i < BG_ANIMATION_FRAMES; i++){
@@ -1333,7 +1382,7 @@ public class GameMode implements Screen {
 			levels[i] = directory.getEntry("level" + Integer.toString(i + 1), JsonValue.class);
 		}
 
-		this.levelLoader = new LevelLoader(brickTile, reflectiveTile, brickScaffolds, reflectiveScaffolds, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		this.levelLoader = new LevelLoader(this.walls, reflectiveTile, brickScaffolds, reflectiveScaffolds, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
 		// loadLevel(levelIndex);
 		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
 	}
