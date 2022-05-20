@@ -65,6 +65,7 @@ public class MenuMode implements Screen, InputProcessor {
     private static final int LEVEL_BUTTONS_MARGIN = 285;
     private static final int LEVEL_BUTTON_ROWS = 2;
     private static final int LEVEL_BUTTON_COLS = 5;
+    private static final int LEVEL_BACK_OFFSET_X = 100;
     private static final int LEVEL_PAGES = 3;
     private static final int LEVEL_PAGE_OFFSET_X_LEFT = 150;
     private static final int LEVEL_PAGE_OFFSET_X_RIGHT = 1700;
@@ -135,6 +136,8 @@ public class MenuMode implements Screen, InputProcessor {
     protected Texture menuPause;
     /** The texture for level select */
     protected Texture levelSelect;
+    /** The texture for back to menu in the level select screen */
+    protected Texture levelBack;
     /** The texture for level buttons */
     protected Texture[] levelButton = new Texture[LEVEL_PAGES];
     protected Texture[] levelPageSwitch = new Texture[LEVEL_PAGES];
@@ -156,6 +159,7 @@ public class MenuMode implements Screen, InputProcessor {
     private boolean playPressed;
     private boolean optionsPressed;
     private boolean exitPressed;
+    private boolean levelBackPressed;
     private boolean optionsReturnPressed;
     private boolean clearSavePressed;
     private boolean accessibilitySelected;
@@ -264,6 +268,13 @@ public class MenuMode implements Screen, InputProcessor {
                 canvas.getWidth()/2f+optionsButton.getWidth()/2f*sx,
                 (OPTIONS_OFFSET_Y+optionsButton.getHeight()/2f)*sy,
                 (OPTIONS_OFFSET_Y-optionsButton.getHeight()/2f)*sy);
+    }
+
+    private boolean inBackBounds(int x, int y){
+        return inBounds(x, y, LEVEL_BACK_OFFSET_X * sx,
+                (LEVEL_BACK_OFFSET_X + levelBack.getWidth()) * sx,
+                (TITLE_OFFSET_Y + levelBack.getHeight()/2f) * sy,
+                (TITLE_OFFSET_Y - levelBack.getHeight()/2f) * sy);
     }
 
     private boolean inExitBounds(int x, int y){
@@ -406,6 +417,8 @@ public class MenuMode implements Screen, InputProcessor {
     public void drawLevelSelect(){
         canvas.draw(levelSelect, Color.WHITE, levelSelect.getWidth()/2f, levelSelect.getHeight()/2f,
                 canvas.getWidth()/2f, TITLE_OFFSET_Y*sy, 0, sx, sy);
+        canvas.draw(levelBack, levelBackPressed?Color.GRAY:Color.WHITE, 0, levelBack.getHeight()/2f,
+                LEVEL_BACK_OFFSET_X*sx, TITLE_OFFSET_Y*sy, 0, sx, sy);
         int x, y, num;
         float bestTime;
         Color tint;
@@ -555,6 +568,7 @@ public class MenuMode implements Screen, InputProcessor {
             levelButton[i] = directory.getEntry("menu:levelbutton" + (i+1), Texture.class);
             levelPageSwitch[i] = directory.getEntry("menu:levelpage" + (i+1), Texture.class);
         }
+        levelBack = directory.getEntry("menu:levelback", Texture.class);
         toggleOn = directory.getEntry("menu:toggleon", Texture.class);
         toggleOff = directory.getEntry("menu:toggleoff", Texture.class);
         slideOn = directory.getEntry("menu:slideon", Texture.class);
@@ -689,6 +703,18 @@ public class MenuMode implements Screen, InputProcessor {
     }
 
     private boolean touchDownLevel(int screenX, int screenY) {
+        if (inBackBounds(screenX, screenY)){
+            levelBackPressed = true;
+            return true;
+        }
+        if (levelPage != 0 && inLevelPreviousBounds(screenX, screenY)) {
+            levelPageLeftPressed = true;
+            return true;
+        }
+        if (levelPage != LEVEL_PAGES - 1 && inLevelNextBounds(screenX, screenY)) {
+            levelPageRightPressed = true;
+            return true;
+        }
         float x, y, left, right, up, down;
         for (int i = 0; i < LEVEL_BUTTON_ROWS; i++){
             for (int j = 0; j < LEVEL_BUTTON_COLS; j++) {
@@ -703,14 +729,6 @@ public class MenuMode implements Screen, InputProcessor {
                     return true;
                 }
             }
-        }
-        if (levelPage != 0 && inLevelPreviousBounds(screenX, screenY)) {
-            levelPageLeftPressed = true;
-            return true;
-        }
-        if (levelPage != LEVEL_PAGES - 1 && inLevelNextBounds(screenX, screenY)) {
-            levelPageRightPressed = true;
-            return true;
         }
         return false;
     }
@@ -823,7 +841,10 @@ public class MenuMode implements Screen, InputProcessor {
             levelPage -= 1;
         } else if (levelPageRightPressed && inLevelNextBounds(screenX, screenY)){
             levelPage += 1;
+        } else if (levelBackPressed && inBackBounds(screenX, screenY)){
+            type = Type.START;
         }
+        levelBackPressed = false;
         levelPageLeftPressed  = false;
         levelPageRightPressed  = false;
         return false;
