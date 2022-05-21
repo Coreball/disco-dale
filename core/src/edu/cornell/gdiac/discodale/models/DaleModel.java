@@ -118,24 +118,6 @@ public class DaleModel extends WheelObstacle {
 	/** Caceh for general vector calculations */
 	private final Vector2 vectorCache = new Vector2();
 
-	/** Whether to use the head pattern textures. Static so it can be changed from the pause menu? */
-	private static boolean usePattern = false;
-
-	/**
-	 * Toggle whether to use the pattern variant of the head
-	 */
-	public static void switchUsePattern() {
-		DaleModel.usePattern = !DaleModel.usePattern;
-	}
-
-	/**
-	 * Set if Dale Models should use the pattern variant of the head instead of normal
-	 * @param usePattern true if want to use accessibility pattern
-	 */
-	public static void setUsePattern(boolean usePattern) {
-		DaleModel.usePattern = usePattern;
-	}
-
 	public DaleColor getColor() {
 		return availableColors[colorIndex];
 	}
@@ -780,7 +762,7 @@ public class DaleModel extends WheelObstacle {
 	public void setDaleTexture() {
 		headTextures[colorIndex].setFrame((int) (headGrappleAnimationClock / ANIMATION_SPEED));
 		headPatternTextures[colorIndex].setFrame((int) (headGrappleAnimationClock / ANIMATION_SPEED));
-		this.setTexture(usePattern ? headPatternTextures[colorIndex] : headTextures[colorIndex]);
+		this.setTexture(SaveManager.getInstance().getAccessibilityEnabled() ? headPatternTextures[colorIndex] : headTextures[colorIndex]);
 		if (isGrounded && Math.abs(getVX()) > 1) {
 			bodyWalkTextures[colorIndex].setFrame((int) (bodyWalkAnimationClock / ANIMATION_SPEED));
 			bodyPart.setTexture(bodyWalkTextures[colorIndex]);

@@ -661,8 +661,8 @@ public class GameMode implements Screen {
 		}
 
 		if(input.didColor()){
-			ColorRegionModel.switchDisplay();
-			DaleModel.switchUsePattern();
+			boolean accessibility = SaveManager.getInstance().getAccessibilityEnabled();
+			SaveManager.getInstance().putAccessibilityEnabled(!accessibility);
 		}
 
 		// Handle resets
