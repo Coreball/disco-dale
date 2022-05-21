@@ -110,7 +110,7 @@
         {
          "name":"darkMode",
          "type":"bool",
-         "value":true
+         "value":false
         }],
  "renderorder":"right-down",
  "tiledversion":"1.8.4",
