@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.4" orientation="orthogonal" renderorder="right-down" width="32" height="18" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="3">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="32" height="18" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="7">
+ <editorsettings>
+  <export target="../core/assets/levels/tutorial2.json" format="json"/>
+ </editorsettings>
  <properties>
   <property name="colorMode" type="int" value="0"/>
  </properties>
@@ -26,6 +29,32 @@
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 </data>
  </layer>
+ <objectgroup id="3" name="tutorial">
+  <object id="3" x="128" y="416">
+   <properties>
+    <property name="e" type="int" value="3"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" x="128" y="448">
+   <properties>
+    <property name="e" type="int" value="4"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="5" x="704" y="416">
+   <properties>
+    <property name="e" type="int" value="5"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="6" x="704" y="448">
+   <properties>
+    <property name="e" type="int" value="6"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
  <objectgroup id="2" name="colors">
   <object id="1" type="color1" x="0" y="0">
    <polygon points="0,0 512,0 512,576 0,576"/>

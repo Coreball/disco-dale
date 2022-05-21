@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.4" orientation="orthogonal" renderorder="right-down" width="32" height="18" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="2">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="32" height="18" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="5">
  <editorsettings>
   <export target="../core/assets/levels/cl2.json" format="json"/>
  </editorsettings>
@@ -32,6 +32,26 @@
  <objectgroup id="2" name="colors">
   <object id="1" type="color2" x="0" y="0">
    <polygon points="0,0 1024,0 1024,576 0,576"/>
+  </object>
+ </objectgroup>
+ <objectgroup id="3" name="tutorial">
+  <object id="2" x="192" y="320">
+   <properties>
+    <property name="e" type="int" value="10"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="3" x="192" y="384">
+   <properties>
+    <property name="e" type="int" value="11"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="4" x="320" y="384">
+   <properties>
+    <property name="e" type="int" value="9"/>
+   </properties>
+   <point/>
   </object>
  </objectgroup>
 </map>

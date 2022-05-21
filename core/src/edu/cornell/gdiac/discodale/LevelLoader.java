@@ -110,7 +110,7 @@ public class LevelLoader {
     private void addTutorial(SceneModel model, JsonValue layer) {
         for (JsonValue o : layer.get("objects")) {
             float cx = o.getFloat("x") * this.tileScale;
-            float cy = o.getFloat("y") * this.tileScale;
+            float cy = this.levelBounds.getHeight() - o.getFloat("y") * this.tileScale;
             int num = o.get("properties").child.getInt("value");
 
             model.addTutorialElement(new TutorialElement(this.tutorialUI[num - 1], cx, cy));
