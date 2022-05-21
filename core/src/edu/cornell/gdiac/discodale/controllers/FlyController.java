@@ -131,7 +131,7 @@ public class FlyController {
         if(scene.isRealSightMode()){
             seeDaleInWorld = getSeeDaleInRealWorld();
         }
-        return seeInArea && seeDaleInWorld && !dale.getMatch();
+        return seeInArea && seeDaleInWorld && dale.getVisible() && !dale.getMatch();
     }
 
     /**
@@ -149,7 +149,7 @@ public class FlyController {
                 break;
 
             case CHASE:
-                if (dale.getMatch()) {
+                if (dale.getMatch() || !dale.getVisible()) {
                     fly.setAngry(false);
                     state = FSMState.IDLE;
                 }

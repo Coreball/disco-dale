@@ -52,6 +52,9 @@ public class FlyModel extends CapsuleObstacle {
 	/** Flag angry, whether the fly is chasing Dale or not */
 	private boolean angry;
 
+	/** Whether this fly should be visible. Used in failure animations */
+	private boolean isVisible = true;
+
 	/** Record the direction last frame */
 	boolean faceRight;
 
@@ -72,6 +75,8 @@ public class FlyModel extends CapsuleObstacle {
 	public IdleType getIdleType(){
 		return idleType;
 	}
+
+	public void setVisible(boolean visible) { isVisible = visible; }
 
 	public float getDirection() {
 		return this.velocity.angleDeg();
@@ -226,6 +231,7 @@ public class FlyModel extends CapsuleObstacle {
 	 * @param canvas Drawing context
 	 */
 	public void draw(GameCanvas canvas) {
+		if (!isVisible) return;
 		animator.setFrame((int)animeFrame);
 		float sx = faceRight ? -1f : 1f;
 		canvas.draw(animator, Color.WHITE, origin.x, origin.y, getX() * drawScale.x,

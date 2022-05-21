@@ -39,6 +39,8 @@ public class DesktopLauncher {
 		config.resizable = true;
 		config.title = "Disco Dale";
 // 		config.fullscreen = true;
+		config.foregroundFPS = 60;
+		config.vSyncEnabled = false;
 		new LwjglApplication(new GDXRoot(), config);
 	}
 }

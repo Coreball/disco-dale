@@ -14,6 +14,8 @@ public class CollisionController implements ContactListener {
     private DaleModel dale;
     private PooledList<FlyModel> flies;
     private SceneModel sceneModel;
+    /** The fly that catches dale */
+    private FlyModel flyCatch;
 
     /** Vector math cache */
     private final Vector2 vectorCache = new Vector2();
@@ -26,6 +28,7 @@ public class CollisionController implements ContactListener {
         this.dale = dale;
         this.flies = flies;
         this.sceneModel = sceneModel;
+        this.flyCatch = null;
     }
 
     /**
@@ -81,6 +84,8 @@ public class CollisionController implements ContactListener {
 
             if (((bd1 == dale || bd1 == dale.getBodyPart()) && isFly(bd2)) ||
                     (isFly(bd2) && (bd1 == dale || bd1 == dale.getBodyPart()))) {
+                flyCatch = isFly(bd1) ? (FlyModel) bd1 : (FlyModel) bd2;
+                flyCatch.setVisible(false);
                 dale.setWinLose(false);
             }
         } catch (Exception e) {

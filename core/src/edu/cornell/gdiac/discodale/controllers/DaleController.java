@@ -32,8 +32,10 @@ public class DaleController {
 	}
 
 	public void processColorRotation() {
-		if (InputController.getInstance().didRotateColor()) {
-			dale.rotateColor();
+		if (InputController.getInstance().didRotateColorForward()) {
+			dale.rotateColorForward();
+		} else if (InputController.getInstance().didRotateColorBackward()) {
+			dale.rotateColorBackward();
 		}
 	}
 

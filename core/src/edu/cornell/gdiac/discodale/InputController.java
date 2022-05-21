@@ -61,7 +61,11 @@ public class InputController {
 	private boolean prevPrevious;
 	/** Whether the rotating color action button was pressed. */
 	private boolean rotateColorPressed;
+	private boolean rotateForwardColorPressed;
+	private boolean rotateBackwardColorPressed;
 	private boolean rotateColorPrevious;
+	private boolean rotateForwardColorPrevious;
+	private boolean rotateBackwardColorPrevious;
 	/** Whether the click action button was pressed. */
 	private boolean clickPressed;
 	private boolean clickPrevious;
@@ -141,9 +145,10 @@ public class InputController {
 	 *
 	 * @return true if the primary action button was pressed.
 	 */
-	public boolean didRotateColor() {
-		return rotateColorPressed && !rotateColorPrevious;
+	public boolean didRotateColorForward() {
+		return rotateForwardColorPressed && !rotateForwardColorPrevious;
 	}
+	public boolean didRotateColorBackward() {return rotateBackwardColorPressed && !rotateBackwardColorPrevious;}
 
 	/**
 	 * Returns true if the click action button was pressed.
@@ -282,7 +287,8 @@ public class InputController {
 	public void readInput(Rectangle bounds, Vector2 scale) {
 		// Copy state from last animation frame
 		// Helps us ignore buttons that are held down
-		rotateColorPrevious  = rotateColorPressed;
+		rotateForwardColorPrevious  = rotateForwardColorPressed;
+		rotateBackwardColorPrevious = rotateBackwardColorPressed;
 		clickPrevious = clickPressed;
 		resetPrevious  = resetPressed;
 		debugPrevious  = debugPressed;
@@ -318,9 +324,8 @@ public class InputController {
 	private void readGamepad(Rectangle bounds, Vector2 scale) {
 		resetPressed = xbox.getStart();
 		pausePressed  = xbox.getBack();
-		nextPressed  = xbox.getRBumper();
-		prevPressed  = xbox.getLBumper();
-		rotateColorPressed = xbox.getA();
+		rotateForwardColorPressed = xbox.getRBumper();
+		rotateBackwardColorPressed = xbox.getLBumper();
 		debugPressed  = xbox.getY();
 
 		// Increase animation frame, but only if trying to move
@@ -355,7 +360,8 @@ public class InputController {
 		// Give priority to gamepad results
 		resetPressed = (secondary && resetPressed) || (Gdx.input.isKeyPressed(Input.Keys.R));
 		debugPressed = (secondary && debugPressed) || (Gdx.input.isKeyPressed(Input.Keys.G));
-		rotateColorPressed = (secondary && rotateColorPressed) || (Gdx.input.isKeyPressed(Input.Keys.SPACE));
+		rotateForwardColorPressed = (secondary && rotateForwardColorPressed) || (Gdx.input.isKeyPressed(Input.Keys.SPACE));
+		rotateBackwardColorPressed = (secondary && rotateBackwardColorPressed) || (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT));
 		prevPressed = (secondary && prevPressed) || (Gdx.input.isKeyPressed(Input.Keys.P));
 		nextPressed = (secondary && nextPressed) || (Gdx.input.isKeyPressed(Input.Keys.N));
 		pausePressed  = (secondary && pausePressed) || (Gdx.input.isKeyPressed(Input.Keys.ESCAPE));

@@ -4,5 +4,6 @@ public enum CameraState {
     START,
     PAN,
     ZOOM,
-    PLAY;
+    PLAY,
+    FAIL
 }
