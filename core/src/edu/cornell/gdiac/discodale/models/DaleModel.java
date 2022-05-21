@@ -118,6 +118,14 @@ public class DaleModel extends WheelObstacle {
 	/** Caceh for general vector calculations */
 	private final Vector2 vectorCache = new Vector2();
 
+	public DaleColor[] getAvailableColors() {
+		return availableColors;
+	}
+
+	public int getColorIndex() {
+		return colorIndex;
+	}
+
 	public DaleColor getColor() {
 		return availableColors[colorIndex];
 	}
