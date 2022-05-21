@@ -13,6 +13,7 @@ import java.util.stream.StreamSupport;
 
 public class LevelLoader {
 
+    private final TextureRegion[] tutorialUI;
     /** The texture for brick and reflective walls */
     protected Map<WallType, TextureRegion> wallTiles;
     protected TextureRegion reflectiveTile;
@@ -29,7 +30,8 @@ public class LevelLoader {
     private Rectangle bounds;
     private Vector2 scale;
 
-    public LevelLoader(Map<WallType, TextureRegion> wallTiles, TextureRegion reflectiveTile, Map<ScaffoldType, TextureRegion> brickScaffolds, Map<ScaffoldType, TextureRegion> reflectiveScaffolds, TextureRegion goalTile, float width, float height) {
+    public LevelLoader(Map<WallType, TextureRegion> wallTiles, TextureRegion reflectiveTile, Map<ScaffoldType, TextureRegion> brickScaffolds, Map<ScaffoldType, TextureRegion> reflectiveScaffolds, TextureRegion goalTile, float width, float height, TextureRegion[] tutorialUI) {
+        this.tutorialUI = tutorialUI;
         this.wallTiles = wallTiles;
         this.reflectiveTile = reflectiveTile;
         this.brickScaffolds = brickScaffolds;
@@ -89,6 +91,7 @@ public class LevelLoader {
         model.setGoalTexture(this.goalTile);
         model.setDarkMode(darkMode);
 
+
         for (JsonValue layer : json.get("layers")) {
             if (layer.getString("name").equals("colors")) {
                 addColors(model, layer);
@@ -96,10 +99,22 @@ public class LevelLoader {
                 addPlatforms(model, layer, defaults);
             } else if (layer.getString("name").equalsIgnoreCase("spotlight")) {
                 addSpotlight(model, layer, defaults);
+            } else if (layer.getString("name").equalsIgnoreCase("tutorial")) {
+                addTutorial(model, layer);
             }
         }
 
         return model;
+    }
+
+    private void addTutorial(SceneModel model, JsonValue layer) {
+        for (JsonValue o : layer.get("objects")) {
+            float cx = o.getFloat("x") * this.tileScale;
+            float cy = this.levelBounds.getHeight() - o.getFloat("y") * this.tileScale;
+            int num = o.get("properties").child.getInt("value");
+
+            model.addTutorialElement(new TutorialElement(this.tutorialUI[num - 1], cx, cy));
+        }
     }
 
     private void addSpotlight(SceneModel model, JsonValue layer, JsonValue defaults) {
@@ -188,7 +203,7 @@ public class LevelLoader {
                     case 11:
                         model.setGoal(
                                 ((j + 1) * this.tileWidth - (float) this.tileWidth / 2) / scale.x,
-                                ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
+                                ((height - i) * this.tileHeight - (float) this.tileHeight / 2 + 40) / scale.y
                         );
                         break;
                     case 12:
