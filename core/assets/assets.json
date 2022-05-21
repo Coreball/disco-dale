@@ -232,7 +232,8 @@
         "level22": "levels/cz1.json",
         "level23": "levels/cl9.json",
         "level24": "levels/cl10.json",
-        "level25": "levels/ss3.json"
+        "level25": "levels/ss3.json",
+        "level26": "levels/ss4.json"
     },
     "sounds" : {
         "theme" : "sound/theme.mp3",
