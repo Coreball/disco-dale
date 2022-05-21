@@ -9,10 +9,7 @@ import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import edu.cornell.gdiac.discodale.GameCanvas;
-import edu.cornell.gdiac.discodale.models.DaleColor;
-
-import javax.swing.plaf.synth.SynthTextAreaUI;
-import javax.swing.text.Utilities;
+import edu.cornell.gdiac.discodale.SaveManager;
 
 public class ColorRegionModel implements Cloneable{
 	/** An earclipping triangular to make sure we work with convex shapes */
@@ -30,7 +27,6 @@ public class ColorRegionModel implements Cloneable{
 
 	/** Polygon Region used for drawing */
 	private PolygonRegion polygonRegionTexture;
-	private static boolean useTexture;
 
 	/** Array of color textures */
 	private static TextureRegion[] colors = new TextureRegion[5];
@@ -157,7 +153,7 @@ public class ColorRegionModel implements Cloneable{
 //		for (PolygonShape tri : shapes) {
 //			canvas.drawFilledTri(tri, color.toGdxColor(),0f,0f,getAngle(), drawScale.x,drawScale.y);
 //		}
-		if (useTexture){
+		if (SaveManager.getInstance().getAccessibilityEnabled()){
 			polygonRegionTexture = new PolygonRegion(colors[color.ordinal()],
 					polygonRegion.getVertices(), polygonRegion.getTriangles());
 			canvas.draw(polygonRegionTexture, 0, 0);
@@ -165,13 +161,4 @@ public class ColorRegionModel implements Cloneable{
 			canvas.draw(polygonRegion, color.toGdxColor(), 0, 0);
 		}
 	}
-
-	public static void switchDisplay(){
-		useTexture = !useTexture;
-	}
-
-	public static void setDisplay(boolean useColorTexture){ useTexture = useColorTexture;}
-
-	public static boolean getDisplay(){ return useTexture;}
-
 }
