@@ -1,5 +1,60 @@
 {
     "textures": {
+        "shared:t1": {
+            "file": "platform/t1.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t2": {
+            "file": "platform/t2.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t3": {
+            "file": "platform/t3.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t4": {
+            "file": "platform/t4.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t5": {
+            "file": "platform/t5.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t6": {
+            "file": "platform/t6.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t7": {
+            "file": "platform/t7.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t8": {
+            "file": "platform/t8.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t9": {
+            "file": "platform/t9.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t10": {
+            "file": "platform/t10.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t11": {
+            "file": "platform/t11.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
         "shared:wallNeutral" : {
             "file":  "platform/wall.png",
             "wrapU": "repeated",
