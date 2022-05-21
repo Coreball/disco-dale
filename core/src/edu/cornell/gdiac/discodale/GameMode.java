@@ -573,19 +573,21 @@ public class GameMode implements Screen {
 		DaleColor[] availableColors = scene.getPossibleColors();
 
 		FilmStrip[] availableHeadTextures = new FilmStrip[availableColors.length];
+		FilmStrip[] availableHeadPatternTextures = new FilmStrip[availableColors.length];
 		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
 		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
 		FilmStrip[] availableBodyFlyingTextures = new FilmStrip[availableColors.length];
 		for (int i = 0; i < availableColors.length; i++) {
 			int colorIndex = availableColors[i].ordinal();
 			availableHeadTextures[i] = headTextures[colorIndex];
+			availableHeadPatternTextures[i] = headPatternTextures[colorIndex];
 			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
 			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
 			availableBodyFlyingTextures[i] = bodyFlyingTextures[colorIndex];
 		}
 
 		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
-				radius, width, height, bodyOffset, availableColors, availableHeadTextures,
+				radius, width, height, bodyOffset, availableColors, availableHeadTextures, availableHeadPatternTextures,
 				availableBodyIdleTextures, availableBodyWalkTextures, availableBodyFlyingTextures);
 		dale.setDrawScale(scale);
 		dale.setColor(daleBackground());
@@ -660,6 +662,7 @@ public class GameMode implements Screen {
 
 		if(input.didColor()){
 			ColorRegionModel.switchDisplay();
+			DaleModel.switchUsePattern();
 		}
 
 		// Handle resets

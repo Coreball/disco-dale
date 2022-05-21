@@ -100,6 +100,7 @@ public class DaleModel extends WheelObstacle {
 	private int colorIndex;
 	private DaleColor[] availableColors;
 	private FilmStrip[] headTextures;
+	private FilmStrip[] headPatternTextures;
 	private TextureRegion[] bodyIdleTextures;
 	private FilmStrip[] bodyWalkTextures;
 	private FilmStrip[] bodyFlyingTextures;
@@ -116,6 +117,24 @@ public class DaleModel extends WheelObstacle {
 	private final Vector2 forceCache = new Vector2();
 	/** Caceh for general vector calculations */
 	private final Vector2 vectorCache = new Vector2();
+
+	/** Whether to use the head pattern textures. Static so it can be changed from the pause menu? */
+	private static boolean usePattern = false;
+
+	/**
+	 * Toggle whether to use the pattern variant of the head
+	 */
+	public static void switchUsePattern() {
+		DaleModel.usePattern = !DaleModel.usePattern;
+	}
+
+	/**
+	 * Set if Dale Models should use the pattern variant of the head instead of normal
+	 * @param usePattern true if want to use accessibility pattern
+	 */
+	public static void setUsePattern(boolean usePattern) {
+		DaleModel.usePattern = usePattern;
+	}
 
 	public DaleColor getColor() {
 		return availableColors[colorIndex];
@@ -513,7 +532,7 @@ public class DaleModel extends WheelObstacle {
 	 * @param bodyFlyingTextures Body flying textures in order of colors
 	 */
 	public DaleModel(float x, float y, JsonValue data, float headRadius, float bodyWidth, float bodyHeight,
-					 float bodyOffset, DaleColor[] availableColors, FilmStrip[] headTextures,
+					 float bodyOffset, DaleColor[] availableColors, FilmStrip[] headTextures, FilmStrip[] headPatternTextures,
 					 TextureRegion[] bodyIdleTextures, FilmStrip[] bodyWalkTextures, FilmStrip[] bodyFlyingTextures) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(x, y, headRadius * data.getFloat("head_shrink", 1));
@@ -569,6 +588,7 @@ public class DaleModel extends WheelObstacle {
 		colorIndex = 0;
 		this.availableColors = availableColors;
 		this.headTextures = headTextures;
+		this.headPatternTextures = headPatternTextures;
 		this.bodyIdleTextures = bodyIdleTextures;
 		this.bodyWalkTextures = bodyWalkTextures;
 		this.bodyFlyingTextures = bodyFlyingTextures;
@@ -759,7 +779,8 @@ public class DaleModel extends WheelObstacle {
 
 	public void setDaleTexture() {
 		headTextures[colorIndex].setFrame((int) (headGrappleAnimationClock / ANIMATION_SPEED));
-		this.setTexture(headTextures[colorIndex]);
+		headPatternTextures[colorIndex].setFrame((int) (headGrappleAnimationClock / ANIMATION_SPEED));
+		this.setTexture(usePattern ? headPatternTextures[colorIndex] : headTextures[colorIndex]);
 		if (isGrounded && Math.abs(getVX()) > 1) {
 			bodyWalkTextures[colorIndex].setFrame((int) (bodyWalkAnimationClock / ANIMATION_SPEED));
 			bodyPart.setTexture(bodyWalkTextures[colorIndex]);

@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Rectangle;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.discodale.models.ColorRegionModel;
+import edu.cornell.gdiac.discodale.models.DaleModel;
 import edu.cornell.gdiac.util.FilmStrip;
 import edu.cornell.gdiac.util.ScreenListener;
 
@@ -810,7 +811,7 @@ public class MenuMode implements Screen, InputProcessor {
             result = false;
         } else if (inOptionsBounds(screenX, screenY) && optionsPressed) {
             typePrevious = Type.START;
-            accessibilitySelected = ColorRegionModel.getDisplay();
+            accessibilitySelected = ColorRegionModel.getDisplay(); // DaleModel should be same
             this.type = Type.OPTIONS;
             result = false;
         } else if (inExitBounds(screenX, screenY) && exitPressed) {
@@ -854,6 +855,7 @@ public class MenuMode implements Screen, InputProcessor {
         boolean result = true;
         if (inOptionsReturnBounds(screenX, screenY) && optionsReturnPressed){
             ColorRegionModel.setDisplay(accessibilitySelected);
+            DaleModel.setUsePattern(accessibilitySelected);
             this.type = typePrevious;
             typePrevious = Type.OPTIONS;
             result = false;
