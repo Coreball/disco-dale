@@ -145,6 +145,11 @@ public class GameMode implements Screen {
 	private float failAnimY;
 	private float failAnimSpeed = 1f;
 
+	private static final int EXIT_FRAMES = 6;
+	private FilmStrip[] exitTextures;
+	private FilmStrip exitTexture;
+	private int exitFrame;
+
 	private Texture flyIdleTexture;
 	private Texture flyChaseTexture;
 
@@ -294,6 +299,7 @@ public class GameMode implements Screen {
 		}
 		if (value && countdown<0) {
 			countdown = Constants.EXIT_COUNT;
+			dale.setVisible(false);
 		}
 		complete = value;
 	}
@@ -833,14 +839,6 @@ public class GameMode implements Screen {
 			exit_anim_frame = (exit_anim_frame + 1) % EXIT_ANIMATION_FRAMES;
 		}
 
-		if (winLose == LOSE_CODE){
-			if (ticks % 4 == 0)
-				failFrame = (failFrame + 1) % FAIL_FRAMES;
-			// TODO: get rid of magic numbers
-			failAnimX -= 0.2f * failAnimSpeed;
-			failAnimY += 0.14f * failAnimSpeed;
-			failAnimSpeed *= 1.02f;
-		}
 
 		float startX = (this.bounds.getWidth() * this.scene.getTileSize()) - dale.getX();
 		float startY = (this.bounds.getHeight() * this.scene.getTileSize()) - dale.getY();
@@ -953,10 +951,19 @@ public class GameMode implements Screen {
 		}
 
 		if(winLose == WIN_CODE){
+			if (ticks % 10 == 0)
+				exitFrame = Math.min(exitFrame + 1, EXIT_FRAMES - 1);
 			setComplete(true);
+			exitTexture = exitTextures[dale.getColor().ordinal()];
 		}
 
 		if(winLose == LOSE_CODE){
+			if (ticks % 4 == 0)
+				failFrame = (failFrame + 1) % FAIL_FRAMES;
+			// TODO: get rid of magic numbers
+			failAnimX -= 0.2f * failAnimSpeed;
+			failAnimY += 0.14f * failAnimSpeed;
+			failAnimSpeed *= 1.02f;
 			setFailure(true);
 			failTexture = failTextures[dale.getColor().ordinal()];
 		}
@@ -1178,8 +1185,10 @@ public class GameMode implements Screen {
 
 		if (complete) {
 			displayFont.setColor(Color.BLACK);
-			canvas.begin(); // DO NOT SCALE
-			//canvas.drawText("VICTORY!", displayFont, (dale.getX() * scale.x) - 130, (dale.getY() * scale.y) + 50);
+			canvas.begin();
+			exitTexture.setFrame(exitFrame);
+			canvas.draw(exitTexture, (scene.goalDoor.getX() - scene.goalDoor.getWidth()/2f) * scale.x,
+					(scene.goalDoor.getY() - scene.goalDoor.getHeight()/2f) * scale.y);
 			canvas.end();
 		} else if (failed) {
 			diedId = SoundPlayer.playSound(died, diedId, volumeSfx);
@@ -1327,6 +1336,14 @@ public class GameMode implements Screen {
 				new FilmStrip(directory.getEntry("platform:fail:green", Texture.class), 1, 7),
 				new FilmStrip(directory.getEntry("platform:fail:orange", Texture.class), 1, 7),
 				new FilmStrip(directory.getEntry("platform:fail:purple", Texture.class), 1, 7),
+		};
+
+		exitTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:exit:pink", Texture.class), 1, 6),
+				new FilmStrip(directory.getEntry("platform:exit:blue", Texture.class), 1, 6),
+				new FilmStrip(directory.getEntry("platform:exit:green", Texture.class), 1, 6),
+				new FilmStrip(directory.getEntry("platform:exit:orange", Texture.class), 1, 6),
+				new FilmStrip(directory.getEntry("platform:exit:purple", Texture.class), 1, 6),
 		};
 
 		flyIdleTexture = directory.getEntry("platform:flyidle", Texture.class);
