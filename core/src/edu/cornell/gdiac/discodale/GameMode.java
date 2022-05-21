@@ -300,6 +300,7 @@ public class GameMode implements Screen {
 		if (value && countdown<0) {
 			countdown = Constants.EXIT_COUNT;
 			dale.setVisible(false);
+			exitFrame = 0;
 		}
 		complete = value;
 	}
