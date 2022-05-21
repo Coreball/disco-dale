@@ -1171,6 +1171,8 @@ public class GameMode implements Screen {
 			canvas.end();
 		}
 
+		drawColorIndicator();
+
 
 		if (debug) {
 			canvas.beginDebug();
@@ -1198,6 +1200,34 @@ public class GameMode implements Screen {
 			canvas.draw(failTexture, failAnimX * scale.x, failAnimY * scale.y);
 			canvas.end();
 		}
+	}
+
+	/**
+	 * Draw a color change indicator (uses screen coordinates)
+	 */
+	private void drawColorIndicator() {
+		canvas.beginStatic();
+		DaleColor[] availableColors = dale.getAvailableColors();
+		int currentColorIndex = dale.getColorIndex();
+		TextureRegion[] heads = Arrays.stream(availableColors)
+				.map(Enum::ordinal)
+				.map(colorIndex -> SaveManager.getInstance().getAccessibilityEnabled()
+						? headPatternTextures[colorIndex]
+						: headTextures[colorIndex])
+				.peek(filmStrip -> filmStrip.setFrame(0))
+				.toArray(FilmStrip[]::new);
+		float headWidth = heads[0].getRegionWidth();
+		float headHeight = heads[0].getRegionHeight();
+//		float x = canvas.getWidth() - (headWidth * heads.length); // Top right corner
+		float x = canvas.getWidth() / 2f - (headWidth * (heads.length - 1)) / 2f; // Top center
+		float y = canvas.getHeight() - headHeight;
+		float scale;
+		for (int i = 0; i < heads.length; i++) {
+			scale = i == currentColorIndex ? 1 : 0.5f;
+			canvas.draw(heads[i], Color.WHITE, headWidth / 2, headHeight / 2, x, y, 0, scale, scale);
+			x += headWidth;
+		}
+		canvas.end();
 	}
 
 	/**

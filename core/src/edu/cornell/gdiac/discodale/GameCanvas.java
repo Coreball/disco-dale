@@ -77,6 +77,9 @@ public class GameCanvas {
 	
 	/** Camera for the underlying SpriteBatch */
 	private OrthographicCamera camera;
+
+	/** Camera for SpriteBatch, but doesn't get transformed/rotated/whatever */
+	private OrthographicCamera cameraStatic;
 	
 	/** Value to cache window width (if we are currently full screen) */
 	int width;
@@ -109,6 +112,10 @@ public class GameCanvas {
 		camera.setToOrtho(false);
 		spriteBatch.setProjectionMatrix(camera.combined);
 		debugRender.setProjectionMatrix(camera.combined);
+
+		// Set up alternative camera
+		cameraStatic = new OrthographicCamera(getWidth(), getHeight());
+		cameraStatic.setToOrtho(false);
 
 		// Initialize the cache objects
 		holder = new TextureRegion();
@@ -273,6 +280,7 @@ public class GameCanvas {
 		spriteBatch.getProjectionMatrix().setToOrtho2D(0,0, getWidth(), getHeight());
 		if ((getWidth() <= bounds.getWidth()*64) && (getHeight() <= bounds.getHeight()*64)){
 			camera.setToOrtho(false, getWidth(), getHeight());
+			cameraStatic.setToOrtho(false, getWidth(), getHeight());
 		} else {
 			System.out.println("Camera out of bounds!");
 		}
@@ -291,6 +299,7 @@ public class GameCanvas {
 		// Resizing screws up the spriteBatch projection matrix
 		spriteBatch.getProjectionMatrix().setToOrtho2D(0,0, getWidth(), getHeight());
 		camera.setToOrtho(false, getWidth(), getHeight());
+		cameraStatic.setToOrtho(false, getWidth(), getHeight());
 	}
 	
 	/**
@@ -343,6 +352,15 @@ public class GameCanvas {
     	// Clear the screen
 		Gdx.gl.glClearColor(0.39f, 0.58f, 0.93f, 1.0f);  // Homage to the XNA years
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);		
+	}
+
+	/**
+	 * Start a standard drawing sequence using a camera that does not move
+	 */
+	public void beginStatic() {
+		spriteBatch.setProjectionMatrix(cameraStatic.combined);
+		spriteBatch.begin();
+		active = DrawPass.STANDARD;
 	}
 
 	public void begin2(){
