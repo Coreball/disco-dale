@@ -128,6 +128,8 @@ public class GameMode implements Screen {
 
 	/** All head textures for Dale, in order of colors */
 	private FilmStrip[] headTextures;
+	/** All patterned head textures for Dale, in order of colors */
+	private FilmStrip[] headPatternTextures;
 	/** All body idle textures for Dale, in order of colors */
 	private TextureRegion[] bodyIdleTextures;
 	/** All body walk textures for Dale, in order of colors */
@@ -571,19 +573,21 @@ public class GameMode implements Screen {
 		DaleColor[] availableColors = scene.getPossibleColors();
 
 		FilmStrip[] availableHeadTextures = new FilmStrip[availableColors.length];
+		FilmStrip[] availableHeadPatternTextures = new FilmStrip[availableColors.length];
 		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
 		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
 		FilmStrip[] availableBodyFlyingTextures = new FilmStrip[availableColors.length];
 		for (int i = 0; i < availableColors.length; i++) {
 			int colorIndex = availableColors[i].ordinal();
 			availableHeadTextures[i] = headTextures[colorIndex];
+			availableHeadPatternTextures[i] = headPatternTextures[colorIndex];
 			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
 			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
 			availableBodyFlyingTextures[i] = bodyFlyingTextures[colorIndex];
 		}
 
 		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
-				radius, width, height, bodyOffset, availableColors, availableHeadTextures,
+				radius, width, height, bodyOffset, availableColors, availableHeadTextures, availableHeadPatternTextures,
 				availableBodyIdleTextures, availableBodyWalkTextures, availableBodyFlyingTextures);
 		dale.setDrawScale(scale);
 		dale.setColor(daleBackground());
@@ -657,7 +661,8 @@ public class GameMode implements Screen {
 		}
 
 		if(input.didColor()){
-			ColorRegionModel.switchDisplay();
+			boolean accessibility = SaveManager.getInstance().getAccessibilityEnabled();
+			SaveManager.getInstance().putAccessibilityEnabled(!accessibility);
 		}
 
 		// Handle resets
@@ -1292,6 +1297,14 @@ public class GameMode implements Screen {
 				new FilmStrip(directory.getEntry("platform:head:purple", Texture.class), 1, 3),
 		};
 
+		headPatternTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:headpattern:pink", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:blue", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:green", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:orange", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:purple", Texture.class), 1, 3),
+		};
+
 		bodyWalkTextures = new FilmStrip[]{
 				new FilmStrip(directory.getEntry("platform:body:walk:pink", Texture.class), 1, 10),
 				new FilmStrip(directory.getEntry("platform:body:walk:blue", Texture.class), 1, 10),
@@ -1379,11 +1392,11 @@ public class GameMode implements Screen {
 		flyAlert = directory.getEntry("alert", Sound.class);
 		colorChange = directory.getEntry("colorchange", Sound.class);
 
-		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
-		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);
-		colors[2] = directory.getEntry("platform:greencolor", Texture.class);
-		colors[3] = directory.getEntry("platform:orangecolor", Texture.class);
-		colors[4] = directory.getEntry("platform:purplecolor", Texture.class);
+		colors[0] = directory.getEntry("platform:colorpattern:pinkcolor", Texture.class);
+		colors[1] = directory.getEntry("platform:colorpattern:bluecolor", Texture.class);
+		colors[2] = directory.getEntry("platform:colorpattern:greencolor", Texture.class);
+		colors[3] = directory.getEntry("platform:colorpattern:orangecolor", Texture.class);
+		colors[4] = directory.getEntry("platform:colorpattern:purplecolor", Texture.class);
 		ColorRegionModel.setColorTexture(colors);
 
 

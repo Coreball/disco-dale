@@ -100,6 +100,7 @@ public class DaleModel extends WheelObstacle {
 	private int colorIndex;
 	private DaleColor[] availableColors;
 	private FilmStrip[] headTextures;
+	private FilmStrip[] headPatternTextures;
 	private TextureRegion[] bodyIdleTextures;
 	private FilmStrip[] bodyWalkTextures;
 	private FilmStrip[] bodyFlyingTextures;
@@ -513,7 +514,7 @@ public class DaleModel extends WheelObstacle {
 	 * @param bodyFlyingTextures Body flying textures in order of colors
 	 */
 	public DaleModel(float x, float y, JsonValue data, float headRadius, float bodyWidth, float bodyHeight,
-					 float bodyOffset, DaleColor[] availableColors, FilmStrip[] headTextures,
+					 float bodyOffset, DaleColor[] availableColors, FilmStrip[] headTextures, FilmStrip[] headPatternTextures,
 					 TextureRegion[] bodyIdleTextures, FilmStrip[] bodyWalkTextures, FilmStrip[] bodyFlyingTextures) {
 		// The shrink factors fit the image to a tigher hitbox
 		super(x, y, headRadius * data.getFloat("head_shrink", 1));
@@ -569,6 +570,7 @@ public class DaleModel extends WheelObstacle {
 		colorIndex = 0;
 		this.availableColors = availableColors;
 		this.headTextures = headTextures;
+		this.headPatternTextures = headPatternTextures;
 		this.bodyIdleTextures = bodyIdleTextures;
 		this.bodyWalkTextures = bodyWalkTextures;
 		this.bodyFlyingTextures = bodyFlyingTextures;
@@ -759,7 +761,8 @@ public class DaleModel extends WheelObstacle {
 
 	public void setDaleTexture() {
 		headTextures[colorIndex].setFrame((int) (headGrappleAnimationClock / ANIMATION_SPEED));
-		this.setTexture(headTextures[colorIndex]);
+		headPatternTextures[colorIndex].setFrame((int) (headGrappleAnimationClock / ANIMATION_SPEED));
+		this.setTexture(SaveManager.getInstance().getAccessibilityEnabled() ? headPatternTextures[colorIndex] : headTextures[colorIndex]);
 		if (isGrounded && Math.abs(getVX()) > 1) {
 			bodyWalkTextures[colorIndex].setFrame((int) (bodyWalkAnimationClock / ANIMATION_SPEED));
 			bodyPart.setTexture(bodyWalkTextures[colorIndex]);
