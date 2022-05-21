@@ -128,6 +128,8 @@ public class GameMode implements Screen {
 
 	/** All head textures for Dale, in order of colors */
 	private FilmStrip[] headTextures;
+	/** All patterned head textures for Dale, in order of colors */
+	private FilmStrip[] headPatternTextures;
 	/** All body idle textures for Dale, in order of colors */
 	private TextureRegion[] bodyIdleTextures;
 	/** All body walk textures for Dale, in order of colors */
@@ -1293,6 +1295,14 @@ public class GameMode implements Screen {
 				new FilmStrip(directory.getEntry("platform:head:purple", Texture.class), 1, 3),
 		};
 
+		headPatternTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:headpattern:pink", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:blue", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:green", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:orange", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:purple", Texture.class), 1, 3),
+		};
+
 		bodyWalkTextures = new FilmStrip[]{
 				new FilmStrip(directory.getEntry("platform:body:walk:pink", Texture.class), 1, 10),
 				new FilmStrip(directory.getEntry("platform:body:walk:blue", Texture.class), 1, 10),
@@ -1380,11 +1390,11 @@ public class GameMode implements Screen {
 		flyAlert = directory.getEntry("alert", Sound.class);
 		colorChange = directory.getEntry("colorchange", Sound.class);
 
-		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
-		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);
-		colors[2] = directory.getEntry("platform:greencolor", Texture.class);
-		colors[3] = directory.getEntry("platform:orangecolor", Texture.class);
-		colors[4] = directory.getEntry("platform:purplecolor", Texture.class);
+		colors[0] = directory.getEntry("platform:colorpattern:pinkcolor", Texture.class);
+		colors[1] = directory.getEntry("platform:colorpattern:bluecolor", Texture.class);
+		colors[2] = directory.getEntry("platform:colorpattern:greencolor", Texture.class);
+		colors[3] = directory.getEntry("platform:colorpattern:orangecolor", Texture.class);
+		colors[4] = directory.getEntry("platform:colorpattern:purplecolor", Texture.class);
 		ColorRegionModel.setColorTexture(colors);
 
 
