@@ -331,7 +331,7 @@ public class SceneModel {
                 break;
             case SCROLL_VERTICAL:
                 for(ColorRegionModel cr:colorRegions){
-                    cr.move(0,colorMovementAmount);
+                    cr.move(0,-colorMovementAmount);
                     cr.move(0,cr.testBound(window_height,1)*window_height*3);
                 }
                 break;

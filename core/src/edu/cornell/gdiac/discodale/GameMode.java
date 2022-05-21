@@ -298,6 +298,7 @@ public class GameMode implements Screen {
 			return;
 		}
 		if (value && countdown<0) {
+			setCameraState(CameraState.WIN);
 			countdown = Constants.EXIT_COUNT;
 			dale.setVisible(false);
 			exitFrame = 0;
@@ -949,10 +950,19 @@ public class GameMode implements Screen {
 						this.scene.getTileSize()
 				);
 				break;
+			case WIN:
+				canvas.updateCam(
+						scene.goalDoor.getX() * scale.x,
+						scene.goalDoor.getY() * scale.y,
+						zoom_amount,
+						this.bounds,
+						this.scene.getTileSize()
+				);
+				break;
 		}
 
 		if(winLose == WIN_CODE){
-			if (ticks % 10 == 0)
+			if (ticks % 8 == 0)
 				exitFrame = Math.min(exitFrame + 1, EXIT_FRAMES - 1);
 			setComplete(true);
 			exitTexture = exitTextures[dale.getColor().ordinal()];
