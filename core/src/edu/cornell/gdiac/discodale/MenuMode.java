@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Rectangle;
 import edu.cornell.gdiac.assets.AssetDirectory;
 import edu.cornell.gdiac.discodale.models.ColorRegionModel;
+import edu.cornell.gdiac.discodale.models.DaleModel;
 import edu.cornell.gdiac.util.FilmStrip;
 import edu.cornell.gdiac.util.ScreenListener;
 
@@ -162,7 +163,7 @@ public class MenuMode implements Screen, InputProcessor {
     private boolean levelBackPressed;
     private boolean optionsReturnPressed;
     private boolean clearSavePressed;
-    private boolean accessibilitySelected;
+    private boolean togglePressed;
     private boolean bgmPressed, sfxPressed;
     private boolean toMenuPressed, nextLevelPressed, restartPressed;
     private boolean resumePressed;
@@ -189,8 +190,6 @@ public class MenuMode implements Screen, InputProcessor {
     public Type getType(){
         return type;
     }
-
-    public void setAccessibility(boolean useTexture){ accessibilitySelected = useTexture; }
 
     public int getLevel(){
         return levelPressed;
@@ -467,7 +466,7 @@ public class MenuMode implements Screen, InputProcessor {
 
         canvas.drawText("Accessibility Mode", labelFont,
                 OPTIONS_LABEL_OFFSET_X * sx, OPTIONS_ACCESS_LABEL_OFFSET_Y * sy);
-        canvas.draw(accessibilitySelected ? toggleOn : toggleOff, Color.WHITE,
+        canvas.draw(SaveManager.getInstance().getAccessibilityEnabled() ? toggleOn : toggleOff, Color.WHITE,
                 0, 0, OPTIONS_ACCESS_OFFSET_X * sx,OPTIONS_ACCESS_OFFSET_Y * sy, 0, sx, sy);
     }
 
@@ -741,7 +740,7 @@ public class MenuMode implements Screen, InputProcessor {
             clearSavePressed = true;
             return false;
         } else if (inToggleBounds(screenX, screenY)){
-            accessibilitySelected = !accessibilitySelected;
+            togglePressed = true;
             return false;
         } else if (inBgmBounds(screenX, screenY)) {
             bgmPressed = true;
@@ -810,7 +809,6 @@ public class MenuMode implements Screen, InputProcessor {
             result = false;
         } else if (inOptionsBounds(screenX, screenY) && optionsPressed) {
             typePrevious = Type.START;
-            accessibilitySelected = ColorRegionModel.getDisplay();
             this.type = Type.OPTIONS;
             result = false;
         } else if (inExitBounds(screenX, screenY) && exitPressed) {
@@ -853,13 +851,16 @@ public class MenuMode implements Screen, InputProcessor {
     private boolean touchUpOptions(int screenX, int screenY){
         boolean result = true;
         if (inOptionsReturnBounds(screenX, screenY) && optionsReturnPressed){
-            ColorRegionModel.setDisplay(accessibilitySelected);
             this.type = typePrevious;
             typePrevious = Type.OPTIONS;
             result = false;
         } else if (inClearSaveBounds(screenX, screenY) && clearSavePressed) {
             SaveManager.getInstance().clearBestTimes();
             result = false; // what does this do
+        } else if (inToggleBounds(screenX, screenY)) {
+            boolean accessibility = SaveManager.getInstance().getAccessibilityEnabled();
+            SaveManager.getInstance().putAccessibilityEnabled(!accessibility);
+            result = false;
         }
         sfxPressed = false;
         bgmPressed = false;

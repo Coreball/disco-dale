@@ -1,5 +1,60 @@
 {
     "textures": {
+        "shared:t1": {
+            "file": "platform/t1.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t2": {
+            "file": "platform/t2.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t3": {
+            "file": "platform/t3.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t4": {
+            "file": "platform/t4.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t5": {
+            "file": "platform/t5.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t6": {
+            "file": "platform/t6.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t7": {
+            "file": "platform/t7.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t8": {
+            "file": "platform/t8.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t9": {
+            "file": "platform/t9.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t10": {
+            "file": "platform/t10.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
+        "shared:t11": {
+            "file": "platform/t11.png",
+            "wrapU": "repeated",
+            "wrapV": "repeated"
+        },
         "shared:wallNeutral" : {
             "file":  "platform/wall.png",
             "wrapU": "repeated",
@@ -137,6 +192,11 @@
         "platform:head:green": "platform/head/headgreen.png",
         "platform:head:purple": "platform/head/headpurple.png",
         "platform:head:orange": "platform/head/headorange.png",
+        "platform:headpattern:pink": "platform/headpattern/headpatternpink.png",
+        "platform:headpattern:blue": "platform/headpattern/headpatternblue.png",
+        "platform:headpattern:green": "platform/headpattern/headpatterngreen.png",
+        "platform:headpattern:purple": "platform/headpattern/headpatternpurple.png",
+        "platform:headpattern:orange": "platform/headpattern/headpatternorange.png",
         "platform:body:idle:pink": "platform/idle/idlepink.png",
         "platform:body:idle:blue": "platform/idle/idleblue.png",
         "platform:body:idle:green": "platform/idle/idlegreen.png",
@@ -159,11 +219,11 @@
         "platform:fail:orange":"platform/fail/failorange.png",
         "platform:flyidle": "platform/fly_idle.png",
         "platform:flychasing": "platform/fly_chasing.png",
-        "platform:pinkcolor": "platform/pink_tile.png",
-        "platform:bluecolor": "platform/blue_tile.png",
-        "platform:greencolor": "platform/green_tile.png",
-        "platform:purplecolor": "platform/purple_tile.png",
-        "platform:orangecolor": "platform/orange_tile.png",
+        "platform:colorpattern:pinkcolor": "platform/colorpattern/pink_tile1.png",
+        "platform:colorpattern:bluecolor": "platform/colorpattern/blue_tile1.png",
+        "platform:colorpattern:greencolor": "platform/colorpattern/green_tile1.png",
+        "platform:colorpattern:purplecolor": "platform/colorpattern/purple_tile1.png",
+        "platform:colorpattern:orangecolor": "platform/colorpattern/orange_tile1.png",
         "platform:light": "platform/light.png",
         "platform:darkness": "platform/darkness.png",
         "menu:play": "menu/play_button.png",
@@ -234,6 +294,7 @@
         "level24": "levels/cl10.json",
         "level25": "levels/ss3.json",
         "level26": "levels/ss4.json"
+
     },
     "sounds" : {
         "theme" : "sound/theme.mp3",

@@ -128,6 +128,8 @@ public class GameMode implements Screen {
 
 	/** All head textures for Dale, in order of colors */
 	private FilmStrip[] headTextures;
+	/** All patterned head textures for Dale, in order of colors */
+	private FilmStrip[] headPatternTextures;
 	/** All body idle textures for Dale, in order of colors */
 	private TextureRegion[] bodyIdleTextures;
 	/** All body walk textures for Dale, in order of colors */
@@ -205,6 +207,7 @@ public class GameMode implements Screen {
 	private Map<ScaffoldType, TextureRegion> brickScaffolds;
 	private Map<ScaffoldType, TextureRegion> reflectiveScaffolds;
 	private Map<WallType, TextureRegion> walls;
+	private TextureRegion[] tutorialUI;
 
 	/** Enum for which value to change with the increase/decrease buttons */
 	private enum AdjustTarget {
@@ -570,19 +573,21 @@ public class GameMode implements Screen {
 		DaleColor[] availableColors = scene.getPossibleColors();
 
 		FilmStrip[] availableHeadTextures = new FilmStrip[availableColors.length];
+		FilmStrip[] availableHeadPatternTextures = new FilmStrip[availableColors.length];
 		TextureRegion[] availableBodyIdleTextures = new TextureRegion[availableColors.length];
 		FilmStrip[] availableBodyWalkTextures = new FilmStrip[availableColors.length];
 		FilmStrip[] availableBodyFlyingTextures = new FilmStrip[availableColors.length];
 		for (int i = 0; i < availableColors.length; i++) {
 			int colorIndex = availableColors[i].ordinal();
 			availableHeadTextures[i] = headTextures[colorIndex];
+			availableHeadPatternTextures[i] = headPatternTextures[colorIndex];
 			availableBodyIdleTextures[i] = bodyIdleTextures[colorIndex];
 			availableBodyWalkTextures[i] = bodyWalkTextures[colorIndex];
 			availableBodyFlyingTextures[i] = bodyFlyingTextures[colorIndex];
 		}
 
 		dale = new DaleModel(scene.getDaleStart().x, scene.getDaleStart().y, constants.get("dale"),
-				radius, width, height, bodyOffset, availableColors, availableHeadTextures,
+				radius, width, height, bodyOffset, availableColors, availableHeadTextures, availableHeadPatternTextures,
 				availableBodyIdleTextures, availableBodyWalkTextures, availableBodyFlyingTextures);
 		dale.setDrawScale(scale);
 		dale.setColor(daleBackground());
@@ -610,7 +615,7 @@ public class GameMode implements Screen {
 	}
 
 	/**
-	 * Returns whether to process the update loop
+	 * Returns whether to process the loop
 	 *
 	 * At the start of the update loop, we check if it is time
 	 * to switch to a new game mode. If not, the update proceeds
@@ -656,7 +661,8 @@ public class GameMode implements Screen {
 		}
 
 		if(input.didColor()){
-			ColorRegionModel.switchDisplay();
+			boolean accessibility = SaveManager.getInstance().getAccessibilityEnabled();
+			SaveManager.getInstance().putAccessibilityEnabled(!accessibility);
 		}
 
 		// Handle resets
@@ -838,14 +844,13 @@ public class GameMode implements Screen {
 
 		float startX = (this.bounds.getWidth() * this.scene.getTileSize()) - dale.getX();
 		float startY = (this.bounds.getHeight() * this.scene.getTileSize()) - dale.getY();
+		zoomValue = Math.min(
+				this.bounds.getWidth() * this.scene.getTileSize() / this.canvas.getWidth(),
+				this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
+		);
 
 		switch (getCameraState()) {
 			case START:
-				zoomValue = Math.min(
-						this.bounds.getWidth() * this.scene.getTileSize() / this.canvas.getWidth(),
-						this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
-				);
-
 				canvas.setCameraWidth(Math.min(this.bounds.getWidth() * this.scene.getTileSize(), canvas.getWidth()));
 				canvas.setCameraHeight(Math.min(this.bounds.getHeight() * this.scene.getTileSize(), canvas.getHeight()));
 				canvas.updateCam(
@@ -1292,6 +1297,14 @@ public class GameMode implements Screen {
 				new FilmStrip(directory.getEntry("platform:head:purple", Texture.class), 1, 3),
 		};
 
+		headPatternTextures = new FilmStrip[]{
+				new FilmStrip(directory.getEntry("platform:headpattern:pink", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:blue", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:green", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:orange", Texture.class), 1, 3),
+				new FilmStrip(directory.getEntry("platform:headpattern:purple", Texture.class), 1, 3),
+		};
+
 		bodyWalkTextures = new FilmStrip[]{
 				new FilmStrip(directory.getEntry("platform:body:walk:pink", Texture.class), 1, 10),
 				new FilmStrip(directory.getEntry("platform:body:walk:blue", Texture.class), 1, 10),
@@ -1365,6 +1378,12 @@ public class GameMode implements Screen {
 			background_anim[i] = directory.getEntry("menu:bg" + (i + 1), Texture.class);
 		}
 
+		this.tutorialUI = new TextureRegion[11];
+		for (int i = 0; i < this.tutorialUI.length; i++) {
+			System.out.println(i + " " + (1 + i));
+			this.tutorialUI[i] = new TextureRegion(directory.getEntry("shared:t" + (i + 1), Texture.class));
+		}
+
 
 		died = directory.getEntry("died", Sound.class);
 		extend = directory.getEntry("extend", Sound.class);
@@ -1373,11 +1392,11 @@ public class GameMode implements Screen {
 		flyAlert = directory.getEntry("alert", Sound.class);
 		colorChange = directory.getEntry("colorchange", Sound.class);
 
-		colors[0] = directory.getEntry("platform:pinkcolor", Texture.class);
-		colors[1] = directory.getEntry("platform:bluecolor", Texture.class);
-		colors[2] = directory.getEntry("platform:greencolor", Texture.class);
-		colors[3] = directory.getEntry("platform:orangecolor", Texture.class);
-		colors[4] = directory.getEntry("platform:purplecolor", Texture.class);
+		colors[0] = directory.getEntry("platform:colorpattern:pinkcolor", Texture.class);
+		colors[1] = directory.getEntry("platform:colorpattern:bluecolor", Texture.class);
+		colors[2] = directory.getEntry("platform:colorpattern:greencolor", Texture.class);
+		colors[3] = directory.getEntry("platform:colorpattern:orangecolor", Texture.class);
+		colors[4] = directory.getEntry("platform:colorpattern:purplecolor", Texture.class);
 		ColorRegionModel.setColorTexture(colors);
 
 
@@ -1388,7 +1407,7 @@ public class GameMode implements Screen {
 			levels[i] = directory.getEntry("level" + Integer.toString(i + 1), JsonValue.class);
 		}
 
-		this.levelLoader = new LevelLoader(this.walls, reflectiveTile, brickScaffolds, reflectiveScaffolds, goalTile, this.bounds.getWidth(), this.bounds.getHeight());
+		this.levelLoader = new LevelLoader(this.walls, reflectiveTile, brickScaffolds, reflectiveScaffolds, goalTile, this.bounds.getWidth(), this.bounds.getHeight(), this.tutorialUI);
 		// loadLevel(levelIndex);
 		this.scene = levelLoader.load(this.testlevel, constants.get("defaults"));
 	}
