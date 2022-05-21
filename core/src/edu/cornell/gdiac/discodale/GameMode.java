@@ -611,7 +611,7 @@ public class GameMode implements Screen {
 	}
 
 	/**
-	 * Returns whether to process the update loop
+	 * Returns whether to process the loop
 	 *
 	 * At the start of the update loop, we check if it is time
 	 * to switch to a new game mode. If not, the update proceeds
@@ -839,14 +839,13 @@ public class GameMode implements Screen {
 
 		float startX = (this.bounds.getWidth() * this.scene.getTileSize()) - dale.getX();
 		float startY = (this.bounds.getHeight() * this.scene.getTileSize()) - dale.getY();
+		zoomValue = Math.min(
+				this.bounds.getWidth() * this.scene.getTileSize() / this.canvas.getWidth(),
+				this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
+		);
 
 		switch (getCameraState()) {
 			case START:
-				zoomValue = Math.min(
-						this.bounds.getWidth() * this.scene.getTileSize() / this.canvas.getWidth(),
-						this.bounds.getHeight() * this.scene.getTileSize() / this.canvas.getHeight()
-				);
-
 				canvas.setCameraWidth(Math.min(this.bounds.getWidth() * this.scene.getTileSize(), canvas.getWidth()));
 				canvas.setCameraHeight(Math.min(this.bounds.getHeight() * this.scene.getTileSize(), canvas.getHeight()));
 				canvas.updateCam(
