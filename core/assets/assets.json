@@ -294,7 +294,6 @@
         "level24": "levels/cl10.json",
         "level25": "levels/ss3.json",
         "level26": "levels/ss4.json"
-
     },
     "sounds" : {
         "theme" : "sound/theme.mp3",

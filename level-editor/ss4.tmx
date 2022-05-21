@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="32" height="48" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="7">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="32" height="48" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="8">
+ <editorsettings>
+  <export target="../core/assets/levels/ss4.json" format="json"/>
+ </editorsettings>
+ <properties>
+  <property name="colorMode" type="int" value="2"/>
+ </properties>
  <tileset firstgid="1" source="disco.tsx"/>
  <layer id="1" name="platforms" width="32" height="48">
   <data encoding="csv">
@@ -54,23 +60,17 @@
 </data>
  </layer>
  <objectgroup id="2" name="colors">
-  <object id="1" type="color1" x="0" y="1120">
-   <polygon points="0,-864 512,-480 1024,-864 1024,-384 512,0 0,-384"/>
+  <object id="1" type="color1" x="0" y="896">
+   <polygon points="0,-896 512,-512 1024,-896 1024,-384 512,0 0,-384"/>
   </object>
-  <object id="2" type="color2" x="0" y="1600">
-   <polygon points="0,-864 512,-480 1024,-864 1024,-384 512,0 0,-384"/>
+  <object id="2" type="color2" x="0" y="1408">
+   <polygon points="0,-896 512,-512 1024,-896 1024,-384 512,0 0,-384"/>
   </object>
-  <object id="3" type="color5" x="0" y="2080">
-   <polygon points="0,-864 512,-480 1024,-864 1024,-384 512,0 0,-384"/>
+  <object id="3" type="color5" x="0" y="1920">
+   <polygon points="0,-896 512,-512 1024,-896 1024,-384 0,-384"/>
   </object>
-  <object id="4" type="color1" x="0" y="-320">
-   <polygon points="0,-864 512,-480 1024,-864 1024,-384 512,0 0,-384"/>
-  </object>
-  <object id="5" type="color2" x="0" y="160">
-   <polygon points="0,-864 512,-480 1024,-864 1024,-384 512,0 0,-384"/>
-  </object>
-  <object id="6" type="color5" x="0" y="640">
-   <polygon points="0,-864 512,-480 1024,-864 1024,-384 512,0 0,-384"/>
+  <object id="7" type="color5" x="0" y="896">
+   <polygon points="0,-896 512,-512 1024,-896"/>
   </object>
  </objectgroup>
 </map>
