@@ -5,7 +5,7 @@
  </editorsettings>
  <properties>
   <property name="colorMode" type="int" value="1"/>
-  <property name="darkMode" type="bool" value="true"/>
+  <property name="darkMode" type="bool" value="false"/>
  </properties>
  <tileset firstgid="1" source="disco.tsx"/>
  <layer id="1" name="platforms" width="32" height="18" locked="1">
