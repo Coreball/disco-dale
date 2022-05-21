@@ -203,7 +203,7 @@ public class LevelLoader {
                     case 11:
                         model.setGoal(
                                 ((j + 1) * this.tileWidth - (float) this.tileWidth / 2) / scale.x,
-                                ((height - i) * this.tileHeight - (float) this.tileHeight / 2) / scale.y
+                                ((height - i) * this.tileHeight - (float) this.tileHeight / 2 + 40) / scale.y
                         );
                         break;
                     case 12:
